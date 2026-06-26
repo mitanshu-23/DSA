@@ -1,0 +1,8 @@
+pub mod p01_binary_search_to_find_x_in_sorted_array;
+pub mod p02_implement_lower_bound;
+pub mod p03_implement_upper_bound;
+pub mod p04_search_insert_position;
+pub mod p05_floor_and_ceil_in_sorted_array;
+pub mod p06_find_first_and_last_occurrence;
+pub mod p07_count_occurrences_of_a_number_in_sorted_array;
+pub mod p11_how_many_times_array_has_been_rotated;
