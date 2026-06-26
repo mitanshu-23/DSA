@@ -2,3 +2,4 @@ pub mod p08_search_in_rotated_sorted_array_i_no_duplicates;
 pub mod p09_search_in_rotated_sorted_array_ii_with_duplicates;
 pub mod p10_minimum_in_rotated_sorted_array;
 pub mod p12_single_element_in_a_sorted_array;
+pub mod p13_find_peak_element;
