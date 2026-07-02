@@ -1,1 +1,3 @@
 pub mod p16_koko_eating_bananas;
+pub mod p17_minimum_days_to_make_m_bouquets;
+pub mod p18_find_the_smallest_divisor_given_a_threshold;
