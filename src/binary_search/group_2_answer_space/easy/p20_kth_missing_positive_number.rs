@@ -24,39 +24,33 @@
 pub struct Solution;
 
 impl Solution {
-    pub fn find_kth_missing(arr: Vec<i32>, mut k: i32) -> i32 {
-        let mut prev = 0;
-        let mut indx = 0;
+    pub fn find_kth_missing(arr: Vec<i32>, k: i32) -> i32 {
+        let mut left = 0i32;
+        let mut right = arr.len() as i32;
+        let mut candidate = 0;
 
-        while indx < arr.len() {
-            let missing = arr[indx] - prev - 1;
-            if k <= missing {
-                return prev + k;
-            }
-            k -= missing;
-            prev = arr[indx];
-            indx += 1;
-        }
+        while left <= right {
+            let mid = left + ((right - left) / 2);
+            println!("{mid}");
 
-        prev + k
-    }
-
-    fn binary_search_solution(arr: Vec<i32>, k: i32) -> i32 {
-        let mut lo = 0;
-        let mut hi = arr.len() - 1;
-
-        while lo <= hi {
-            let mid = lo + (hi - lo) / 2;
-            let missing = arr[mid] - (mid as i32 + 1);
-
-            if missing < k {
-                lo = mid + 1;
+            if arr[mid as usize] == mid - 1 {
+                left = mid + 1;
             } else {
-                hi = mid - 1;
+                let diff = arr[mid as usize] - mid - 1;
+                println!("Diff: {}", diff);
+                if diff == k {
+                    return arr[mid as usize];
+                } else if diff < k {
+                    left = mid + 1;
+                    candidate = arr[mid as usize] + (k - diff);
+                } else {
+                    right = mid - 1;
+                    candidate = arr[mid as usize] - diff + k;
+                }
             }
         }
 
-        lo as i32 + k
+        candidate
     }
 }
 
