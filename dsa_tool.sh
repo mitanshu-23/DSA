@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  DSA Practice Tool — Binary Search Edition
-#  Striver's A2Z DSA Sheet · Step 4 · 32 Problems
+#  DSA Practice Tool — Multi-Topic Edition
+#  Striver's A2Z DSA Sheet · Step 3 Arrays (40) · Step 4 Binary Search (32)
 # =============================================================================
 #  Features
 #  --------
-#  • Browse all 32 problems by Group or by Difficulty (Easy→Medium→Hard)
+#  • Pick a topic (Arrays / Binary Search) — each has its own problems, its own
+#    src/ module tree, and its own progress file. The last topic is remembered.
+#  • Browse every problem by Group/Cluster or by Difficulty (Easy→Medium→Hard)
 #  • Select a platform (LeetCode / GFG / Coding Ninjas) per problem
 #  • Auto-generate Rust solution templates with correct function signatures
 #  • Auto-manage Rust mod.rs hierarchy so `cargo build` always works
@@ -19,10 +21,15 @@ set -uo pipefail
 # ─── Paths ────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$SCRIPT_DIR/src"
-BS_DIR="$SRC_DIR/binary_search"
 MAIN_RS="$SRC_DIR/main.rs"
-PROGRESS_FILE="$SCRIPT_DIR/.dsa_progress"
 SOLUTIONS_DIR="$SCRIPT_DIR/solutions"   # non-Rust solutions (not built by cargo)
+TOPIC_FILE="$SCRIPT_DIR/.dsa_topic"     # remembers the last-selected topic
+
+# These are (re)assigned by load_topic — see the Topic Registry further down.
+# TOPIC / TOPIC_MOD / TOPIC_DIR / TOPIC_LABEL / TOPIC_STEP / PROGRESS_FILE
+# plus the active PROBLEMS / GROUP_NAMES / GROUP_DIRS / PROBLEM_STATEMENTS.
+TOPIC=""; TOPIC_MOD=""; TOPIC_DIR=""; TOPIC_LABEL=""; TOPIC_STEP=""
+PROGRESS_FILE=""
 
 # ─── ANSI Colors ──────────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -167,6 +174,180 @@ PROBLEM_STATEMENTS["31"]="A peak element in a 2D grid is an element that is stri
 
 PROBLEM_STATEMENTS["32"]="Given an m x n matrix where each row is sorted in non-decreasing order and m*n is odd,\nreturn the median of the matrix.\n\nExample 1:  matrix = [[1,3,5],[2,6,9],[3,6,9]]  →  5\nExample 2:  matrix = [[1,1,1],[2,2,2],[3,3,3]]  →  2\n\nKey insight: binary search on the value range [global_min, global_max].\nFor each candidate mid, count elements <= mid using binary search per row.\nMedian is the smallest value where that total count > (m*n)/2.\n\nConstraints:\n  1 <= m, n <= 500\n  1 <= matrix[i][j] <= 10^6\n  m*n is odd."
 
+# ─── Topic Registry ───────────────────────────────────────────────────────────
+# The PROBLEMS / GROUP_NAMES / GROUP_DIRS / PROBLEM_STATEMENTS defined above are
+# the Binary Search (Step 4) data. Snapshot them under BS_* so we can restore
+# them on a topic switch, then define the Arrays (Step 3) data under ARR_*.
+# load_topic <key> copies the chosen topic's data into the active globals.
+declare -a BS_PROBLEMS=("${PROBLEMS[@]}")
+declare -a BS_GROUP_NAMES=("${GROUP_NAMES[@]}")
+declare -a BS_GROUP_DIRS=("${GROUP_DIRS[@]}")
+declare -A BS_STATEMENTS
+for _k in "${!PROBLEM_STATEMENTS[@]}"; do BS_STATEMENTS["${_k}"]="${PROBLEM_STATEMENTS[${_k}]}"; done
+unset _k
+
+# ── Arrays · Step 3 · 40 problems across 11 correlation clusters ───────────────
+# Clusters follow the "Smart Solve Order" in ArraysReadme.md — problems that share
+# a technique sit together, so PROBLEMS order == recommended study order. Problem
+# IDs match the readme's numbering (01–40); the cluster is the "group".
+declare -a ARR_GROUP_NAMES=(""
+  "Basic Traversal & In-place"
+  "Two Sorted Arrays (merge logic)"
+  "Missing / Duplicate / XOR"
+  "Prefix Sum / Subarray"
+  "Sorting + Two Pointers"
+  "Majority / Voting"
+  "Kadane / Subarray Optimisation"
+  "Greedy / Observation"
+  "Matrix (2D arrays)"
+  "Hashing / HashMap"
+  "Merge Sort Based"
+)
+declare -a ARR_GROUP_DIRS=(""
+  "group_01_basic_traversal"
+  "group_02_two_sorted_arrays"
+  "group_03_missing_dup_xor"
+  "group_04_prefix_sum_subarray"
+  "group_05_sorting_two_pointers"
+  "group_06_majority_voting"
+  "group_07_kadane_subarray"
+  "group_08_greedy_observation"
+  "group_09_matrix"
+  "group_10_hashing"
+  "group_11_merge_sort"
+)
+# Each entry: "id|name|difficulty|group|lc_url|gfg_url|cn_url|fn_signature|core_idea"
+declare -a ARR_PROBLEMS=(
+  # ── Cluster 1 · Basic Traversal & In-place ───────────────────────────────
+  "01|Largest Element in an Array|Easy|1||https://www.geeksforgeeks.org/problems/largest-element-in-array4009/1||fn largest_element(arr: Vec<i32>) -> i32|Single pass tracking the running maximum; O(n) time, O(1) space"
+  "02|Second Largest Element Without Sorting|Easy|1|https://leetcode.com/problems/third-maximum-number/|https://www.geeksforgeeks.org/problems/second-largest3735/1||fn second_largest(arr: Vec<i32>) -> i32|Track largest and second-largest in one pass; the second must be strictly less than the largest"
+  "03|Check if the Array is Sorted|Easy|1|https://leetcode.com/problems/check-if-array-is-sorted-and-rotated/|https://www.geeksforgeeks.org/problems/check-if-an-array-is-sorted0701/1||fn is_sorted(arr: Vec<i32>) -> bool|Scan adjacent pairs; if any arr[i] > arr[i+1] the array is not sorted"
+  "04|Remove Duplicates from Sorted Array|Easy|1|https://leetcode.com/problems/remove-duplicates-from-sorted-array/|https://www.geeksforgeeks.org/problems/remove-duplicate-elements-from-sorted-array/1||fn remove_duplicates(nums: &mut Vec<i32>) -> i32|Two pointers: i is the write index, j scans; write when nums[j] != nums[i]"
+  "05|Left Rotate an Array by One Place|Easy|1||https://www.geeksforgeeks.org/problems/cyclically-rotate-an-array-by-one2614/1||fn rotate_by_one(arr: &mut Vec<i32>)|Store arr[0], shift everything left by one, place the stored value at the end"
+  "06|Left Rotate an Array by D Places|Easy|1|https://leetcode.com/problems/rotate-array/|https://www.geeksforgeeks.org/problems/rotate-array-by-n-elements-1587115621/1||fn rotate_left(arr: &mut Vec<i32>, d: i32)|Reversal trick: reverse [0,d), reverse [d,n), reverse the whole array; O(n) time O(1) space"
+  "07|Move Zeros to End|Easy|1|https://leetcode.com/problems/move-zeroes/|https://www.geeksforgeeks.org/problems/move-all-zeroes-to-end-of-array0751/1||fn move_zeroes(nums: &mut Vec<i32>)|Two pointers: j finds the first zero, i the next non-zero after it, swap; both walk forward"
+  "08|Linear Search|Easy|1||https://www.geeksforgeeks.org/problems/who-will-win-1587115621/1||fn linear_search(arr: Vec<i32>, target: i32) -> i32|Scan left to right and return the index when found, else -1"
+  # ── Cluster 2 · Two Sorted Arrays ────────────────────────────────────────
+  "09|Find the Union of Two Sorted Arrays|Easy|2|https://leetcode.com/problems/intersection-of-two-arrays/|https://www.geeksforgeeks.org/problems/union-of-two-sorted-arrays-1587115621/1||fn find_union(a: Vec<i32>, b: Vec<i32>) -> Vec<i32>|Two-pointer merge; advance the smaller side; skip a value equal to the last one added"
+  "35|Merge Two Sorted Arrays Without Extra Space|Hard|2|https://leetcode.com/problems/merge-sorted-array/|https://www.geeksforgeeks.org/problems/merge-two-sorted-arrays-1587115621/1||fn merge(a: &mut Vec<i32>, b: &mut Vec<i32>)|Gap method (shell-sort variant): gap=(m+n+1)/2, swap out-of-order pairs, halve the gap each round"
+  # ── Cluster 3 · Missing / Duplicate / XOR ────────────────────────────────
+  "10|Find Missing Number in an Array|Easy|3|https://leetcode.com/problems/missing-number/|https://www.geeksforgeeks.org/problems/missing-number-in-array1416/1||fn missing_number(nums: Vec<i32>) -> i32|XOR all indices 0..n with all elements, or subtract the actual sum from n*(n+1)/2"
+  "11|Maximum Consecutive Ones|Easy|3|https://leetcode.com/problems/max-consecutive-ones/|https://www.geeksforgeeks.org/problems/maximum-consecutive-ones3234/1||fn find_max_consecutive_ones(nums: Vec<i32>) -> i32|Single scan: running count, reset to 0 on a zero, track the global max"
+  "12|Find the Number That Appears Once|Easy|3|https://leetcode.com/problems/single-number/|https://www.geeksforgeeks.org/problems/element-appearing-once2552/1||fn single_number(nums: Vec<i32>) -> i32|XOR every element; equal pairs cancel (a^a=0), leaving the unique value"
+  "36|Find the Repeating and Missing Number|Hard|3|https://leetcode.com/problems/set-mismatch/|https://www.geeksforgeeks.org/problems/find-missing-and-repeating2512/1||fn find_missing_repeating(arr: Vec<i32>) -> Vec<i32>|XOR to get (repeat ^ missing), split by a set bit; or use sum and sum-of-squares equations"
+  # ── Cluster 4 · Prefix Sum / Subarray ────────────────────────────────────
+  "13|Longest Subarray with Sum K (Positives)|Medium|4|https://leetcode.com/problems/minimum-size-subarray-sum/|https://www.geeksforgeeks.org/problems/longest-sub-array-with-sum-k0809/1||fn longest_subarray_with_sum_k(arr: Vec<i32>, k: i64) -> i32|All values positive → sliding window: grow to add, shrink from the left when the sum exceeds k"
+  "14|Longest Subarray with Sum K (Positives + Negatives)|Medium|4|https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/|https://www.geeksforgeeks.org/problems/longest-sub-array-with-sum-k0809/1||fn longest_subarray_with_sum_k(arr: Vec<i32>, k: i64) -> i32|Prefix sum + hashmap of the earliest index; if prefix[j]-k was seen, that subarray sums to k"
+  "27|Count Subarrays with Given Sum|Medium|4|https://leetcode.com/problems/subarray-sum-equals-k/|https://www.geeksforgeeks.org/problems/subarray-with-given-sum-1587115621/1||fn subarray_sum(nums: Vec<i32>, k: i32) -> i32|Prefix sum + hashmap of counts; at each index add the count of (prefix - k) seen so far"
+  "33|Count Subarrays with Given XOR K|Hard|4||https://www.geeksforgeeks.org/problems/count-subarray-with-given-xor/1||fn subarrays_with_xor_k(arr: Vec<i32>, k: i32) -> i32|Same prefix+hashmap trick with XOR; look up (prefix_xor ^ k) among earlier prefixes"
+  "32|Largest Subarray with Sum 0|Hard|4|https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/|https://www.geeksforgeeks.org/problems/largest-subarray-with-0-sum/1||fn max_len_zero_sum(arr: Vec<i32>) -> i32|Prefix sum + hashmap of first occurrence; equal prefixes bound a span that sums to 0"
+  # ── Cluster 5 · Sorting + Two Pointers ───────────────────────────────────
+  "15|Sort Array of 0s, 1s, and 2s|Medium|5|https://leetcode.com/problems/sort-colors/|https://www.geeksforgeeks.org/problems/sort-an-array-of-0s-1s-and-2s4231/1||fn sort_colors(nums: &mut Vec<i32>)|Dutch National Flag: lo/mid/hi partition into three regions in a single pass"
+  "39|2Sum Problem|Hard|5|https://leetcode.com/problems/two-sum/|https://www.geeksforgeeks.org/problems/key-pair5616/1||fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32>|HashMap of complement->index for O(n) with original indices, or sort + two pointers"
+  "30|3Sum Problem|Hard|5|https://leetcode.com/problems/3sum/|https://www.geeksforgeeks.org/problems/triplet-sum-in-array-1587115621/1||fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>>|Sort; fix i then two-pointer on the rest; skip duplicates at every level; O(n^2)"
+  "31|4Sum Problem|Hard|5|https://leetcode.com/problems/4sum/|https://www.geeksforgeeks.org/problems/find-all-four-sum-numbers1732/1||fn four_sum(nums: Vec<i32>, target: i32) -> Vec<Vec<i32>>|Sort; fix i and j then two-pointer; skip duplicates at all levels; use i64 to avoid overflow"
+  # ── Cluster 6 · Majority / Voting ────────────────────────────────────────
+  "16|Majority Element (> n/2 times)|Medium|6|https://leetcode.com/problems/majority-element/|https://www.geeksforgeeks.org/problems/majority-element-1587115620/1||fn majority_element(nums: Vec<i32>) -> i32|Boyer-Moore voting: one candidate and a count; increment on match, decrement otherwise"
+  "29|Majority Element (> n/3 times)|Hard|6|https://leetcode.com/problems/majority-element-ii/|https://www.geeksforgeeks.org/problems/majority-vote/1||fn majority_element_n3(nums: Vec<i32>) -> Vec<i32>|Extended Boyer-Moore with two candidates (at most two exceed n/3); verify both at the end"
+  # ── Cluster 7 · Kadane / Subarray Optimisation ───────────────────────────
+  "17|Kadane's Algorithm — Maximum Subarray Sum|Medium|7|https://leetcode.com/problems/maximum-subarray/|https://www.geeksforgeeks.org/problems/kadanes-algorithm-1587115620/1||fn max_sub_array(nums: Vec<i32>) -> i32|current = max(arr[i], current + arr[i]); track the global maximum"
+  "18|Print Subarray with Maximum Sum|Medium|7|https://leetcode.com/problems/maximum-subarray/|https://www.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313/1||fn max_subarray_range(nums: Vec<i32>) -> Vec<i32>|Kadane while tracking start/end; remember temp_start on reset, commit on a new global max"
+  "40|Maximum Product Subarray|Hard|7|https://leetcode.com/problems/maximum-product-subarray/|https://www.geeksforgeeks.org/problems/maximum-product-subarray3604/1||fn max_product(nums: Vec<i32>) -> i32|Track both max and min products (a negative swaps them); reset when starting fresh wins"
+  # ── Cluster 8 · Greedy / Observation ─────────────────────────────────────
+  "19|Best Time to Buy and Sell Stock|Medium|8|https://leetcode.com/problems/best-time-to-buy-and-sell-stock/|https://www.geeksforgeeks.org/problems/buy-and-sell-a-stock-best-time-to-buy-and-sell-stock/1||fn max_profit(prices: Vec<i32>) -> i32|Single pass tracking the minimum price so far; profit = price - min; keep the global best"
+  "21|Next Permutation|Medium|8|https://leetcode.com/problems/next-permutation/|https://www.geeksforgeeks.org/problems/next-permutation5226/1||fn next_permutation(nums: &mut Vec<i32>)|Find the rightmost dip i, swap with the next greater to its right, reverse the suffix"
+  "22|Leaders in an Array|Medium|8||https://www.geeksforgeeks.org/problems/leaders-in-an-array-1587115620/1||fn leaders(arr: Vec<i32>) -> Vec<i32>|Scan from the right keeping a running max; a leader is greater than everything to its right"
+  "34|Merge Overlapping Subintervals|Hard|8|https://leetcode.com/problems/merge-intervals/|https://www.geeksforgeeks.org/problems/overlapping-intervals--170633/1||fn merge_intervals(intervals: Vec<Vec<i32>>) -> Vec<Vec<i32>>|Sort by start; if the next interval overlaps the last kept one extend its end, else push a new one"
+  # ── Cluster 9 · Matrix (2D arrays) ───────────────────────────────────────
+  "24|Set Matrix Zeros|Medium|9|https://leetcode.com/problems/set-matrix-zeroes/|https://www.geeksforgeeks.org/problems/set-matrix-zeroes/1||fn set_zeroes(matrix: &mut Vec<Vec<i32>>)|Use row 0 and column 0 as markers; two passes mark then apply; O(1) extra space"
+  "25|Rotate Matrix by 90 Degrees|Medium|9|https://leetcode.com/problems/rotate-image/|https://www.geeksforgeeks.org/problems/rotate-by-90-degree-1587115621/1||fn rotate(matrix: &mut Vec<Vec<i32>>)|Transpose the matrix, then reverse each row, for a clockwise 90-degree rotation"
+  "26|Spiral Traversal of a Matrix|Medium|9|https://leetcode.com/problems/spiral-matrix/|https://www.geeksforgeeks.org/problems/spirally-traversing-a-matrix-1587115621/1||fn spiral_order(matrix: Vec<Vec<i32>>) -> Vec<i32>|Keep top/bottom/left/right boundaries; go right,down,left,up shrinking after each direction"
+  "28|Pascal's Triangle|Hard|9|https://leetcode.com/problems/pascals-triangle/|https://www.geeksforgeeks.org/problems/pascals-triangle0652/1||fn generate(num_rows: i32) -> Vec<Vec<i32>>|Each entry is C(r,c); build every row from the previous using running multiplication"
+  # ── Cluster 10 · Hashing / HashMap ───────────────────────────────────────
+  "23|Longest Consecutive Sequence|Medium|10|https://leetcode.com/problems/longest-consecutive-sequence/|https://www.geeksforgeeks.org/problems/longest-consecutive-subsequence2449/1||fn longest_consecutive(nums: Vec<i32>) -> i32|Put all in a HashSet; only begin counting at x when x-1 is absent; walk up; O(n)"
+  "20|Rearrange Array Elements by Sign|Medium|10|https://leetcode.com/problems/rearrange-array-elements-by-sign/|https://www.geeksforgeeks.org/problems/array-of-alternate-ve-and-ve-nos1401/1||fn rearrange_array(nums: Vec<i32>) -> Vec<i32>|Positives to even indices, negatives to odd, using two running position pointers"
+  # ── Cluster 11 · Merge Sort Based ────────────────────────────────────────
+  "37|Count Inversions|Hard|11|https://leetcode.com/problems/count-of-smaller-numbers-after-self/|https://www.geeksforgeeks.org/problems/inversion-of-array-1587115620/1||fn count_inversions(arr: Vec<i32>) -> i64|Modified merge sort; when a right element is placed before left ones add (mid - i + 1)"
+  "38|Reverse Pairs|Hard|11|https://leetcode.com/problems/reverse-pairs/|https://www.geeksforgeeks.org/problems/reverse-pairs/1||fn reverse_pairs(nums: Vec<i32>) -> i32|Modified merge sort; count pairs where arr[i] > 2*arr[j] across halves before merging"
+)
+
+declare -A ARR_STATEMENTS
+ARR_STATEMENTS["01"]="Given an array arr[], return the largest element in it.\n\nExample 1:  arr = [3, 5, 1, 9, 2]  →  9\nExample 2:  arr = [7]              →  7\n\nConstraints:\n  1 <= arr.length <= 10^6\n  -10^9 <= arr[i] <= 10^9"
+ARR_STATEMENTS["02"]="Given an array arr[], return the second largest DISTINCT element, or -1 if it does not exist.\n\nExample 1:  arr = [12, 35, 1, 10, 34, 1]  →  34\nExample 2:  arr = [10, 10, 10]            →  -1  (no distinct second largest)\n\nKey insight: track largest and second-largest in one pass; ignore values equal to the current largest.\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["03"]="Given an array arr[], return true if it is sorted in non-decreasing order, else false.\n\nExample 1:  arr = [1, 2, 2, 3]  →  true\nExample 2:  arr = [1, 3, 2]     →  false\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["04"]="Given a sorted array nums, remove duplicates in-place so each unique element appears once, keeping order.\nReturn k, the count of unique elements; the first k slots of nums must hold them.\n\nExample 1:  nums = [1, 1, 2]          →  2, nums = [1, 2, _]\nExample 2:  nums = [0,0,1,1,1,2,2]   →  3, nums = [0, 1, 2, ...]\n\nConstraints:\n  1 <= nums.length <= 3*10^4\n  nums is sorted in non-decreasing order."
+ARR_STATEMENTS["05"]="Left-rotate the array by one place: each element moves one index left and the first wraps to the end.\n\nExample 1:  arr = [1, 2, 3, 4, 5]  →  [2, 3, 4, 5, 1]\nExample 2:  arr = [9]              →  [9]\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["06"]="Left-rotate the array by d places.\n\nExample 1:  arr = [1,2,3,4,5,6,7], d = 2  →  [3,4,5,6,7,1,2]\nExample 2:  arr = [1,2,3], d = 4          →  [2,3,1]  (d may exceed n; use d % n)\n\nKey insight: reverse [0,d), reverse [d,n), then reverse the whole array. O(n) time, O(1) space.\n\nConstraints:\n  1 <= arr.length <= 10^5\n  0 <= d"
+ARR_STATEMENTS["07"]="Move all zeros to the end while keeping the relative order of the non-zero elements. Do it in-place.\n\nExample 1:  nums = [0,1,0,3,12]  →  [1,3,12,0,0]\nExample 2:  nums = [0]            →  [0]\n\nConstraints:\n  1 <= nums.length <= 10^4\n  -2^31 <= nums[i] <= 2^31 - 1"
+ARR_STATEMENTS["08"]="Given an array arr[] and a target, return the index of the first occurrence of target, or -1 if absent.\n\nExample 1:  arr = [4, 2, 7, 1], target = 7  →  2\nExample 2:  arr = [4, 2, 7, 1], target = 5  →  -1\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["09"]="Given two sorted arrays a and b, return their union: all distinct elements in sorted order.\n\nExample 1:  a = [1,2,3,4,5], b = [2,3,4,4,5,6]  →  [1,2,3,4,5,6]\nExample 2:  a = [1,1,1], b = [1,1]              →  [1]\n\nKey insight: two-pointer merge; skip a value that equals the last one already added.\n\nConstraints:\n  1 <= a.length, b.length <= 10^5\n  both arrays are sorted in non-decreasing order."
+ARR_STATEMENTS["10"]="Given n distinct numbers taken from 0..n (exactly one missing), return the missing number.\n\nExample 1:  nums = [3, 0, 1]              →  2\nExample 2:  nums = [9,6,4,2,3,5,7,0,1]    →  8\n\nKey insight: XOR all indices 0..n with all elements, or subtract the actual sum from n*(n+1)/2.\n\nConstraints:\n  n == nums.length\n  0 <= nums[i] <= n, all distinct."
+ARR_STATEMENTS["11"]="Given a binary array nums, return the maximum number of consecutive 1s.\n\nExample 1:  nums = [1,1,0,1,1,1]  →  3\nExample 2:  nums = [1,0,1,1,0,1] →  2\n\nConstraints:\n  1 <= nums.length <= 10^5\n  nums[i] is 0 or 1."
+ARR_STATEMENTS["12"]="Every element appears twice except one that appears once. Return the single one. O(n) time, O(1) space.\n\nExample 1:  nums = [2, 2, 1]        →  1\nExample 2:  nums = [4, 1, 2, 1, 2]  →  4\n\nKey insight: XOR of all elements — equal pairs cancel, leaving the unique value.\n\nConstraints:\n  1 <= nums.length <= 3*10^4"
+ARR_STATEMENTS["36"]="The array arr[] of size n holds numbers from 1..n where one number repeats (twice) and one is missing.\nReturn [repeating, missing].\n\nExample 1:  arr = [3, 1, 2, 5, 3]  →  [3, 4]\nExample 2:  arr = [1, 2, 2, 4]     →  [2, 3]\n\nKey insight: X = XOR of all elements with 1..n = repeat ^ missing; a differing bit separates the two.\n\nConstraints:\n  2 <= n <= 10^5"
+ARR_STATEMENTS["13"]="Given an array of POSITIVE integers and a target k, return the length of the longest subarray with sum k.\n\nExample 1:  arr = [2,3,5,1,9], k = 10  →  3   ([2,3,5])\nExample 2:  arr = [1,1,1,1], k = 2      →  2\n\nKey insight: all values positive → sliding window; grow to add, shrink from the left when sum exceeds k.\n\nConstraints:\n  1 <= arr.length <= 10^5\n  1 <= arr[i] <= 10^9"
+ARR_STATEMENTS["14"]="Given an array that may contain negatives and a target k, return the length of the longest subarray with sum k.\n\nExample 1:  arr = [10, 5, 2, 7, 1, 9], k = 15  →  4   ([5,2,7,1])\nExample 2:  arr = [-1, 1, 1], k = 1              →  3\n\nKey insight: prefix sum + hashmap storing the EARLIEST index of each prefix; sliding window fails with negatives.\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["27"]="Given an array nums and integer k, return the total number of contiguous subarrays whose sum equals k.\n\nExample 1:  nums = [1, 1, 1], k = 2   →  2\nExample 2:  nums = [1, 2, 3], k = 3   →  2\n\nKey insight: prefix sum + hashmap of prefix->count; at each index add the count of (prefix - k) seen so far.\n\nConstraints:\n  1 <= nums.length <= 2*10^4\n  -1000 <= nums[i] <= 1000"
+ARR_STATEMENTS["33"]="Given an array arr[] and integer k, count the subarrays whose elements XOR to exactly k.\n\nExample 1:  arr = [4, 2, 2, 6, 4], k = 6  →  4\nExample 2:  arr = [5, 6, 7, 8, 9], k = 5  →  2\n\nKey insight: prefix XOR + hashmap; for each prefix look up (prefix ^ k) among earlier prefixes.\n\nConstraints:\n  1 <= arr.length <= 10^5\n  0 <= arr[i], k"
+ARR_STATEMENTS["32"]="Given an array arr[] (may contain negatives), return the length of the longest subarray with sum 0.\n\nExample 1:  arr = [15, -2, 2, -8, 1, 7, 10, 23]  →  5   ([-2,2,-8,1,7])\nExample 2:  arr = [1, 2, 3]                       →  0\n\nKey insight: prefix sum + hashmap of the FIRST index of each prefix; equal prefixes bound a zero-sum span.\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["15"]="Given an array of only 0s, 1s and 2s, sort it in-place in a single pass (no counting sort).\n\nExample 1:  nums = [2,0,2,1,1,0]  →  [0,0,1,1,2,2]\nExample 2:  nums = [2,0,1]        →  [0,1,2]\n\nKey insight: Dutch National Flag with three pointers lo, mid, hi.\n\nConstraints:\n  1 <= nums.length <= 300\n  nums[i] is 0, 1, or 2."
+ARR_STATEMENTS["39"]="Given an array nums and a target, return the indices of the two numbers that add to target.\nExactly one solution exists and you may not reuse an element.\n\nExample 1:  nums = [2,7,11,15], target = 9  →  [0, 1]\nExample 2:  nums = [3, 2, 4], target = 6     →  [1, 2]\n\nKey insight: hashmap of value->index; for each x check whether (target - x) was already seen.\n\nConstraints:\n  2 <= nums.length <= 10^4"
+ARR_STATEMENTS["30"]="Return all unique triplets [a, b, c] with a + b + c = 0. No duplicate triplets.\n\nExample 1:  nums = [-1,0,1,2,-1,-4]  →  [[-1,-1,2],[-1,0,1]]\nExample 2:  nums = [0,0,0]           →  [[0,0,0]]\n\nKey insight: sort, fix i, two-pointer on the rest; skip duplicate values at every level.\n\nConstraints:\n  3 <= nums.length <= 3000"
+ARR_STATEMENTS["31"]="Return all unique quadruplets [a,b,c,d] with a+b+c+d = target. No duplicate quadruplets.\n\nExample 1:  nums = [1,0,-1,0,-2,2], target = 0  →  [[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]\nExample 2:  nums = [2,2,2,2,2], target = 8       →  [[2,2,2,2]]\n\nKey insight: sort, fix i and j, two-pointer; skip duplicates at all levels; use i64 to avoid overflow.\n\nConstraints:\n  1 <= nums.length <= 200\n  -10^9 <= nums[i], target <= 10^9"
+ARR_STATEMENTS["16"]="An element appearing more than n/2 times is the majority element; it is guaranteed to exist. Return it.\n\nExample 1:  nums = [3, 2, 3]           →  3\nExample 2:  nums = [2,2,1,1,1,2,2]     →  2\n\nKey insight: Boyer-Moore voting — one candidate and a count.\n\nConstraints:\n  1 <= nums.length <= 5*10^4"
+ARR_STATEMENTS["29"]="Return all elements that appear more than n/3 times (there can be at most two).\n\nExample 1:  nums = [3, 2, 3]           →  [3]\nExample 2:  nums = [1,1,1,3,3,2,2,2]  →  [1, 2]\n\nKey insight: extended Boyer-Moore with two candidate/count slots; verify both in a final pass.\n\nConstraints:\n  1 <= nums.length <= 5*10^4"
+ARR_STATEMENTS["17"]="Return the largest sum of any contiguous subarray (at least one element).\n\nExample 1:  nums = [-2,1,-3,4,-1,2,1,-5,4]  →  6   ([4,-1,2,1])\nExample 2:  nums = [5, 4, -1, 7, 8]         →  23\n\nKey insight: current = max(arr[i], current + arr[i]); track the global max (Kadane).\n\nConstraints:\n  1 <= nums.length <= 10^5\n  -10^4 <= nums[i] <= 10^4"
+ARR_STATEMENTS["18"]="Return the contiguous subarray (its elements) that has the largest sum.\n\nExample 1:  nums = [-2,1,-3,4,-1,2,1,-5,4]  →  [4,-1,2,1]\nExample 2:  nums = [1, 2, 3]                →  [1, 2, 3]\n\nKey insight: run Kadane while tracking start/end; on reset remember temp_start, commit on a new max.\n\nConstraints:\n  1 <= nums.length <= 10^4"
+ARR_STATEMENTS["40"]="Return the largest product of any contiguous subarray.\n\nExample 1:  nums = [2, 3, -2, 4]  →  6   ([2,3])\nExample 2:  nums = [-2, 0, -1]     →  0\n\nKey insight: track both the running max and min product (a negative swaps them); reset when starting fresh wins.\n\nConstraints:\n  1 <= nums.length <= 2*10^4"
+ARR_STATEMENTS["19"]="prices[i] is the stock price on day i. Buy once and sell on a later day to maximise profit; return the max profit, or 0.\n\nExample 1:  prices = [7,1,5,3,6,4]  →  5   (buy at 1, sell at 6)\nExample 2:  prices = [7,6,4,3,1]   →  0\n\nKey insight: single pass tracking the minimum price so far.\n\nConstraints:\n  1 <= prices.length <= 10^5\n  0 <= prices[i] <= 10^4"
+ARR_STATEMENTS["21"]="Rearrange the numbers in-place into the next lexicographically greater permutation. If none exists, wrap to the sorted (smallest) order.\n\nExample 1:  nums = [1, 2, 3]  →  [1, 3, 2]\nExample 2:  nums = [3, 2, 1]  →  [1, 2, 3]\nExample 3:  nums = [1, 1, 5]  →  [1, 5, 1]\n\nKey insight: find the rightmost dip, swap with the next greater to its right, reverse the suffix.\n\nConstraints:\n  1 <= nums.length <= 100"
+ARR_STATEMENTS["22"]="An element is a leader if it is greater than every element to its right (the last element is always a leader).\nReturn all leaders, left to right.\n\nExample 1:  arr = [16, 17, 4, 3, 5, 2]  →  [17, 5, 2]\nExample 2:  arr = [1, 2, 3, 4]           →  [4]\n\nKey insight: scan from the right keeping a running max.\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["34"]="Given a list of intervals [start, end], merge all overlapping intervals and return the result.\n\nExample 1:  intervals = [[1,3],[2,6],[8,10],[15,18]]  →  [[1,6],[8,10],[15,18]]\nExample 2:  intervals = [[1,4],[4,5]]                  →  [[1,5]]\n\nKey insight: sort by start; extend the last kept interval when it overlaps, else start a new one.\n\nConstraints:\n  1 <= intervals.length <= 10^4"
+ARR_STATEMENTS["24"]="Given an m x n matrix, if a cell is 0 set its entire row and column to 0. Do it in-place.\n\nExample 1:  [[1,1,1],[1,0,1],[1,1,1]]        →  [[1,0,1],[0,0,0],[1,0,1]]\nExample 2:  [[0,1,2,0],[3,4,5,2],[1,3,1,5]]  →  [[0,0,0,0],[0,4,5,0],[0,3,1,0]]\n\nKey insight: use row 0 and column 0 as marker storage for O(1) extra space.\n\nConstraints:\n  1 <= m, n <= 200"
+ARR_STATEMENTS["25"]="Rotate the n x n matrix 90 degrees clockwise, in-place.\n\nExample 1:  [[1,2,3],[4,5,6],[7,8,9]]  →  [[7,4,1],[8,5,2],[9,6,3]]\nExample 2:  [[1,2],[3,4]]               →  [[3,1],[4,2]]\n\nKey insight: transpose, then reverse each row.\n\nConstraints:\n  1 <= n <= 20"
+ARR_STATEMENTS["26"]="Return all elements of the m x n matrix in spiral order.\n\nExample 1:  [[1,2,3],[4,5,6],[7,8,9]]              →  [1,2,3,6,9,8,7,4,5]\nExample 2:  [[1,2,3,4],[5,6,7,8],[9,10,11,12]]     →  [1,2,3,4,8,12,11,10,9,5,6,7]\n\nKey insight: maintain top/bottom/left/right boundaries and shrink after each pass.\n\nConstraints:\n  1 <= m, n <= 10"
+ARR_STATEMENTS["28"]="Return the first num_rows rows of Pascal's triangle.\n\nExample 1:  num_rows = 5  →  [[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]\nExample 2:  num_rows = 1  →  [[1]]\n\nKey insight: each entry is C(r,c); build each row from the previous using running multiplication.\n\nConstraints:\n  1 <= num_rows <= 30"
+ARR_STATEMENTS["23"]="Return the length of the longest run of consecutive integers present in nums (array order does not matter). O(n) expected.\n\nExample 1:  nums = [100,4,200,1,3,2]       →  4   (1,2,3,4)\nExample 2:  nums = [0,3,7,2,5,8,4,6,0,1]  →  9\n\nKey insight: put all in a HashSet; only begin counting at x when x-1 is not in the set.\n\nConstraints:\n  0 <= nums.length <= 10^5"
+ARR_STATEMENTS["20"]="nums has an equal number of positive and negative integers. Rearrange so signs alternate starting with a positive,\npreserving the relative order within each sign.\n\nExample 1:  nums = [3,1,-2,-5,2,-4]  →  [3,-2,1,-5,2,-4]\nExample 2:  nums = [-1, 1]           →  [1, -1]\n\nKey insight: positives to even indices, negatives to odd, using two position pointers.\n\nConstraints:\n  2 <= nums.length <= 2*10^5\n  equal positives and negatives; no zeros."
+ARR_STATEMENTS["37"]="Count the inversions in arr[]: pairs (i, j) with i < j but arr[i] > arr[j].\n\nExample 1:  arr = [2, 4, 1, 3, 5]  →  3   ((2,1),(4,1),(4,3))\nExample 2:  arr = [5, 4, 3, 2, 1]  →  10\n\nKey insight: modified merge sort — when a right element is placed before left ones, add (mid - i + 1).\n\nConstraints:\n  1 <= arr.length <= 10^5"
+ARR_STATEMENTS["38"]="Count the reverse pairs: pairs (i, j) with i < j and arr[i] > 2 * arr[j].\n\nExample 1:  nums = [1,3,2,3,1]  →  2\nExample 2:  nums = [2,4,3,5,1]  →  3\n\nKey insight: modified merge sort — count qualifying cross-half pairs before the merge step.\n\nConstraints:\n  1 <= nums.length <= 5*10^4\n  -2^31 <= nums[i] <= 2^31 - 1"
+
+# load_topic <bs|arr> — point the active globals at the chosen topic's data.
+load_topic() {
+  local key="${1:-bs}"
+  case "${key}" in
+    arr|arrays|3)
+      TOPIC="arr"; TOPIC_MOD="arrays"; TOPIC_DIR="${SRC_DIR}/arrays"
+      TOPIC_LABEL="Arrays"; TOPIC_STEP="3"
+      PROGRESS_FILE="${SCRIPT_DIR}/.dsa_progress_arrays"
+      PROBLEMS=("${ARR_PROBLEMS[@]}")
+      GROUP_NAMES=("${ARR_GROUP_NAMES[@]}")
+      GROUP_DIRS=("${ARR_GROUP_DIRS[@]}")
+      PROBLEM_STATEMENTS=()
+      local _k
+      for _k in "${!ARR_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${ARR_STATEMENTS[${_k}]}"; done
+      ;;
+    *)
+      TOPIC="bs"; TOPIC_MOD="binary_search"; TOPIC_DIR="${SRC_DIR}/binary_search"
+      TOPIC_LABEL="Binary Search"; TOPIC_STEP="4"
+      PROGRESS_FILE="${SCRIPT_DIR}/.dsa_progress"
+      PROBLEMS=("${BS_PROBLEMS[@]}")
+      GROUP_NAMES=("${BS_GROUP_NAMES[@]}")
+      GROUP_DIRS=("${BS_GROUP_DIRS[@]}")
+      PROBLEM_STATEMENTS=()
+      local _k
+      for _k in "${!BS_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${BS_STATEMENTS[${_k}]}"; done
+      ;;
+  esac
+  # Rebuild the id→record index for the active topic.
+  PROB_BY_ID=()
+  local _p
+  for _p in "${PROBLEMS[@]}"; do PROB_BY_ID["${_p%%|*}"]="${_p}"; done
+}
+
+# Number of groups in the active topic (groups are 1-indexed; slot 0 is empty).
+group_count() { printf '%s' "$(( ${#GROUP_DIRS[@]} - 1 ))"; }
+
 # ─── Field Parsers ────────────────────────────────────────────────────────────
 # Split a "a|b|c|..." record without forking an external `cut` for every access.
 field() {
@@ -190,10 +371,9 @@ unpack_problem() {
   IFS='|' read -r P_ID P_NAME P_DIFF P_GROUP P_LC P_GFG P_CN P_SIG P_IDEA <<< "${1}"
 }
 
-# id → record lookup, built once, replaces linear scans over PROBLEMS.
+# id → record lookup for the active topic. Declared here (so the associative
+# attribute exists) and (re)populated by load_topic on every topic switch.
 declare -A PROB_BY_ID
-for _p in "${PROBLEMS[@]}"; do PROB_BY_ID["${_p%%|*}"]="${_p}"; done
-unset _p
 
 diff_color() {
   case "${1}" in
@@ -315,7 +495,7 @@ get_problem_dir() {
   diff=$(p_diff "${p}")
   gdir="${GROUP_DIRS[$g]}"
   ddir="${diff,,}"
-  echo "${BS_DIR}/${gdir}/${ddir}"
+  echo "${TOPIC_DIR}/${gdir}/${ddir}"
 }
 
 get_problem_file() {
@@ -337,6 +517,33 @@ add_mod_decl() {
   fi
 }
 
+# Ensure `pub mod <topic>;` is declared in main.rs. If the crate-level
+# #![allow(...)] header already exists (any topic set it up before), insert the
+# new declaration right after it — prepending a second inner attribute after an
+# item would be a Rust compile error. Otherwise write the header from scratch.
+ensure_main_mod() {
+  local mod_name="${1}"
+  grep -q "pub mod ${mod_name};" "${MAIN_RS}" 2>/dev/null && return
+  if grep -q '#!\[allow' "${MAIN_RS}" 2>/dev/null; then
+    local tmp
+    tmp="$(mktemp)"
+    awk -v m="pub mod ${mod_name};" '
+      { print }
+      !ins && /^#!\[allow/ { print ""; print m; ins=1 }
+    ' "${MAIN_RS}" > "${tmp}" && mv "${tmp}" "${MAIN_RS}"
+  else
+    local old_content
+    old_content=$(cat "${MAIN_RS}")
+    {
+      echo "#![allow(dead_code, unused_variables, unused_imports)]"
+      echo ""
+      echo "pub mod ${mod_name};"
+      echo ""
+      printf '%s\n' "${old_content}"
+    } > "${MAIN_RS}"
+  fi
+}
+
 ensure_module_chain() {
   local p="${1}"
   local g diff gdir ddir
@@ -345,23 +552,11 @@ ensure_module_chain() {
   gdir="${GROUP_DIRS[$g]}"
   ddir="${diff,,}"
 
-  mkdir -p "${BS_DIR}/${gdir}/${ddir}"
+  mkdir -p "${TOPIC_DIR}/${gdir}/${ddir}"
 
-  # main.rs → binary_search
-  if ! grep -q "pub mod binary_search;" "${MAIN_RS}" 2>/dev/null; then
-    local old_content
-    old_content=$(cat "${MAIN_RS}")
-    {
-      echo "#![allow(dead_code, unused_variables, unused_imports)]"
-      echo ""
-      echo "pub mod binary_search;"
-      echo ""
-      printf '%s\n' "${old_content}"
-    } > "${MAIN_RS}"
-  fi
-
-  add_mod_decl "${BS_DIR}/mod.rs"           "${gdir}"
-  add_mod_decl "${BS_DIR}/${gdir}/mod.rs"   "${ddir}"
+  ensure_main_mod "${TOPIC_MOD}"                # main.rs → <topic>
+  add_mod_decl "${TOPIC_DIR}/mod.rs"           "${gdir}"
+  add_mod_decl "${TOPIC_DIR}/${gdir}/mod.rs"   "${ddir}"
 }
 
 register_problem_mod() {
@@ -374,7 +569,7 @@ register_problem_mod() {
   id=$(p_id "${p}")
   nm=$(snake_name "$(p_name "${p}")")
   local mod_name="p${id}_${nm}"
-  add_mod_decl "${BS_DIR}/${gdir}/${ddir}/mod.rs" "${mod_name}"
+  add_mod_decl "${TOPIC_DIR}/${gdir}/${ddir}/mod.rs" "${mod_name}"
 }
 
 # ─── Statement / Hint Splitter ────────────────────────────────────────────────
@@ -626,77 +821,77 @@ create_lang_template() {
 }
 
 # ─── Workspace Initialisation ─────────────────────────────────────────────────
+# Builds the module skeleton for the ACTIVE topic so `cargo build` compiles from
+# the very first run. Difficulty subdirs (easy/medium/hard) are created for every
+# group; empty mod.rs files are valid Rust and get children as you solve problems.
 setup_workspace() {
-  printf '%b\n' "${BOLD}${CYAN}Setting up DSA workspace structure...${NC}"
+  printf '%b\n' "${BOLD}${CYAN}Setting up ${TOPIC_LABEL} workspace structure...${NC}"
+
+  local gmax g gdir d
+  gmax=$(group_count)
 
   # Directory tree
-  local g gdir
-  for g in 1 2 3; do
+  for g in $(seq 1 "${gmax}"); do
     gdir="${GROUP_DIRS[$g]}"
-    mkdir -p "${BS_DIR}/${gdir}/easy"
-    mkdir -p "${BS_DIR}/${gdir}/medium"
-    mkdir -p "${BS_DIR}/${gdir}/hard"
+    for d in easy medium hard; do mkdir -p "${TOPIC_DIR}/${gdir}/${d}"; done
   done
 
-  # src/binary_search/mod.rs
-  if [[ ! -f "${BS_DIR}/mod.rs" ]]; then
+  # src/<topic>/mod.rs — declares every group
+  if [[ ! -f "${TOPIC_DIR}/mod.rs" ]]; then
     {
-      echo "//! Binary Search — Striver's A2Z DSA Sheet, Step 4"
+      echo "//! ${TOPIC_LABEL} — Striver's A2Z DSA Sheet, Step ${TOPIC_STEP}"
       echo "//!"
-      echo "//! 32 problems across 3 groups:"
-      echo "//!   Group 1 · Binary Search on 1D Arrays        (13 problems)"
-      echo "//!   Group 2 · Binary Search on Answer Space     (14 problems)"
-      echo "//!   Group 3 · Binary Search on 2D Arrays        ( 5 problems)"
+      echo "//! ${#PROBLEMS[@]} problems across ${gmax} groups."
       echo ""
-      echo "pub mod group_1_1d_arrays;"
-      echo "pub mod group_2_answer_space;"
-      echo "pub mod group_3_2d_arrays;"
-    } > "${BS_DIR}/mod.rs"
+      for g in $(seq 1 "${gmax}"); do
+        echo "pub mod ${GROUP_DIRS[$g]};"
+      done
+    } > "${TOPIC_DIR}/mod.rs"
   fi
 
-  # Per-group mod.rs
-  for g in 1 2 3; do
+  # Per-group mod.rs + empty difficulty mod.rs
+  for g in $(seq 1 "${gmax}"); do
     gdir="${GROUP_DIRS[$g]}"
-    if [[ ! -f "${BS_DIR}/${gdir}/mod.rs" ]]; then
+    if [[ ! -f "${TOPIC_DIR}/${gdir}/mod.rs" ]]; then
       {
         echo "//! ${GROUP_NAMES[$g]}"
         echo ""
         echo "pub mod easy;"
         echo "pub mod medium;"
         echo "pub mod hard;"
-      } > "${BS_DIR}/${gdir}/mod.rs"
+      } > "${TOPIC_DIR}/${gdir}/mod.rs"
     fi
-    # Empty difficulty mod.rs files (valid Rust — just no children yet)
     for d in easy medium hard; do
-      [[ ! -f "${BS_DIR}/${gdir}/${d}/mod.rs" ]] && touch "${BS_DIR}/${gdir}/${d}/mod.rs"
+      [[ ! -f "${TOPIC_DIR}/${gdir}/${d}/mod.rs" ]] && touch "${TOPIC_DIR}/${gdir}/${d}/mod.rs"
     done
   done
 
-  # src/main.rs
-  if ! grep -q "pub mod binary_search;" "${MAIN_RS}" 2>/dev/null; then
-    local old
-    old=$(cat "${MAIN_RS}")
-    {
-      echo "#![allow(dead_code, unused_variables, unused_imports)]"
-      echo ""
-      echo "pub mod binary_search;"
-      echo ""
-      printf '%s\n' "${old}"
-    } > "${MAIN_RS}"
-  fi
-
+  ensure_main_mod "${TOPIC_MOD}"    # src/main.rs → pub mod <topic>;
   printf '%b\n' "${GREEN}Done!${NC}"
 }
 
 # ─── Display Helpers ──────────────────────────────────────────────────────────
 clear_screen() { printf '\033[2J\033[H'; }
 
+# Print text centred inside a box of inner width $2, bounded by ║ on both sides.
+center_line() {
+  local text="${1}" w="${2}" len left right lpad rpad
+  len=${#text}
+  (( len > w )) && { text="${text:0:w}"; len=${w}; }
+  left=$(( (w - len) / 2 )); right=$(( w - len - left ))
+  printf -v lpad '%*s' "${left}"  ''
+  printf -v rpad '%*s' "${right}" ''
+  printf '║%s%s%s║\n' "${lpad}" "${text}" "${rpad}"
+}
+
 print_header() {
+  local w=60 border
+  printf -v border '%*s' "${w}" ''; border="${border// /═}"
   printf '%b\n' "${BOLD}${CYAN}"
-  echo "╔══════════════════════════════════════════════════════════════╗"
-  echo "║       DSA Practice Tool  ·  Binary Search Edition           ║"
-  echo "║       Striver's A2Z Sheet  ·  Step 4  ·  32 Problems        ║"
-  echo "╚══════════════════════════════════════════════════════════════╝"
+  printf '╔%s╗\n' "${border}"
+  center_line "DSA Practice Tool  ·  ${TOPIC_LABEL} Edition" "${w}"
+  center_line "Striver's A2Z Sheet  ·  Step ${TOPIC_STEP}  ·  ${#PROBLEMS[@]} Problems" "${w}"
+  printf '╚%s╝\n' "${border}"
   printf '%b\n' "${NC}"
 }
 
@@ -754,6 +949,29 @@ print_problem_detail() {
   echo ""
 }
 
+# ─── Study Order (per topic) ──────────────────────────────────────────────────
+print_study_order() {
+  printf '%b  Recommended Study Order%b\n' "${BOLD}" "${NC}"
+  if [[ "${TOPIC}" == "arr" ]]; then
+    printf '  %bProblems 01-08%b  Basic traversal & in-place tricks (rotate, move zeros)\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 09-12,35-36%b  Merge logic, XOR & missing/duplicate patterns\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 13-14,27,32-33%b  Prefix sum + hashmap — do them together\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 15,30-31,39%b  Sort + two pointers (2Sum → 3Sum → 4Sum chain)\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 16-22,29,40%b  Voting, Kadane family & greedy observations\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 24-26,28,34%b  Matrix + interval merging\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 37-38%b  Modified merge sort (inversions, reverse pairs) — last\n' "${RED}" "${NC}"
+  else
+    printf '  %bProblems 1-7%b    Bounds & occurrences — master the two templates\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 8-13%b   Rotated arrays, peak, single element\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 14-16%b  Intro to search-space BS (sqrt, Nth root, Koko)\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 17-20%b  Standard answer-space medium problems\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 21-24%b  Aggressive Cows / Book Allocation family — interview staples\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 25-27%b  Floating-point BS and two-array hard problems\n' "${RED}" "${NC}"
+    printf '  %bProblems 28-30%b  2D matrix basics\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 31-32%b  2D hard problems\n' "${RED}" "${NC}"
+  fi
+}
+
 # ─── Dashboard ────────────────────────────────────────────────────────────────
 print_dashboard() {
   clear_screen
@@ -788,7 +1006,7 @@ print_dashboard() {
   echo ""
 
   printf '%b  By Group%b\n' "${BOLD}" "${NC}"
-  for g in 1 2 3; do
+  for g in $(seq 1 "$(group_count)"); do
     local g_total=0 g_done=0
     for p in "${PROBLEMS[@]}"; do
       unpack_problem "${p}"
@@ -796,7 +1014,7 @@ print_dashboard() {
       (( g_total++ )) || true
       [[ "${ST_STATUS[${P_ID}]:-not_started}" == "completed" ]] && (( g_done++ )) || true
     done
-    printf '  %b%-42s%b  %s  %s/%s\n' "${CYAN}" "${GROUP_NAMES[$g]}" "${NC}" \
+    printf '  %b%-34s%b  %s  %s/%s\n' "${CYAN}" "${GROUP_NAMES[$g]}" "${NC}" \
       "$(progress_bar "${g_done}" "${g_total}" 16)" "${g_done}" "${g_total}"
   done
   echo ""
@@ -815,16 +1033,7 @@ print_dashboard() {
     echo ""
   fi
 
-  # Study order reminder
-  printf '%b  Recommended Study Order%b\n' "${BOLD}" "${NC}"
-  printf '  %bProblems 1-7%b    Bounds & occurrences — master the two templates\n' "${GREEN}" "${NC}"
-  printf '  %bProblems 8-13%b   Rotated arrays, peak, single element\n' "${GREEN}" "${NC}"
-  printf '  %bProblems 14-16%b  Intro to search-space BS (sqrt, Nth root, Koko)\n' "${YELLOW}" "${NC}"
-  printf '  %bProblems 17-20%b  Standard answer-space medium problems\n' "${YELLOW}" "${NC}"
-  printf '  %bProblems 21-24%b  Aggressive Cows / Book Allocation family — interview staples\n' "${YELLOW}" "${NC}"
-  printf '  %bProblems 25-27%b  Floating-point BS and two-array hard problems\n' "${RED}" "${NC}"
-  printf '  %bProblems 28-30%b  2D matrix basics\n' "${YELLOW}" "${NC}"
-  printf '  %bProblems 31-32%b  2D hard problems\n' "${RED}" "${NC}"
+  print_study_order
   echo ""
 }
 
@@ -1046,7 +1255,9 @@ browse_by_group() {
     print_header
     printf '%b  Browse by Group%b\n\n' "${BOLD}" "${NC}"
 
-    for g in 1 2 3; do
+    local gmax
+    gmax=$(group_count)
+    for g in $(seq 1 "${gmax}"); do
       local g_total=0 g_done=0
       for p in "${PROBLEMS[@]}"; do
         unpack_problem "${p}"
@@ -1054,15 +1265,16 @@ browse_by_group() {
         (( g_total++ )) || true
         [[ "${ST_STATUS[${P_ID}]:-not_started}" == "completed" ]] && (( g_done++ )) || true
       done
-      printf '  [%d]  Group %d · %b%s%b  (%s/%s)\n' \
+      printf '  [%2d]  Group %d · %b%s%b  (%s/%s)\n' \
         "${g}" "${g}" "${CYAN}" "${GROUP_NAMES[$g]}" "${NC}" "${g_done}" "${g_total}"
     done
-    echo "  [0]  Back"
+    echo "  [ 0]  Back"
     echo ""
     local choice
     read -rp "  Choice: " choice || return
     [[ "${choice}" == "0" || -z "${choice}" ]] && return
-    [[ "${choice}" =~ ^[123]$ ]] || continue
+    [[ "${choice}" =~ ^[0-9]+$ ]] || continue
+    (( choice >= 1 && choice <= gmax )) || continue
 
     # Show problems in this group, ordered Easy → Medium → Hard
     while true; do
@@ -1160,7 +1372,7 @@ browse_by_difficulty() {
 show_all_problems() {
   clear_screen
   print_header
-  printf '%b  All 32 Problems%b\n' "${BOLD}" "${NC}"
+  printf '%b  All %s %s Problems%b\n' "${BOLD}" "${#PROBLEMS[@]}" "${TOPIC_LABEL}" "${NC}"
 
   local current_group=0
   local idx=0
@@ -1177,7 +1389,7 @@ show_all_problems() {
   done
 
   echo ""
-  echo "  [ 0]  Back to menu  |  [1-32] Open problem"
+  printf '  [ 0]  Back to menu  |  [1-%d] Open problem\n' "${#PROBLEMS[@]}"
   echo ""
   local sel
   read -rp "  Choice: " sel || return
@@ -1202,18 +1414,32 @@ next_unsolved() {
 show_cheatsheet() {
   clear_screen
   print_header
-  printf '%b  Binary Search Pattern Cheatsheet%b\n\n' "${BOLD}" "${NC}"
+  printf '%b  %s Pattern Cheatsheet%b\n\n' "${BOLD}" "${TOPIC_LABEL}" "${NC}"
 
-  local patterns=(
-    "1. Exact Search (classic)|Find target X in sorted array|lo=0 hi=n-1; while lo<=hi; if arr[mid]==x return; else shrink"
-    "2. Lower Bound|First index where arr[i] >= x|hi=mid when arr[mid]>=x; else lo=mid+1; return lo at end"
-    "3. Upper Bound|First index where arr[i] > x|hi=mid when arr[mid]>x; else lo=mid+1; return lo at end"
-    "4. Rotated Array|One half is always sorted|Check sorted half; if target in range go there; else go other side"
-    "5. Answer Space — Minimise|BS on the answer value|can(mid) -> hi=mid; else lo=mid+1; return lo"
-    "6. Answer Space — Maximise|Flip direction|can(mid) -> lo=mid; else hi=mid-1; use mid=lo+(hi-lo+1)/2"
-    "7. 2D as 1D|Virtual index into matrix|index i -> (i/cols, i%cols); standard BS on range [0, m*n-1]"
-    "8. Value-range on Matrix|BS on value not index|count_le(mid) per row; total > (m*n)/2 -> reduce hi"
-  )
+  local patterns
+  if [[ "${TOPIC}" == "arr" ]]; then
+    patterns=(
+      "1. Two Pointers|Sorted / partitioned array|One from each end (2Sum), or read+write (remove dups, move zeros, DNF sort)"
+      "2. Prefix Sum + HashMap|Count/length of subarrays with sum/XOR K|Store prefix->index (longest) or prefix->count (count); look up prefix-K"
+      "3. Kadane's Family|Max subarray sum / product|current = max(x, current+x); for product also track the running min"
+      "4. Boyer-Moore Voting|Majority > n/2 or > n/3|1 candidate for n/2, 2 candidates for n/3; verify counts in a final pass"
+      "5. XOR Tricks|Missing / single / repeat+missing|a^a=0: XOR everything; split repeat vs missing by a differing set bit"
+      "6. Modified Merge Sort|Count inversions / reverse pairs|Count cross-half pairs during (or just before) the merge step; O(n log n)"
+      "7. Matrix In-place|Set-zeros / rotate / spiral|Row0+Col0 as flags; transpose+reverse rows; 4 shrinking boundaries"
+      "8. Sort + Two Pointers|3Sum / 4Sum / merge intervals|Fix outer indices, two-pointer the rest; skip duplicates at every level"
+    )
+  else
+    patterns=(
+      "1. Exact Search (classic)|Find target X in sorted array|lo=0 hi=n-1; while lo<=hi; if arr[mid]==x return; else shrink"
+      "2. Lower Bound|First index where arr[i] >= x|hi=mid when arr[mid]>=x; else lo=mid+1; return lo at end"
+      "3. Upper Bound|First index where arr[i] > x|hi=mid when arr[mid]>x; else lo=mid+1; return lo at end"
+      "4. Rotated Array|One half is always sorted|Check sorted half; if target in range go there; else go other side"
+      "5. Answer Space — Minimise|BS on the answer value|can(mid) -> hi=mid; else lo=mid+1; return lo"
+      "6. Answer Space — Maximise|Flip direction|can(mid) -> lo=mid; else hi=mid-1; use mid=lo+(hi-lo+1)/2"
+      "7. 2D as 1D|Virtual index into matrix|index i -> (i/cols, i%cols); standard BS on range [0, m*n-1]"
+      "8. Value-range on Matrix|BS on value not index|count_le(mid) per row; total > (m*n)/2 -> reduce hi"
+    )
+  fi
 
   for pat in "${patterns[@]}"; do
     local title desc tmpl
@@ -1233,13 +1459,15 @@ main_menu() {
     print_header
     print_mini_progress
 
-    printf '%b  Main Menu%b\n\n' "${BOLD}" "${NC}"
+    printf '%b  Main Menu%b   %b(topic: %s · Step %s)%b\n\n' \
+      "${BOLD}" "${NC}" "${DIM}" "${TOPIC_LABEL}" "${TOPIC_STEP}" "${NC}"
     echo "  [1]  Browse by Group        (Easy → Medium → Hard within each group)"
     echo "  [2]  Browse by Difficulty   (see all Easy / Medium / Hard across groups)"
     echo "  [3]  Start Next Unsolved    (recommended study order)"
     echo "  [4]  Show All Problems"
     echo "  [5]  Progress Dashboard"
     echo "  [6]  Pattern Cheatsheet"
+    echo "  [7]  Switch Topic          (Arrays ⇄ Binary Search)"
     echo "  [0]  Exit"
     echo ""
     local choice
@@ -1256,7 +1484,8 @@ main_menu() {
         local nxt
         nxt=$(next_unsolved)
         if [[ -z "${nxt}" ]]; then
-          printf '\n  %b🎉 All 32 problems completed! Impressive!%b\n' "${GREEN}${BOLD}" "${NC}"
+          printf '\n  %b🎉 All %s %s problems completed! Impressive!%b\n' \
+            "${GREEN}${BOLD}" "${#PROBLEMS[@]}" "${TOPIC_LABEL}" "${NC}"
           read -rp "  Press Enter..." _
         else
           problem_action_menu "${nxt}"
@@ -1265,25 +1494,66 @@ main_menu() {
       4) show_all_problems ;;
       5) print_dashboard; read -rp "  Press Enter to go back..." _ ;;
       6) show_cheatsheet ;;
+      7) switch_topic ;;
     esac
   done
 }
 
-# ─── Entry Point ──────────────────────────────────────────────────────────────
-main() {
-  # First-run workspace setup
-  if [[ ! -d "${BS_DIR}" ]]; then
+# ─── Topic Selection & Persistence ────────────────────────────────────────────
+save_topic()       { printf '%s' "${TOPIC}" > "${TOPIC_FILE}" 2>/dev/null || true; }
+read_saved_topic() { [[ -f "${TOPIC_FILE}" ]] && cat "${TOPIC_FILE}" || printf 'bs'; }
+
+# Make <key> the active topic: point globals at its data, remember the choice,
+# build its src/ skeleton on first use, and (re)load its progress file.
+activate_topic() {
+  load_topic "${1}"
+  save_topic
+  if [[ ! -d "${TOPIC_DIR}" ]]; then
     clear_screen
     print_header
     setup_workspace
     sleep 1
   fi
-
   init_progress
+}
 
-  # VS Code tasks.json passes the chosen action as the first argument.
-  # Running the script directly (no arg) always shows the main menu.
-  local mode="${1:-}"
+# Interactive topic picker (main-menu option). Shows each topic's completion.
+switch_topic() {
+  clear_screen
+  print_header
+  printf '%b  Select Topic%b\n\n' "${BOLD}" "${NC}"
+  printf '  [1]  %bArrays%b          Step 3 · %s problems\n' "${CYAN}" "${NC}" "${#ARR_PROBLEMS[@]}"
+  printf '  [2]  %bBinary Search%b   Step 4 · %s problems\n' "${CYAN}" "${NC}" "${#BS_PROBLEMS[@]}"
+  echo "  [0]  Back"
+  echo ""
+  local c
+  read -rp "  Choice: " c || return
+  case "${c}" in
+    1) activate_topic arr ;;
+    2) activate_topic bs ;;
+    *) return ;;
+  esac
+}
+
+# ─── Entry Point ──────────────────────────────────────────────────────────────
+# Usage: dsa_tool.sh [topic] [mode]
+#   topic (optional): arr | arrays | bs | binary_search
+#   mode  (optional): next | group | difficulty | all | dashboard | cheatsheet
+# tasks.json passes just a mode, so a bare first arg is treated as the mode and
+# the topic falls back to the last-used one (.dsa_topic), defaulting to bs.
+main() {
+  local first="${1:-}" topic_arg="" mode=""
+  case "${first}" in
+    arr|arrays|bs|binary_search) topic_arg="${first}"; mode="${2:-}" ;;
+    *)                           mode="${first}" ;;
+  esac
+
+  if [[ -n "${topic_arg}" ]]; then
+    activate_topic "${topic_arg}"
+  else
+    activate_topic "$(read_saved_topic)"
+  fi
+
   case "${mode}" in
     group)      browse_by_group;      main_menu ;;
     difficulty) browse_by_difficulty; main_menu ;;
@@ -1300,7 +1570,8 @@ main() {
       if [[ -z "${nxt}" ]]; then
         clear_screen
         print_header
-        printf '\n  %b🎉 All 32 problems completed! Impressive!%b\n' "${GREEN}${BOLD}" "${NC}"
+        printf '\n  %b🎉 All %s %s problems completed! Impressive!%b\n' \
+          "${GREEN}${BOLD}" "${#PROBLEMS[@]}" "${TOPIC_LABEL}" "${NC}"
         read -rp "  Press Enter..." _
       else
         problem_action_menu "${nxt}"
