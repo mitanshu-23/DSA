@@ -1,4 +1,5 @@
 /target
-.dsa_progress
+.dsa_progress*
+.dsa_topic
 prompt.txt
 .vscode/

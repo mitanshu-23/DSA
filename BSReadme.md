@@ -600,3 +600,13 @@ count_less_equal(mid) tells you which side the answer is on
 | YouTube Playlist | [takeUforward Channel](https://www.youtube.com/@takeUforward) |
 | Binary Search Playlist | [BS Playlist](https://www.youtube.com/playlist?list=PLgUwDviBIf0pMFMWuuvDNMAkoQFi-h0i3) |
 | Striver's Binary Search Blog | [takeuforward BS page](https://takeuforward.org/blogs/binary-search) |
+
+---
+
+## Where This Fits in the Sheet
+
+Binary Search (Step 4) builds directly on **Arrays** (Step 3) — the two-pointer, sorted-array, and answer-space instincts you form there are exactly what this step exploits to get from O(n) to O(log n).
+
+| ← Previous | Index | Next → |
+|---|---|---|
+| [Step 3 — Arrays](ArraysReadme.md) | [All Topics](README.md) | *Next step coming soon* |
