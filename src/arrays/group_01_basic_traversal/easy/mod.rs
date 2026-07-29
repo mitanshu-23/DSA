@@ -1,1 +1,6 @@
 pub mod p01_largest_element_in_an_array;
+pub mod p02_second_largest_element_without_sorting;
+pub mod p03_check_if_the_array_is_sorted;
+pub mod p04_remove_duplicates_from_sorted_array;
+pub mod p07_move_zeros_to_end;
+pub mod p06_left_rotate_an_array_by_d_places;
