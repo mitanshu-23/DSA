@@ -38,7 +38,7 @@ impl Solution {
             }
         }
 
-        println!("{}", first_set_bit);
+        // println!("{}", first_set_bit);
 
         for n in arr.iter() {
             if (n & (1 << first_set_bit)) != 0 {
