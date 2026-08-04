@@ -1,5 +1,0 @@
-pub mod p23_split_array_largest_sum;
-pub mod p24_painter_s_partition_problem;
-pub mod p25_minimise_maximum_distance_between_gas_stations;
-pub mod p26_median_of_two_sorted_arrays;
-pub mod p27_kth_element_of_two_sorted_arrays;

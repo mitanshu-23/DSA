@@ -22,7 +22,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$SCRIPT_DIR/src"
 MAIN_RS="$SRC_DIR/main.rs"
-SOLUTIONS_DIR="$SCRIPT_DIR/solutions"   # non-Rust solutions (not built by cargo)
+SOLUTIONS_DIR="$SCRIPT_DIR/solutions"   # legacy/unused: non-Rust solutions are now co-located under src/
 TOPIC_FILE="$SCRIPT_DIR/.dsa_topic"     # remembers the last-selected topic
 
 # These are (re)assigned by load_topic — see the Topic Registry further down.
@@ -84,7 +84,7 @@ declare -a PROBLEMS=(
 )
 
 declare -a GROUP_NAMES=("" "Binary Search on 1D Arrays" "Binary Search on Answer Space" "Binary Search on 2D Arrays")
-declare -a GROUP_DIRS=("" "group_1_1d_arrays" "group_2_answer_space" "group_3_2d_arrays")
+declare -a GROUP_DIRS=("" "group_1" "group_2" "group_3")
 
 # ─── Platform Language Support ────────────────────────────────────────────────
 # Languages each judge accepts (Rust is listed only where supported — notably GFG
@@ -204,17 +204,17 @@ declare -a ARR_GROUP_NAMES=(""
   "Merge Sort Based"
 )
 declare -a ARR_GROUP_DIRS=(""
-  "group_01_basic_traversal"
-  "group_02_two_sorted_arrays"
-  "group_03_missing_dup_xor"
-  "group_04_prefix_sum_subarray"
-  "group_05_sorting_two_pointers"
-  "group_06_majority_voting"
-  "group_07_kadane_subarray"
-  "group_08_greedy_observation"
-  "group_09_matrix"
-  "group_10_hashing"
-  "group_11_merge_sort"
+  "group_01"
+  "group_02"
+  "group_03"
+  "group_04"
+  "group_05"
+  "group_06"
+  "group_07"
+  "group_08"
+  "group_09"
+  "group_10"
+  "group_11"
 )
 # Each entry: "id|name|difficulty|group|lc_url|gfg_url|cn_url|fn_signature|core_idea"
 declare -a ARR_PROBLEMS=(
@@ -638,7 +638,7 @@ create_rust_template() {
     echo "//! # Problem ${id}: ${name}"
     echo "//!"
     echo "//! **Difficulty:** ${diff}"
-    echo "//! **Group:**      ${gname}"
+    echo "//! **Group:**      ${g}"
     echo "//! **Platform:**   ${platform}"
     echo "//!"
     echo "//! ## Problem Statement"
@@ -716,23 +716,21 @@ create_rust_template() {
 }
 
 # ─── Non-Rust Template Generator ─────────────────────────────────────────────
-# Rust solutions live in src/ and are driven by cargo; every other language is a
-# standalone stub under solutions/<platform>/ holding the problem context, since
-# those judges (e.g. GFG, which has no Rust) are where you'll actually submit.
+# Every language's solution is co-located in the SAME group/difficulty folder as
+# its Rust sibling (src/<topic>/group_N/<difficulty>/). cargo only compiles .rs
+# reachable from the mod.rs chain, so non-Rust files here are ignored by the build.
+# GFG (which has no Rust) is the usual reason a problem is solved in C++ instead.
 
-# Folder that holds a problem's non-Rust solution for the chosen platform.
+# Co-located path (beside the Rust sibling) for a problem's non-Rust solution.
 get_lang_file() {
-  local p="${1}" platform="${2}" language="${3}"
+  local p="${1}" platform="${2:-}" language="${3}"
   unpack_problem "${p}"
-  local ext="${LANG_EXT[$language]:-txt}" pdir
-  if [[ "${platform}" == "ALL" ]]; then
-    if   [[ -n "${P_LC}"  ]]; then pdir="${PLATFORM_DIR[LC]}"
-    elif [[ -n "${P_GFG}" ]]; then pdir="${PLATFORM_DIR[GFG]}"
-    else                           pdir="${PLATFORM_DIR[CN]}"; fi
-  else
-    pdir="${PLATFORM_DIR[$platform]:-misc}"
-  fi
-  printf '%s/%s/p%s_%s.%s' "${SOLUTIONS_DIR}" "${pdir}" "${P_ID}" "$(snake_name "${P_NAME}")" "${ext}"
+  local ext="${LANG_EXT[$language]:-txt}"
+  # Co-located beside the Rust sibling in the same group/difficulty folder:
+  #   src/<topic>/group_N/<difficulty>/pNN_name.ext
+  # cargo only compiles .rs reachable from the mod.rs chain, so non-Rust files
+  # dropped here are ignored by the build. (platform no longer affects the path.)
+  printf '%s/p%s_%s.%s' "$(get_problem_dir "${p}")" "${P_ID}" "$(snake_name "${P_NAME}")" "${ext}"
 }
 
 # A minimal, language-appropriate skeleton emitted below the header comment.
@@ -773,7 +771,7 @@ create_lang_template() {
     printf '%s Problem %s: %s\n' "${c}" "${P_ID}" "${P_NAME}"
     printf '%s\n' "${c}"
     printf '%s Difficulty: %s\n' "${c}" "${P_DIFF}"
-    printf '%s Group:      %s\n' "${c}" "${gname}"
+    printf '%s Group:      %s\n' "${c}" "${P_GROUP}"
     printf '%s Platform:   %s\n' "${c}" "${platform}"
     printf '%s Language:   %s\n' "${c}" "${language}"
     printf '%s\n' "${c}"
@@ -854,7 +852,7 @@ setup_workspace() {
     gdir="${GROUP_DIRS[$g]}"
     if [[ ! -f "${TOPIC_DIR}/${gdir}/mod.rs" ]]; then
       {
-        echo "//! ${GROUP_NAMES[$g]}"
+        echo "//! Group ${g}"
         echo ""
         echo "pub mod easy;"
         echo "pub mod medium;"
@@ -938,11 +936,12 @@ print_problem_detail() {
   printf '   Difficulty : %b\n'   "$(diff_color "${P_DIFF}")"
   printf '   Status     : %b %s%s\n' "$(status_icon "${status}")" "${status}" \
     "${meta:+ (${meta})}"
-  printf '   Group      : %b%s%b\n' "${CYAN}" "${gname}" "${NC}"
+  printf '   Group      : %b%s%b\n' "${CYAN}" "${P_GROUP}" "${NC}"
   echo ""
   printf '   %bSignature:%b  %b%s%b\n' "${BOLD}" "${NC}" "${CYAN}" "${P_SIG}" "${NC}"
-  printf '   %bCore Idea:%b  %s\n' "${BOLD}" "${NC}" "${P_IDEA}"
   echo ""
+  # Core Idea is deliberately NOT shown here — it spoils the approach. Reveal it on
+  # demand via the "[7] Reveal core idea" action in the problem menu.
   [[ -n "${P_LC}"  ]] && printf '   %bLC :%b  %b%s%b\n' "${BOLD}" "${NC}" "${DIM}" "${P_LC}"  "${NC}"
   [[ -n "${P_GFG}" ]] && printf '   %bGFG:%b  %b%s%b\n' "${BOLD}" "${NC}" "${DIM}" "${P_GFG}" "${NC}"
   [[ -n "${P_CN}"  ]] && printf '   %bCN :%b  %b%s%b\n' "${BOLD}" "${NC}" "${DIM}" "${P_CN}"  "${NC}"
@@ -1014,7 +1013,7 @@ print_dashboard() {
       (( g_total++ )) || true
       [[ "${ST_STATUS[${P_ID}]:-not_started}" == "completed" ]] && (( g_done++ )) || true
     done
-    printf '  %b%-34s%b  %s  %s/%s\n' "${CYAN}" "${GROUP_NAMES[$g]}" "${NC}" \
+    printf '  %b%-34s%b  %s  %s/%s\n' "${CYAN}" "Group ${g}" "${NC}" \
       "$(progress_bar "${g_done}" "${g_total}" 16)" "${g_done}" "${g_total}"
   done
   echo ""
@@ -1154,6 +1153,7 @@ problem_action_menu() {
     echo "  [4]  Mark → Not Started  (reset)"
     echo "  [5]  Run tests  (Rust only — cargo test p<id>)"
     echo "  [6]  Show file path"
+    echo "  [7]  Reveal core idea  (hint — spoiler)"
     echo "  [0]  Back"
     echo ""
     local choice
@@ -1197,7 +1197,7 @@ problem_action_menu() {
           printf '  %bTip:%b  cargo test %s -- --show-output\n' "${DIM}" "${NC}" "p${id}"
           printf '  %bTip:%b  cargo build  (to verify it compiles)\n' "${DIM}" "${NC}"
         else
-          printf '  %bNote:%b  %s solutions live under solutions/ and are not built by cargo.\n' "${DIM}" "${NC}" "${language}"
+          printf '  %bNote:%b  %s lives beside the Rust file in the same folder and is not built by cargo.\n' "${DIM}" "${NC}" "${language}"
         fi
         read -rp "  Press Enter..." _
         ;;
@@ -1244,6 +1244,12 @@ problem_action_menu() {
         printf '\n  %b%s%b\n' "${CYAN}" "${filepath}" "${NC}"
         read -rp "  Press Enter..." _
         ;;
+      7)
+        unpack_problem "${p}"
+        printf '\n  %b💡 Core idea (hint):%b  %s\n' "${YELLOW}${BOLD}" "${NC}" "${P_IDEA}"
+        printf '  %bMore hints live in the file'"'"'s "Solution Notes" section.%b\n' "${DIM}" "${NC}"
+        read -rp "  Press Enter..." _
+        ;;
     esac
   done
 }
@@ -1265,8 +1271,8 @@ browse_by_group() {
         (( g_total++ )) || true
         [[ "${ST_STATUS[${P_ID}]:-not_started}" == "completed" ]] && (( g_done++ )) || true
       done
-      printf '  [%2d]  Group %d · %b%s%b  (%s/%s)\n' \
-        "${g}" "${g}" "${CYAN}" "${GROUP_NAMES[$g]}" "${NC}" "${g_done}" "${g_total}"
+      printf '  [%2d]  Group %d  (%s/%s)\n' \
+        "${g}" "${g}" "${g_done}" "${g_total}"
     done
     echo "  [ 0]  Back"
     echo ""
@@ -1280,7 +1286,7 @@ browse_by_group() {
     while true; do
       clear_screen
       print_header
-      printf '%b  Group %s · %s%b\n\n' "${BOLD}${CYAN}" "${choice}" "${GROUP_NAMES[$choice]}" "${NC}"
+      printf '%b  Group %s%b\n\n' "${BOLD}${CYAN}" "${choice}" "${NC}"
 
       local idx=0
       declare -a gprobs=()
@@ -1349,7 +1355,7 @@ browse_by_difficulty() {
         [[ "${P_DIFF}" != "${target_diff}" ]] && continue
         if [[ "${P_GROUP}" != "${current_group}" ]]; then
           current_group="${P_GROUP}"
-          printf '  %b── %s ──%b\n' "${DIM}" "${GROUP_NAMES[$P_GROUP]}" "${NC}"
+          printf '  %b── Group %s ──%b\n' "${DIM}" "${P_GROUP}" "${NC}"
         fi
         dprobs+=("${p}")
         printf '  [%2d]  ' "$((++idx))"
@@ -1381,7 +1387,7 @@ show_all_problems() {
     unpack_problem "${p}"
     if [[ "${P_GROUP}" != "${current_group}" ]]; then
       current_group="${P_GROUP}"
-      printf '\n  %b── %s ──%b\n' "${BOLD}${CYAN}" "${GROUP_NAMES[$P_GROUP]}" "${NC}"
+      printf '\n  %b── Group %s ──%b\n' "${BOLD}${CYAN}" "${P_GROUP}" "${NC}"
     fi
     all_probs+=("${p}")
     printf '  [%2d]  ' "$((++idx))"

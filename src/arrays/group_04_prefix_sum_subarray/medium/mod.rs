@@ -1,3 +1,0 @@
-pub mod p13_longest_subarray_with_sum_k_positives;
-// pub mod p14_longest_subarray_with_sum_k_positives_negatives;
-pub mod p27_count_subarrays_with_given_sum;

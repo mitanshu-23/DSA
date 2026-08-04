@@ -7,6 +7,20 @@
 
 ---
 
+## Where the Solutions Live
+
+Every solution sits at a deterministic path:
+`src/arrays/group_<N>/<easy|medium|hard>/pNN_<name>.<rs|cpp>`
+
+- **`.rs`** when the exact problem is free on LeetCode; **`.cpp`** when it's GFG-only
+  or LeetCode-Premium (GFG has no Rust judge). If a problem has both, they share the
+  same folder.
+- Group folders are plain **numbers**, not technique names, so opening a problem never
+  spoils the approach. The cluster names in this guide are the deliberate hint — read
+  them when you actually want the pattern.
+
+---
+
 ## What You Will Learn in This Step
 
 Arrays is **not just a data structure** — it is the training ground for every core algorithmic technique you will use everywhere else:

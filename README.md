@@ -4,21 +4,36 @@ My solutions to [Striver's A2Z DSA Sheet](https://takeuforward.org/strivers-a2z-
 
 ## Structure
 
-Each topic is its own module tree of `group_*/{easy,medium,hard}/pNN_*.rs`, and each
-problem file holds the solution plus comments explaining the approach.
+Each topic is a module tree of `group_N/{easy,medium,hard}/pNN_*.{rs,cpp}`. Every
+problem file couples the statement, approach notes, and (for Rust) tests.
 
 ```
 src/
-├── arrays/                       (Step 3 · 40 problems · 11 correlation clusters)
-│   ├── group_01_basic_traversal/ (Easy / Medium / Hard)
-│   ├── group_02_two_sorted_arrays/
-│   ├── … group_03 … group_10 …
-│   └── group_11_merge_sort/
-└── binary_search/                (Step 4 · 32 problems · 3 groups)
-    ├── group_1_1d_arrays/        (Easy / Medium / Hard)
-    ├── group_2_answer_space/
-    └── group_3_2d_arrays/
+├── arrays/            (Step 3 · 40 problems · groups 01–11)
+│   ├── group_01/      (each group has easy/ medium/ hard/)
+│   ├── group_02/
+│   ├── …
+│   └── group_11/
+└── binary_search/     (Step 4 · 32 problems · groups 1–3)
+    ├── group_1/       (each group has easy/ medium/ hard/)
+    ├── group_2/
+    └── group_3/
 ```
+
+### Conventions
+
+- **One place per problem.** Every solution lives at a deterministic path —
+  `src/<topic>/group_<N>/<difficulty>/pNN_<name>.<ext>`. There is no separate
+  `solutions/` tree and no guessing whether a problem is solved in Rust or C++.
+- **Language rule.** Rust when the exact problem is solvable for free on LeetCode;
+  C++ when the problem is GFG-only or LeetCode-Premium (GFG has no Rust judge). When
+  both languages exist for a problem they sit side by side in the same folder. cargo
+  only compiles `.rs` reachable from the `mod.rs` chain, so co-located `.cpp` files are
+  ignored by the build.
+- **Neutral group names (no spoilers).** Group folders are plain numbers and each
+  problem header shows only `Group: <N>`, so opening a problem never reveals the
+  technique. The pattern behind each group lives in the study guides below and in each
+  file's gated "Solution Notes" — look there deliberately when you want the hint.
 
 ## Tooling
 

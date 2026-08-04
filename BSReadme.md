@@ -7,6 +7,20 @@
 
 ---
 
+## Where the Solutions Live
+
+Every solution sits at a deterministic path:
+`src/binary_search/group_<N>/<easy|medium|hard>/pNN_<name>.<rs|cpp>`
+
+- **`.rs`** when the exact problem is free on LeetCode; **`.cpp`** when it's GFG-only
+  or LeetCode-Premium (GFG has no Rust judge). If a problem has both, they share the
+  same folder.
+- Group folders are plain **numbers**, not technique names, so opening a problem never
+  spoils the approach. The group descriptions in this guide are the deliberate hint —
+  read them when you actually want the pattern.
+
+---
+
 ## What is Binary Search?
 
 Binary Search is a search algorithm that works on **sorted** data by repeatedly halving the search space. Instead of scanning every element (O(n)), it eliminates half the candidates at each step, achieving **O(log n)** time. The core template:
