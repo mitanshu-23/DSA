@@ -240,7 +240,7 @@ init_progress() {
     local today
     today=$(date '+%Y-%m-%d')
     for p in "${PROBLEMS[@]}"; do
-      printf '%s|not_started|||%s|\n' "${p%%|*}" "${today}"
+      printf '%s|not_started||%s||\n' "${p%%|*}" "${today}"
     done > "${PROGRESS_FILE}"
   fi
   load_progress
@@ -274,7 +274,7 @@ set_status() {
   for p in "${PROBLEMS[@]}"; do
     pid="${p%%|*}"
     printf '%s|%s|%s|%s|%s|%s\n' "${pid}" "${ST_STATUS[${pid}]:-not_started}" \
-      "${ST_PLATFORM[${pid}]:-}" "${ST_START[${pid}]:-${today}}" \
+      "${ST_PLATFORM[${pid}]:-}" "${ST_START[${pid}]:-}" \
       "${ST_DONE[${pid}]:-}" "${ST_LANG[${pid}]:-}"
   done > "${PROGRESS_FILE}"
 }
@@ -377,6 +377,49 @@ register_problem_mod() {
   add_mod_decl "${BS_DIR}/${gdir}/${ddir}/mod.rs" "${mod_name}"
 }
 
+# ─── Statement / Hint Splitter ────────────────────────────────────────────────
+# A problem statement should read like the real judge page: examples + constraints
+# only, no algorithmic spoilers. Several stored statements embed "Key insight:",
+# "Hint:" or "Note:" blocks — pull those out so they can be shown separately, down
+# in the Solution Notes, instead of up in the description.
+#
+# Input: the expanded statement text (\n already turned into real newlines).
+# Populates globals:
+#   SPLIT_BODY  — the statement with any hint block removed (blank runs collapsed)
+#   SPLIT_HINTS — the extracted Key insight / Hint / Note lines (may be empty)
+split_statement() {
+  local text="${1}"
+  SPLIT_BODY=""; SPLIT_HINTS=""
+  local hint_re='^(Key insight|Hint|Note)'
+  local in_hint=0 prev_blank=1 line
+  while IFS= read -r line; do
+    if [[ "${line}" =~ $hint_re ]]; then
+      in_hint=1
+      SPLIT_HINTS+="${line}"$'\n'
+      continue
+    fi
+    if (( in_hint )); then
+      # A hint block ends at the first blank line or the Constraints heading.
+      if [[ -z "${line// /}" || "${line}" =~ ^Constraints ]]; then
+        in_hint=0
+        # fall through and emit this line as normal body
+      else
+        SPLIT_HINTS+="${line}"$'\n'   # continuation of the hint
+        continue
+      fi
+    fi
+    if [[ -z "${line// /}" ]]; then
+      (( prev_blank )) && continue    # collapse consecutive blanks left by removal
+      prev_blank=1
+    else
+      prev_blank=0
+    fi
+    SPLIT_BODY+="${line}"$'\n'
+  done <<< "${text}"
+  SPLIT_BODY="${SPLIT_BODY%$'\n'}"
+  SPLIT_HINTS="${SPLIT_HINTS%$'\n'}"
+}
+
 # ─── Rust Template Generator ─────────────────────────────────────────────────
 create_rust_template() {
   local p="${1}" platform="${2:-LC}"
@@ -406,31 +449,19 @@ create_rust_template() {
     echo "//! ## Problem Statement"
     local stmt="${PROBLEM_STATEMENTS[$id]:-}"
     if [[ -n "${stmt}" ]]; then
-      # Each \n in the stored string becomes a new //! line
+      # Show only the statement itself (examples + constraints); any embedded
+      # Key insight / Hint / Note block is deferred to the Solution Notes below.
+      split_statement "$(printf '%b' "${stmt}")"
       while IFS= read -r line; do
         echo "//! ${line}"
-      done <<< "$(printf '%b' "${stmt}")"
+      done <<< "${SPLIT_BODY}"
     else
-      echo "//! *(see problem link above)*"
+      SPLIT_HINTS=""
+      echo "//! *(see problem link below)*"
     fi
     echo "//!"
     echo "//! ## Problem Link"
     echo "//! <${primary_url}>"
-    echo "//!"
-    echo "//! ## All Links"
-    [[ -n "${lc}"  ]] && echo "//! - LeetCode:       ${lc}"
-    [[ -n "${gfg}" ]] && echo "//! - GeeksForGeeks:  ${gfg}"
-    [[ -n "${cn}"  ]] && echo "//! - Coding Ninjas:  ${cn}"
-    echo "//!"
-    echo "//! ## Core Idea"
-    echo "//! ${idea}"
-    echo "//!"
-    echo "//! ## Your Approach"
-    echo "//! <!-- Write your approach / key observations here before coding -->"
-    echo "//!"
-    echo "//! ## Complexity"
-    echo "//! - **Time:**  O(?)"
-    echo "//! - **Space:** O(?)"
     echo ""
     echo "#![allow(dead_code)]"
     echo ""
@@ -455,6 +486,35 @@ create_rust_template() {
     echo "        todo!()"
     echo "    }"
     echo "}"
+    echo ""
+    # ── Solution Notes ──────────────────────────────────────────────────────
+    # Hints and scratch space live below the code so the description above stays
+    # spoiler-free. Scroll down here only once you're stuck or done.
+    echo "// ═══════════════════════════════════════════════════════════════════════════"
+    echo "//  SOLUTION NOTES  ·  hints & scratch space — peek here only when you're stuck"
+    echo "// ═══════════════════════════════════════════════════════════════════════════"
+    echo "//"
+    if [[ -n "${SPLIT_HINTS}" ]]; then
+      echo "//  ## Hints"
+      while IFS= read -r line; do
+        echo "//  ${line}"
+      done <<< "${SPLIT_HINTS}"
+      echo "//"
+    fi
+    echo "//  ## Core Idea"
+    echo "//  ${idea}"
+    echo "//"
+    echo "//  ## Your Approach"
+    echo "//  (write your approach / key observations here before coding)"
+    echo "//"
+    echo "//  ## Complexity"
+    echo "//  - Time:  O(?)"
+    echo "//  - Space: O(?)"
+    echo "//"
+    echo "//  ## All Links"
+    [[ -n "${lc}"  ]] && echo "//  - LeetCode:      ${lc}"
+    [[ -n "${gfg}" ]] && echo "//  - GeeksForGeeks: ${gfg}"
+    [[ -n "${cn}"  ]] && echo "//  - Coding Ninjas: ${cn}"
   } > "${filepath}"
 
   echo "${filepath}"
@@ -525,26 +585,41 @@ create_lang_template() {
     printf '%s Problem Statement\n' "${c}"
     local stmt="${PROBLEM_STATEMENTS[$P_ID]:-}"
     if [[ -n "${stmt}" ]]; then
-      while IFS= read -r line; do printf '%s   %s\n' "${c}" "${line}"; done <<< "$(printf '%b' "${stmt}")"
+      # Only the statement itself; any Key insight / Hint / Note block is deferred
+      # to the Solution Notes below the skeleton.
+      split_statement "$(printf '%b' "${stmt}")"
+      while IFS= read -r line; do printf '%s   %s\n' "${c}" "${line}"; done <<< "${SPLIT_BODY}"
     else
+      SPLIT_HINTS=""
       printf '%s   (see problem link below)\n' "${c}"
     fi
     printf '%s\n' "${c}"
     printf '%s Problem Link\n' "${c}"
     printf '%s   %s\n' "${c}" "${primary_url}"
+    printf '\n'
+    lang_skeleton "${language}"
+    printf '\n'
+    # ── Solution Notes: hints & extra info, kept below the code so the problem
+    #    description above stays spoiler-free. Peek here only when stuck.
+    printf '%s ===========================================================================\n' "${c}"
+    printf '%s  SOLUTION NOTES  ·  hints & scratch space — peek here only when stuck\n' "${c}"
+    printf '%s ===========================================================================\n' "${c}"
     printf '%s\n' "${c}"
-    printf '%s All Links\n' "${c}"
-    [[ -n "${P_LC}"  ]] && printf '%s   LeetCode:      %s\n' "${c}" "${P_LC}"
-    [[ -n "${P_GFG}" ]] && printf '%s   GeeksForGeeks: %s\n' "${c}" "${P_GFG}"
-    [[ -n "${P_CN}"  ]] && printf '%s   Coding Ninjas: %s\n' "${c}" "${P_CN}"
-    printf '%s\n' "${c}"
+    if [[ -n "${SPLIT_HINTS}" ]]; then
+      printf '%s Hints\n' "${c}"
+      while IFS= read -r line; do printf '%s   %s\n' "${c}" "${line}"; done <<< "${SPLIT_HINTS}"
+      printf '%s\n' "${c}"
+    fi
     printf '%s Core Idea\n' "${c}"
     printf '%s   %s\n' "${c}" "${P_IDEA}"
     printf '%s\n' "${c}"
     printf '%s Reference signature (Rust): %s\n' "${c}" "${P_SIG}"
     printf '%s Complexity — Time: O(?)  Space: O(?)\n' "${c}"
-    printf '\n'
-    lang_skeleton "${language}"
+    printf '%s\n' "${c}"
+    printf '%s All Links\n' "${c}"
+    [[ -n "${P_LC}"  ]] && printf '%s   LeetCode:      %s\n' "${c}" "${P_LC}"
+    [[ -n "${P_GFG}" ]] && printf '%s   GeeksForGeeks: %s\n' "${c}" "${P_GFG}"
+    [[ -n "${P_CN}"  ]] && printf '%s   Coding Ninjas: %s\n' "${c}" "${P_CN}"
   } > "${filepath}"
 
   printf '%s' "${filepath}"
@@ -726,9 +801,9 @@ print_dashboard() {
   done
   echo ""
 
-  # Recently completed — read dates/names straight from the in-memory cache.
+  # Recently completed — sorted by completion date (field 5), most recent first.
   local recent
-  recent=$(grep "|completed|" "${PROGRESS_FILE}" | grep -v "||$" | tail -5 | cut -d'|' -f1 || true)
+  recent=$(grep "|completed|" "${PROGRESS_FILE}" | awk -F'|' '$5 != ""' | sort -t'|' -k5 -r | head -5 | cut -d'|' -f1 || true)
   if [[ -n "${recent}" ]]; then
     printf '%b  Recently Completed%b\n' "${BOLD}" "${NC}"
     while IFS= read -r rid; do
@@ -873,10 +948,10 @@ problem_action_menu() {
     echo "  [0]  Back"
     echo ""
     local choice
-    read -rp "  Choice: " choice
+    read -rp "  Choice: " choice || return
 
     case "${choice}" in
-      0) return ;;
+      0|"") return ;;
       1)
         local platform language
         platform=$(select_platform "${p}")
@@ -985,8 +1060,8 @@ browse_by_group() {
     echo "  [0]  Back"
     echo ""
     local choice
-    read -rp "  Choice: " choice
-    [[ "${choice}" == "0" ]] && return
+    read -rp "  Choice: " choice || return
+    [[ "${choice}" == "0" || -z "${choice}" ]] && return
     [[ "${choice}" =~ ^[123]$ ]] || continue
 
     # Show problems in this group, ordered Easy → Medium → Hard
@@ -1017,8 +1092,8 @@ browse_by_group() {
       echo "  [ 0]  Back"
       echo ""
       local sel
-      read -rp "  Select problem [0-${idx}]: " sel
-      [[ "${sel}" == "0" ]] && break
+      read -rp "  Select problem [0-${idx}]: " sel || break
+      [[ "${sel}" == "0" || -z "${sel}" ]] && break
       [[ "${sel}" =~ ^[0-9]+$ ]] || continue
       (( sel >= 1 && sel <= idx )) || continue
       problem_action_menu "${gprobs[$((sel-1))]}"
@@ -1038,8 +1113,8 @@ browse_by_difficulty() {
     echo "  [0]  Back"
     echo ""
     local choice
-    read -rp "  Choice: " choice
-    [[ "${choice}" == "0" ]] && return
+    read -rp "  Choice: " choice || return
+    [[ "${choice}" == "0" || -z "${choice}" ]] && return
 
     local target_diff
     case "${choice}" in
@@ -1072,8 +1147,8 @@ browse_by_difficulty() {
       echo "  [ 0]  Back"
       echo ""
       local sel
-      read -rp "  Select problem [0-${idx}]: " sel
-      [[ "${sel}" == "0" ]] && break
+      read -rp "  Select problem [0-${idx}]: " sel || break
+      [[ "${sel}" == "0" || -z "${sel}" ]] && break
       [[ "${sel}" =~ ^[0-9]+$ ]] || continue
       (( sel >= 1 && sel <= idx )) || continue
       problem_action_menu "${dprobs[$((sel-1))]}"
@@ -1105,8 +1180,8 @@ show_all_problems() {
   echo "  [ 0]  Back to menu  |  [1-32] Open problem"
   echo ""
   local sel
-  read -rp "  Choice: " sel
-  [[ "${sel}" == "0" ]] && return
+  read -rp "  Choice: " sel || return
+  [[ "${sel}" == "0" || -z "${sel}" ]] && return
   [[ "${sel}" =~ ^[0-9]+$ ]] || return
   (( sel >= 1 && sel <= idx )) || return
   problem_action_menu "${all_probs[$((sel-1))]}"
@@ -1168,10 +1243,10 @@ main_menu() {
     echo "  [0]  Exit"
     echo ""
     local choice
-    read -rp "  Choice: " choice
+    read -rp "  Choice: " choice || exit 0
 
     case "${choice}" in
-      0)
+      0|"")
         printf '\n  %bGoodbye! Keep grinding. 🚀%b\n\n' "${DIM}" "${NC}"
         exit 0
         ;;
