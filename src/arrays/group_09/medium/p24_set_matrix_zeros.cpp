@@ -38,6 +38,7 @@ public:
           rows_map[i] = true;
           cols_map[j] = true;
         }
+        
       }
     }
 
