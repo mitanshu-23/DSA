@@ -2,11 +2,13 @@
 # =============================================================================
 #  DSA Practice Tool — Multi-Topic Edition
 #  Striver's A2Z DSA Sheet · Step 3 Arrays (40) · Step 4 Binary Search (32)
+#  · Step 5 + Step 18 Strings (24)
 # =============================================================================
 #  Features
 #  --------
-#  • Pick a topic (Arrays / Binary Search) — each has its own problems, its own
-#    src/ module tree, and its own progress file. The last topic is remembered.
+#  • Pick a topic (Arrays / Binary Search / Strings) — each has its own problems,
+#    its own src/ module tree, and its own progress file. The last topic is
+#    remembered.
 #  • Browse every problem by Group/Cluster or by Difficulty (Easy→Medium→Hard)
 #  • Select a platform (LeetCode / GFG / Coding Ninjas) per problem
 #  • Auto-generate Rust solution templates with correct function signatures
@@ -312,7 +314,72 @@ ARR_STATEMENTS["20"]="nums has an equal number of positive and negative integers
 ARR_STATEMENTS["37"]="Count the inversions in arr[]: pairs (i, j) with i < j but arr[i] > arr[j].\n\nExample 1:  arr = [2, 4, 1, 3, 5]  →  3   ((2,1),(4,1),(4,3))\nExample 2:  arr = [5, 4, 3, 2, 1]  →  10\n\nKey insight: modified merge sort — when a right element is placed before left ones, add (mid - i + 1).\n\nConstraints:\n  1 <= arr.length <= 10^5"
 ARR_STATEMENTS["38"]="Count the reverse pairs: pairs (i, j) with i < j and arr[i] > 2 * arr[j].\n\nExample 1:  nums = [1,3,2,3,1]  →  2\nExample 2:  nums = [2,4,3,5,1]  →  3\n\nKey insight: modified merge sort — count qualifying cross-half pairs before the merge step.\n\nConstraints:\n  1 <= nums.length <= 5*10^4\n  -2^31 <= nums[i] <= 2^31 - 1"
 
-# load_topic <bs|arr> — point the active globals at the chosen topic's data.
+# ── Strings · Step 5 (Basic & Medium) · 15 problems across 6 clusters ──────
+# Step 18 (Advanced Strings: KMP, Z-function, Rabin-Karp, ...) is deferred —
+# StringsReadme.md pushes it to after Tries and DP, so it is intentionally
+# NOT tracked here yet. Add it back as its own cluster when that step starts.
+# Clusters follow the "Smart Solve Order" in StringsReadme.md — problems that share
+# a technique sit together, so PROBLEMS order == recommended study order. Problem
+# IDs match the readme's numbering (01-15); the cluster is the "group".
+declare -a STR_GROUP_NAMES=(""
+  "Basic String Ops"
+  "Two Pointer / Reversal"
+  "Character Mapping / Hashing"
+  "String Identity / Rotation"
+  "Parsing / Simulation"
+  "Substring Problems"
+)
+declare -a STR_GROUP_DIRS=(""
+  "group_01"
+  "group_02"
+  "group_03"
+  "group_04"
+  "group_05"
+  "group_06"
+)
+# Each entry: "id|name|difficulty|group|lc_url|gfg_url|cn_url|fn_signature|core_idea"
+declare -a STR_PROBLEMS=(
+  # ── Cluster 1 · Basic String Ops ─────────────────────────────────────────
+  "01|Remove Outermost Parentheses|Easy|1|https://leetcode.com/problems/remove-outermost-parentheses/|https://www.geeksforgeeks.org/remove-outermost-parentheses/||fn remove_outer_parentheses(s: String) -> String|Depth counter; chars at depth>0 (for open) or depth>1 (for close) are not outermost"
+  "03|Largest Odd Number in a String|Easy|1|https://leetcode.com/problems/largest-odd-number-in-string/|https://www.geeksforgeeks.org/problems/largest-odd-number-in-string/1||fn largest_odd_number(num: String) -> String|Scan from the right; return the prefix ending at the first odd digit found"
+  "09|Maximum Nesting Depth of Parentheses|Easy|1|https://leetcode.com/problems/maximum-nesting-depth-of-the-parentheses/|https://www.geeksforgeeks.org/problems/maximum-nesting-depth-of-the-parentheses/1||fn max_depth(s: String) -> i32|Same depth counter as problem 1; increment on open, decrement on close, track the max"
+  # ── Cluster 2 · Two Pointer / Reversal ───────────────────────────────────
+  "02|Reverse Words in a String / Palindrome Check|Easy|2|https://leetcode.com/problems/reverse-words-in-a-string/|https://www.geeksforgeeks.org/problems/reverse-words-in-a-given-string1946/1||fn reverse_words(s: String) -> String|Split on spaces and reverse the word list; for palindrome use two pointers walking inward"
+  "15|Reverse Every Word in a String|Medium|2|https://leetcode.com/problems/reverse-words-in-a-string-iii/|https://www.geeksforgeeks.org/problems/reverse-each-word-in-a-given-string1001/1||fn reverse_each_word(s: String) -> String|Reverse each word's characters in place; keep the word order unchanged"
+  # ── Cluster 3 · Character Mapping / Hashing ──────────────────────────────
+  "05|Isomorphic Strings|Easy|3|https://leetcode.com/problems/isomorphic-strings/|https://www.geeksforgeeks.org/problems/isomorphic-strings-1587115620/1||fn is_isomorphic(s: String, t: String) -> bool|Two maps s->t and t->s; check consistency in both directions for every pair"
+  "07|Check if Two Strings are Anagram|Easy|3|https://leetcode.com/problems/valid-anagram/|https://www.geeksforgeeks.org/problems/anagram-1587115620/1||fn is_anagram(s: String, t: String) -> bool|Frequency array of size 26; increment for s, decrement for t; all zero means anagram"
+  "08|Sort Characters by Frequency|Medium|3|https://leetcode.com/problems/sort-characters-by-frequency/|https://www.geeksforgeeks.org/problems/sort-characters-by-frequency/1||fn frequency_sort(s: String) -> String|Build a frequency map, sort characters descending by count, rebuild the string"
+  # ── Cluster 4 · String Identity / Rotation ───────────────────────────────
+  "04|Longest Common Prefix|Easy|4|https://leetcode.com/problems/longest-common-prefix/|https://www.geeksforgeeks.org/problems/longest-common-prefix-in-an-array5129/1||fn longest_common_prefix(strs: Vec<String>) -> String|Take the first string as candidate; shrink it while a later string does not start with it"
+  "06|Check if One String is a Rotation of Another|Easy|4|https://leetcode.com/problems/rotate-string/|https://www.geeksforgeeks.org/problems/check-if-strings-are-rotations-of-each-other-or-not-1587115620/1||fn rotate_string(s: String, goal: String) -> bool|goal is a rotation of s iff goal is a substring of s+s and lengths match"
+  # ── Cluster 5 · Parsing / Simulation ─────────────────────────────────────
+  "10|Roman Number to Integer and Vice Versa|Medium|5|https://leetcode.com/problems/roman-to-integer/|https://www.geeksforgeeks.org/problems/roman-number-to-integer3201/1||fn roman_to_int(s: String) -> i32|Scan left to right; subtract when current value < next value, else add"
+  "11|Implement atoi (String to Integer)|Medium|5|https://leetcode.com/problems/string-to-integer-atoi/|https://www.geeksforgeeks.org/problems/implement-atoi/1||fn my_atoi(s: String) -> i32|Trim, read optional sign, read digits, clamp to i32 range on overflow"
+  # ── Cluster 6 · Substring Problems ────────────────────────────────────────
+  "12|Count Number of Substrings with K Distinct Characters|Hard|6||https://www.geeksforgeeks.org/problems/count-number-of-substrings4528/1||fn count_substrings_with_k_distinct(s: String, k: i32) -> i32|exactly K distinct = atMost(K) - atMost(K-1); atMost is an O(n) sliding window"
+  "13|Longest Palindromic Substring|Medium|6|https://leetcode.com/problems/longest-palindromic-substring/|https://www.geeksforgeeks.org/problems/longest-palindrome-in-a-string3411/1||fn longest_palindrome(s: String) -> String|Expand around every center, both odd and even length; track the best window"
+  "14|Sum of Beauty of All Substrings|Medium|6|https://leetcode.com/problems/sum-of-beauty-of-all-substrings/|https://www.geeksforgeeks.org/problems/sum-of-beauty-of-all-substrings/1||fn beauty_sum(s: String) -> i32|For each start expand right maintaining a freq array; beauty = max_freq - min_freq"
+)
+
+declare -A STR_STATEMENTS
+STR_STATEMENTS["01"]="Given a valid parentheses string s consisting only of '(' and ')', remove the outermost parentheses of every primitive substring and return the result.\n\nExample 1:  s = \"(()())(())\"        →  \"()()()\"\nExample 2:  s = \"(()())(())(()(()))\"  →  \"()()()()(())\"\nExample 3:  s = \"()()\"                →  \"\"\n\nKey insight: track depth with a counter; characters at depth > 0 for '(' or depth > 1 for ')' are not outermost.\n\nConstraints:\n  1 <= s.length <= 10^5\n  s is a valid parentheses string."
+STR_STATEMENTS["03"]="Given a string num representing a large non-negative integer, return the largest-valued odd substring prefix, or empty string if none exists.\n\nExample 1:  num = \"52\"    →  \"5\"\nExample 2:  num = \"4206\"  →  \"\"\nExample 3:  num = \"35427\" →  \"35427\"\n\nKey insight: scan from the right; return the prefix ending at the first odd digit found.\n\nConstraints:\n  1 <= num.length <= 10^5\n  num contains only digits, no leading zeros except num=\"0\" itself."
+STR_STATEMENTS["04"]="Given an array of strings strs, return the longest common prefix among all strings. Return \"\" if there is none.\n\nExample 1:  strs = [\"flower\",\"flow\",\"flight\"]  →  \"fl\"\nExample 2:  strs = [\"dog\",\"racecar\",\"car\"]      →  \"\"\n\nKey insight: take the first string as the candidate prefix and shrink it while a later string doesn't start with it.\n\nConstraints:\n  1 <= strs.length <= 200\n  0 <= strs[i].length <= 200"
+STR_STATEMENTS["02"]="Two related problems:\n(a) Reverse Words: given s, reverse the order of the words, collapsing extra spaces.\n(b) Valid Palindrome: given s, considering only alphanumerics and ignoring case, return true if it reads the same forwards and backwards.\n\nExample 1 (a):  s = \"the sky is blue\"  →  \"blue is sky the\"\nExample 2 (b):  s = \"A man, a plan, a canal: Panama\"  →  true\n\nKey insight: reverse-words splits on spaces and reverses the list (or reverses the whole string then each word); palindrome check uses two pointers from both ends.\n\nConstraints:\n  1 <= s.length <= 10^4"
+STR_STATEMENTS["15"]="Given a string s, reverse the characters of every word while keeping the words and spaces in their original order.\n\nExample 1:  s = \"Let's take LeetCode contest\"  →  \"s'teL ekat edoCteeL tsetnoc\"\nExample 2:  s = \"God Ding\"                     →  \"doG gniD\"\n\nKey insight: split on spaces, reverse each word's characters in place (not the word order), rejoin.\n\nConstraints:\n  1 <= s.length <= 5*10^4"
+STR_STATEMENTS["05"]="Given two strings s and t, return true if the characters in s can be replaced to get t, with a consistent one-to-one mapping in both directions.\n\nExample 1:  s = \"egg\", t = \"add\"     →  true\nExample 2:  s = \"foo\", t = \"bar\"     →  false\nExample 3:  s = \"paper\", t = \"title\" →  true\n\nKey insight: maintain two maps s->t and t->s; a character may not map two different ways in either direction.\n\nConstraints:\n  1 <= s.length <= 5*10^4\n  s.length == t.length"
+STR_STATEMENTS["07"]="Given two strings s and t, return true if t is an anagram of s (same letters, same multiplicity).\n\nExample 1:  s = \"anagram\", t = \"nagaram\"  →  true\nExample 2:  s = \"rat\", t = \"car\"           →  false\n\nKey insight: frequency array of size 26; increment for chars in s, decrement for chars in t; anagram iff all zero.\n\nConstraints:\n  1 <= s.length, t.length <= 5*10^4\n  s and t consist of lowercase English letters."
+STR_STATEMENTS["08"]="Given a string s, sort it in decreasing order based on the frequency of characters; return any string with the same multiset that satisfies this.\n\nExample 1:  s = \"tree\"    →  \"eert\"  (or \"eetr\")\nExample 2:  s = \"cccaaa\"  →  \"cccaaa\"  (or \"aaaccc\")\n\nKey insight: build a frequency map, sort characters by frequency descending, rebuild by repeating each character its count times.\n\nConstraints:\n  1 <= s.length <= 5*10^5"
+STR_STATEMENTS["06"]="Given two strings s and goal, return true if s can become goal after some number of shifts (left rotations) on s.\n\nExample 1:  s = \"abcde\", goal = \"cdeab\"  →  true\nExample 2:  s = \"abcde\", goal = \"abced\"  →  false\n\nKey insight: goal is a rotation of s iff len(s)==len(goal) and goal is a substring of s+s.\n\nConstraints:\n  1 <= s.length, goal.length <= 100"
+STR_STATEMENTS["12"]="Given a string s and an integer k, count the substrings that contain exactly k distinct characters.\n\nExample 1:  s = \"abcba\", k = 2  →  5\nExample 2:  s = \"aba\", k = 1    →  4\n\nKey insight: count(exactly k) = count(at most k) - count(at most k-1); count(at most k) is an O(n) sliding window.\n\nConstraints:\n  1 <= s.length <= 5*10^3\n  1 <= k <= 26"
+STR_STATEMENTS["09"]="Given a valid parentheses string s (may include other characters), return the maximum nesting depth of the parentheses.\n\nExample 1:  s = \"(1+(2*3)+((8)/4))+1\"  →  3\nExample 2:  s = \"(1)+((2))+(((3)))\"     →  3\n\nKey insight: a counter incremented on '(' and decremented on ')'; track the running maximum.\n\nConstraints:\n  1 <= s.length <= 100\n  s is a valid parentheses string, possibly with digits and operators."
+STR_STATEMENTS["10"]="Convert between Roman numerals and integers.\n(a) Roman to Integer: given a Roman numeral s, return its integer value.\n(b) Integer to Roman: given an integer num (1-3999), return its Roman numeral.\n\nExample 1 (a):  s = \"MCMXCIV\"  →  1994\nExample 2 (b):  num = 1994      →  \"MCMXCIV\"\n\nKey insight: Roman->Int scans left to right, subtracting when the current symbol's value is less than the next; Int->Roman is greedy using a value-symbol table sorted descending.\n\nConstraints:\n  1 <= value <= 3999"
+STR_STATEMENTS["11"]="Implement atoi: convert a string to a 32-bit signed integer, following these steps — skip leading whitespace, read an optional sign, read digits until a non-digit, then clamp to [INT_MIN, INT_MAX].\n\nExample 1:  s = \"42\"          →  42\nExample 2:  s = \"   -42\"      →  -42\nExample 3:  s = \"4193 with words\"  →  4193\nExample 4:  s = \"words and 987\"    →  0\n\nKey insight: overflow must be checked before multiplying — compare against INT_MAX/10 before applying the next digit.\n\nConstraints:\n  0 <= s.length <= 200"
+STR_STATEMENTS["13"]="Given a string s, return the longest palindromic substring of s.\n\nExample 1:  s = \"babad\"  →  \"bab\"  (or \"aba\")\nExample 2:  s = \"cbbd\"   →  \"bb\"\n\nKey insight: expand around every center, trying both odd-length and even-length windows; track the best span seen.\n\nConstraints:\n  1 <= s.length <= 1000"
+STR_STATEMENTS["14"]="The beauty of a string is the difference between the frequencies of its most frequent and least frequent characters. Given s, return the sum of beauty over all its substrings.\n\nExample 1:  s = \"aabcb\"  →  5\nExample 2:  s = \"aabcbaa\" →  17\n\nKey insight: for each starting index expand right while maintaining a 26-slot frequency array; beauty = max_freq - min_freq among present chars.\n\nConstraints:\n  1 <= s.length <= 500"
+
+# load_topic <bs|arr|str> — point the active globals at the chosen topic's data.
 load_topic() {
   local key="${1:-bs}"
   case "${key}" in
@@ -326,6 +393,17 @@ load_topic() {
       PROBLEM_STATEMENTS=()
       local _k
       for _k in "${!ARR_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${ARR_STATEMENTS[${_k}]}"; done
+      ;;
+    str|strings|5)
+      TOPIC="str"; TOPIC_MOD="strings"; TOPIC_DIR="${SRC_DIR}/strings"
+      TOPIC_LABEL="Strings"; TOPIC_STEP="5"
+      PROGRESS_FILE="${SCRIPT_DIR}/.dsa_progress_strings"
+      PROBLEMS=("${STR_PROBLEMS[@]}")
+      GROUP_NAMES=("${STR_GROUP_NAMES[@]}")
+      GROUP_DIRS=("${STR_GROUP_DIRS[@]}")
+      PROBLEM_STATEMENTS=()
+      local _k
+      for _k in "${!STR_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${STR_STATEMENTS[${_k}]}"; done
       ;;
     *)
       TOPIC="bs"; TOPIC_MOD="binary_search"; TOPIC_DIR="${SRC_DIR}/binary_search"
@@ -450,7 +528,11 @@ set_status() {
   ST_LANG["${id}"]="${lang}"
 
   # Rewrite the file once from the cache, preserving the canonical study order.
-  local pid
+  # NOTE: `p`/`pid` must be local — set_status is called directly (no subshell)
+  # from problem_action_menu's action loop, which keeps its own `local p` alive
+  # across iterations. An unlocalized loop variable here would leak into and
+  # permanently overwrite that caller's `p` with the last problem in the array.
+  local p pid
   for p in "${PROBLEMS[@]}"; do
     pid="${p%%|*}"
     printf '%s|%s|%s|%s|%s|%s\n' "${pid}" "${ST_STATUS[${pid}]:-not_started}" \
@@ -959,6 +1041,14 @@ print_study_order() {
     printf '  %bProblems 16-22,29,40%b  Voting, Kadane family & greedy observations\n' "${YELLOW}" "${NC}"
     printf '  %bProblems 24-26,28,34%b  Matrix + interval merging\n' "${YELLOW}" "${NC}"
     printf '  %bProblems 37-38%b  Modified merge sort (inversions, reverse pairs) — last\n' "${RED}" "${NC}"
+  elif [[ "${TOPIC}" == "str" ]]; then
+    printf '  %bProblems 1,3,9%b     Basic string ops — same depth counter for 1 and 9\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 2,15%b      Two pointer / reversal (words, palindrome)\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 5,7,8%b     Character mapping / hashing (freq array anchor)\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 4,6%b       String identity / rotation (LCP, s+s trick)\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 10,11%b     Parsing / simulation (atoi is edge-case heavy)\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 12,13,14%b  Substring problems (atMost-K, expand around center)\n' "${RED}" "${NC}"
+    printf '  %b(Step 18 deferred)%b Advanced strings (KMP, Z-function, Rabin-Karp) — after Tries and DP\n' "${DIM}" "${NC}"
   else
     printf '  %bProblems 1-7%b    Bounds & occurrences — master the two templates\n' "${GREEN}" "${NC}"
     printf '  %bProblems 8-13%b   Rotated arrays, peak, single element\n' "${GREEN}" "${NC}"
@@ -1448,6 +1538,16 @@ show_cheatsheet() {
       "7. Matrix In-place|Set-zeros / rotate / spiral|Row0+Col0 as flags; transpose+reverse rows; 4 shrinking boundaries"
       "8. Sort + Two Pointers|3Sum / 4Sum / merge intervals|Fix outer indices, two-pointer the rest; skip duplicates at every level"
     )
+  elif [[ "${TOPIC}" == "str" ]]; then
+    patterns=(
+      "1. Frequency Array (26-slot)|Anagram / char-count problems on lowercase ASCII|freq[26]={0}; ++ for s, -- for t; anagram iff all zero"
+      "2. Two-Pointer Palindrome|Check if a string reads the same both ways|lo,hi from both ends; compare and walk inward while equal"
+      "3. Expand Around Center|Longest palindromic substring|for each i try odd (i,i) and even (i,i+1) centers; expand while matching"
+      "4. Bijective Mapping|Isomorphic strings, Word Pattern|two maps s->t and t->s; every pair must agree in both directions"
+      "5. s+s Rotation Check|Is t a rotation of s?|len(t)==len(s) and t is a substring of (s+s)"
+      "6. Exactly K -> AtMost K|Count substrings with exactly K distinct chars|count(exactly K) = count(atmost K) - count(atmost K-1)"
+    )
+    printf '  %b(Step 18 patterns — KMP/LPS, Z-function, Rabin-Karp — are deferred; see StringsReadme.md)%b\n\n' "${DIM}" "${NC}"
   else
     patterns=(
       "1. Exact Search (classic)|Find target X in sorted array|lo=0 hi=n-1; while lo<=hi; if arr[mid]==x return; else shrink"
@@ -1487,7 +1587,7 @@ main_menu() {
     echo "  [4]  Show All Problems"
     echo "  [5]  Progress Dashboard"
     echo "  [6]  Pattern Cheatsheet"
-    echo "  [7]  Switch Topic          (Arrays ⇄ Binary Search)"
+    echo "  [7]  Switch Topic          (Arrays ⇄ Binary Search ⇄ Strings)"
     echo "  [0]  Exit"
     echo ""
     local choice
@@ -1542,8 +1642,9 @@ switch_topic() {
   clear_screen
   print_header
   printf '%b  Select Topic%b\n\n' "${BOLD}" "${NC}"
-  printf '  [1]  %bArrays%b          Step 3 · %s problems\n' "${CYAN}" "${NC}" "${#ARR_PROBLEMS[@]}"
-  printf '  [2]  %bBinary Search%b   Step 4 · %s problems\n' "${CYAN}" "${NC}" "${#BS_PROBLEMS[@]}"
+  printf '  [1]  %bArrays%b          Step 3      · %s problems\n' "${CYAN}" "${NC}" "${#ARR_PROBLEMS[@]}"
+  printf '  [2]  %bBinary Search%b   Step 4      · %s problems\n' "${CYAN}" "${NC}" "${#BS_PROBLEMS[@]}"
+  printf '  [3]  %bStrings%b        Step 5      · %s problems\n' "${CYAN}" "${NC}" "${#STR_PROBLEMS[@]}"
   echo "  [0]  Back"
   echo ""
   local c
@@ -1551,21 +1652,22 @@ switch_topic() {
   case "${c}" in
     1) activate_topic arr ;;
     2) activate_topic bs ;;
+    3) activate_topic str ;;
     *) return ;;
   esac
 }
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────
 # Usage: dsa_tool.sh [topic] [mode]
-#   topic (optional): arr | arrays | bs | binary_search
+#   topic (optional): arr | arrays | bs | binary_search | str | strings
 #   mode  (optional): next | group | difficulty | all | dashboard | cheatsheet
 # tasks.json passes just a mode, so a bare first arg is treated as the mode and
 # the topic falls back to the last-used one (.dsa_topic), defaulting to bs.
 main() {
   local first="${1:-}" topic_arg="" mode=""
   case "${first}" in
-    arr|arrays|bs|binary_search) topic_arg="${first}"; mode="${2:-}" ;;
-    *)                           mode="${first}" ;;
+    arr|arrays|bs|binary_search|str|strings) topic_arg="${first}"; mode="${2:-}" ;;
+    *)                                       mode="${first}" ;;
   esac
 
   if [[ -n "${topic_arg}" ]]; then
