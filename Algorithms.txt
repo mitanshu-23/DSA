@@ -31,6 +31,7 @@ Two Pointers
 - Merge Two Sorted Arrays Without Extra Space  —  src/arrays/group_02/hard/p35_merge_two_sorted_arrays_without_extra_space.rs (note: active code is the 3-pointer merge-from-the-back, not the "Gap method" the notes mention)
 - 3Sum Problem  —  src/arrays/group_05/hard/p30_3sum_problem.cpp (sort + fix i + two pointers)
 - 4Sum Problem  —  src/arrays/group_05/hard/p31_4sum_problem.cpp (sort + fix i,j + two pointers)
+- Rearrange Array Elements by Sign  —  src/arrays/group_10/medium/p20_rearrange_array_elements_by_sign.cpp (two monotonic READ cursors, one per sign, gathering into a new vector; Theta(n) with 2n reads. note: the standard form is the dual — one sequential read pass with two WRITE cursors at 2j / 2j+1, n reads, ~3x faster measured; and `result` is never reserve()d. The file also carries rearrangeArray_worelativeorder: in-place slot filling by swaps, Theta(n) time / O(1) space, correct but NOT order-preserving, so it answers the GFG phrasing, not LC 2149. Both variants assume equal +/- counts and no zeros — a zero would be emitted twice since the two scans test `< 0` and `> 0`, which are not complements. see notes/two_pointers.md)
 
 
 --------------------------------------------------------
@@ -65,9 +66,34 @@ Array Reversal Trick (rotation)
 
 
 --------------------------------------------------------
+Next Permutation (lexicographic successor)
+--------------------------------------------------------
+- Next Permutation  —  src/arrays/group_08/medium/p21_next_permutation.cpp (pivot = rightmost a[i]<a[i+1], swap with smallest suffix value > pivot, then reorder suffix ascending; note: code sorts the suffix instead of the O(n) reverse — see notes/next_permutation.md)
+
+
+--------------------------------------------------------
+Interval Merging (sort by start + sweep)
+--------------------------------------------------------
+- Merge Overlapping Subintervals  —  src/arrays/group_08/hard/p34_merge_overlapping_subintervals.cpp (sort by start; extend result.back() end via max when result.back().end >= next.start, else push; see notes/intervals.md)
+
+
+--------------------------------------------------------
 HashMap Complement Lookup (Two Sum hashing)
 --------------------------------------------------------
-- 2Sum Problem  —  src/arrays/group_05/hard/p39_2sum_problem.cpp (one-pass hashmap for target - x)
+- 2Sum Problem  —  src/arrays/group_05/hard/p39_2sum_problem.cpp (one-pass hashmap for target - x; see notes/hashing.md)
+
+
+--------------------------------------------------------
+Hash-Set Endpoint-Anchored Chain Scan (amortised O(n))
+--------------------------------------------------------
+- Longest Consecutive Sequence  —  src/arrays/group_10/medium/p23_longest_consecutive_sequence.cpp (hash map used as a set; count only from a chain endpoint — this file anchors at the TAIL, x+1 absent, and walks down, the mirror of the usual head-anchored form. Theta(n) amortised. note: the driving loop originally iterated nums rather than the deduplicated keys, making it Theta(n^2) — 7.7s at n=1e5; fixed 2026-08-24 by looping over the map, now 2.9ms. see notes/hashing.md §3)
+
+
+--------------------------------------------------------
+Pascal's Triangle / Binomial Coefficients
+--------------------------------------------------------
+- Pascal's Triangle  —  src/arrays/group_09/hard/p28_pascal_s_triangle.cpp (each row from the previous via C(r,k)=C(r-1,k-1)+C(r-1,k); Theta(N^2), optimal. note: first version returned [[1]] for every input — the new row was never pushed into result AND the interior sum indexed with the outer loop variable i instead of j, two bugs that masked each other; both fixed 2026-08-24, verified against C(r,c) for all numRows 1..30. A dead generate_helper + result_n_1 member is still in the file. see notes/pascals_triangle.md)
+- (variant, not yet solved) single row / single element: C(r,k+1) = C(r,k)*(r-k)/(k+1) running product — Theta(r) time, Theta(1) space, no previous row needed; multiply BEFORE dividing or the integer division truncates. see notes/pascals_triangle.md §2
 
 
 --------------------------------------------------------
@@ -132,6 +158,21 @@ Binary Search in a 2D Matrix
 --------------------------------------------------------
 - Search in a 2D Matrix  —  src/binary_search/group_3/medium/p29_search_in_a_2d_matrix.rs (flatten to 1D; mid/cols, mid%cols)
 - Find Peak Element in 2D Matrix  —  src/binary_search/group_3/hard/p31_find_peak_element_in_2d_matrix.rs (binary search on columns, pick global-max row)
+
+
+--------------------------------------------------------
+Matrix In-Place Manipulation (markers, layer cycles, boundaries)
+--------------------------------------------------------
+- Set Matrix Zeros  —  src/arrays/group_09/medium/p24_set_matrix_zeros.cpp (note: solved with O(m+n) row/col marker maps, not the O(1) first-row/first-column trick; two passes — record then apply)
+- Rotate Matrix by 90 Degrees  —  src/arrays/group_09/medium/p25_rotate_matrix_by_90_degrees.cpp (note: layer-by-layer 4-cycle on (i,j)→(j,n-1-i), not the transpose+reverse-rows hint; fewer writes)
+- Spiral Traversal of a Matrix  —  src/arrays/group_09/medium/p26_spiral_traversal_of_a_matrix.cpp (note: walker + -101 visited sentinel instead of the standard four shrinking boundaries; -101 is safe because the problem guarantees -100 <= a[i][j] <= 100. Destroys the input matrix)
+
+
+--------------------------------------------------------
+Merge Sort — Counting Cross-Pairs
+--------------------------------------------------------
+- Count Inversions  —  src/arrays/group_11/hard/p37_count_inversions.cpp (count folded directly into the merge comparison; halves kept sorted descending by construction — see notes/divide_and_conquer_counting.md)
+- Reverse Pairs  —  src/arrays/group_11/hard/p38_reverse_pairs.cpp (condition not monotonic with the merge comparison, so counted in a separate two-pointer prescan before merging; same descending-order convention as p37)
 
 
 ========================================================

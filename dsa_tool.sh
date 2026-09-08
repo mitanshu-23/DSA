@@ -1193,6 +1193,20 @@ problem_action_menu() {
         fi
         set_status "${id}" "in_progress" "${platform}" "${language}"
         printf '\n  %b✓ Created %s template:%b  %s\n' "${GREEN}" "${language}" "${NC}" "${created#"${SCRIPT_DIR}/"}"
+
+        # Scaffold the co-located `_approach.md` note *immediately*, in the same
+        # action that creates the template — so it never lags a turn behind. This
+        # reuses the very same generator wired as the Claude Code UserPromptSubmit
+        # hook, keeping ONE source of truth for the note format + freeze guard.
+        # (The hook stays as a safety net for files created by other means.)
+        local _approach_hook="${SCRIPT_DIR}/.claude/hooks/gen_approach_notes.sh"
+        local _approach_note="${created%.*}_approach.md"
+        if [[ -x "${_approach_hook}" ]]; then
+          CLAUDE_PROJECT_DIR="${SCRIPT_DIR}" bash "${_approach_hook}" >/dev/null 2>&1 || true
+          [[ -f "${_approach_note}" ]] && \
+            printf '  %b✓ Approach note ready:%b   %s\n' "${GREEN}" "${NC}" "${_approach_note#"${SCRIPT_DIR}/"}"
+        fi
+
         if [[ "${language}" == "Rust" ]]; then
           printf '  %bTip:%b  cargo test %s -- --show-output\n' "${DIM}" "${NC}" "p${id}"
           printf '  %bTip:%b  cargo build  (to verify it compiles)\n' "${DIM}" "${NC}"
