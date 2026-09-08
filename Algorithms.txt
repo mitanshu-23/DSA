@@ -1,0 +1,195 @@
+========================================================
+  ALGORITHMS ENCOUNTERED  —  DSA Sheet
+========================================================
+An index of the named algorithms / notable techniques used across the
+completed solutions. Format per entry:
+
+    Problem Name  —  file path
+
+Where a problem was solved with an approach that differs from its filename
+or in-file notes, that is called out with a (note: ...).
+
+
+--------------------------------------------------------
+Boyer-Moore (Moore's) Voting Algorithm
+--------------------------------------------------------
+- Majority Element (n/2 times)  —  src/arrays/group_06/medium/p16_majority_element_n_2_times.cpp
+
+
+--------------------------------------------------------
+Dutch National Flag Algorithm
+--------------------------------------------------------
+- Sort Array of 0s, 1s, and 2s  —  src/arrays/group_05/medium/p15_sort_array_of_0s_1s_and_2s.cpp
+
+
+--------------------------------------------------------
+Two Pointers
+--------------------------------------------------------
+- Remove Duplicates from Sorted Array  —  src/arrays/group_01/easy/p04_remove_duplicates_from_sorted_array.rs
+- Move Zeros to End  —  src/arrays/group_01/easy/p07_move_zeros_to_end.rs
+- Find the Union of Two Sorted Arrays  —  src/arrays/group_02/easy/p09_find_the_union_of_two_sorted_arrays.rs (also .cpp)
+- Merge Two Sorted Arrays Without Extra Space  —  src/arrays/group_02/hard/p35_merge_two_sorted_arrays_without_extra_space.rs (note: active code is the 3-pointer merge-from-the-back, not the "Gap method" the notes mention)
+- 3Sum Problem  —  src/arrays/group_05/hard/p30_3sum_problem.cpp (sort + fix i + two pointers)
+- 4Sum Problem  —  src/arrays/group_05/hard/p31_4sum_problem.cpp (sort + fix i,j + two pointers)
+- Rearrange Array Elements by Sign  —  src/arrays/group_10/medium/p20_rearrange_array_elements_by_sign.cpp (two monotonic READ cursors, one per sign, gathering into a new vector; Theta(n) with 2n reads. note: the standard form is the dual — one sequential read pass with two WRITE cursors at 2j / 2j+1, n reads, ~3x faster measured; and `result` is never reserve()d. The file also carries rearrangeArray_worelativeorder: in-place slot filling by swaps, Theta(n) time / O(1) space, correct but NOT order-preserving, so it answers the GFG phrasing, not LC 2149. Both variants assume equal +/- counts and no zeros — a zero would be emitted twice since the two scans test `< 0` and `> 0`, which are not complements. see notes/two_pointers.md)
+
+
+--------------------------------------------------------
+Sliding Window
+--------------------------------------------------------
+- Minimum Size Subarray Sum (LC 209)  —  src/arrays/group_04/medium/p13v_minimum_size_subarray_sum_lc209.rs
+
+
+--------------------------------------------------------
+Prefix Sum + HashMap
+--------------------------------------------------------
+- Largest Subarray with Sum 0  —  src/arrays/group_04/hard/p32_largest_subarray_with_sum_0.cpp
+- Longest Subarray with Sum K (Positives)  —  src/arrays/group_04/medium/p13_longest_subarray_with_sum_k_positives.cpp (note: notes say sliding window; code is prefix sum + hashmap)
+- Longest Subarray with Sum K (Positives + Negatives)  —  src/arrays/group_04/medium/p14_longest_subarray_with_sum_k_positives_negatives.cpp
+- Count Subarrays with Given Sum  —  src/arrays/group_04/medium/p27_count_subarrays_with_given_sum.rs
+- Count Subarrays with Given XOR K  —  src/arrays/group_04/hard/p33_count_subarrays_with_given_xor_k.cpp (prefix-XOR + hashmap)
+
+
+--------------------------------------------------------
+XOR Trick
+--------------------------------------------------------
+- Find Missing Number in an Array  —  src/arrays/group_03/easy/p10_find_missing_number_in_an_array.rs (XOR of indices vs elements)
+- Find the Number That Appears Once  —  src/arrays/group_03/easy/p12_find_the_number_that_appears_once.rs (XOR-fold; pairs cancel)
+- Find the Repeating and Missing Number  —  src/arrays/group_03/hard/p36_find_the_repeating_and_missing_number.rs (XOR, then split by a differing set bit)
+
+
+--------------------------------------------------------
+Array Reversal Trick (rotation)
+--------------------------------------------------------
+- Left Rotate an Array by One Place  —  src/arrays/group_01/easy/p05_left_rotate_an_array_by_one_place.cpp
+- Left Rotate an Array by D Places  —  src/arrays/group_01/easy/p06_left_rotate_an_array_by_d_places.rs (reverse [0,k), reverse [k,n), reverse all)
+
+
+--------------------------------------------------------
+Next Permutation (lexicographic successor)
+--------------------------------------------------------
+- Next Permutation  —  src/arrays/group_08/medium/p21_next_permutation.cpp (pivot = rightmost a[i]<a[i+1], swap with smallest suffix value > pivot, then reorder suffix ascending; note: code sorts the suffix instead of the O(n) reverse — see notes/next_permutation.md)
+
+
+--------------------------------------------------------
+Interval Merging (sort by start + sweep)
+--------------------------------------------------------
+- Merge Overlapping Subintervals  —  src/arrays/group_08/hard/p34_merge_overlapping_subintervals.cpp (sort by start; extend result.back() end via max when result.back().end >= next.start, else push; see notes/intervals.md)
+
+
+--------------------------------------------------------
+HashMap Complement Lookup (Two Sum hashing)
+--------------------------------------------------------
+- 2Sum Problem  —  src/arrays/group_05/hard/p39_2sum_problem.cpp (one-pass hashmap for target - x; see notes/hashing.md)
+
+
+--------------------------------------------------------
+Hash-Set Endpoint-Anchored Chain Scan (amortised O(n))
+--------------------------------------------------------
+- Longest Consecutive Sequence  —  src/arrays/group_10/medium/p23_longest_consecutive_sequence.cpp (hash map used as a set; count only from a chain endpoint — this file anchors at the TAIL, x+1 absent, and walks down, the mirror of the usual head-anchored form. Theta(n) amortised. note: the driving loop originally iterated nums rather than the deduplicated keys, making it Theta(n^2) — 7.7s at n=1e5; fixed 2026-08-24 by looping over the map, now 2.9ms. see notes/hashing.md §3)
+
+
+--------------------------------------------------------
+Pascal's Triangle / Binomial Coefficients
+--------------------------------------------------------
+- Pascal's Triangle  —  src/arrays/group_09/hard/p28_pascal_s_triangle.cpp (each row from the previous via C(r,k)=C(r-1,k-1)+C(r-1,k); Theta(N^2), optimal. note: first version returned [[1]] for every input — the new row was never pushed into result AND the interior sum indexed with the outer loop variable i instead of j, two bugs that masked each other; both fixed 2026-08-24, verified against C(r,c) for all numRows 1..30. A dead generate_helper + result_n_1 member is still in the file. see notes/pascals_triangle.md)
+- (variant, not yet solved) single row / single element: C(r,k+1) = C(r,k)*(r-k)/(k+1) running product — Theta(r) time, Theta(1) space, no previous row needed; multiply BEFORE dividing or the integer division truncates. see notes/pascals_triangle.md §2
+
+
+--------------------------------------------------------
+Max-Heap / Priority-Queue Greedy
+--------------------------------------------------------
+- Minimise Maximum Distance Between Gas Stations  —  src/binary_search/group_2/hard/p25_minimise_maximum_distance_between_gas_stations.rs (note: lives in binary_search tree, but the implementation is a max-heap greedy that repeatedly splits the largest gap)
+
+
+--------------------------------------------------------
+Binary Search (plain, on a sorted array)
+--------------------------------------------------------
+- Binary Search to Find X in Sorted Array  —  src/binary_search/group_1/easy/p01_binary_search_to_find_x_in_sorted_array.rs
+- Linear Search  —  src/arrays/group_01/easy/p08_linear_search.cpp (note: filename says linear search; code actually implements binary search)
+- Single Element in a Sorted Array  —  src/binary_search/group_1/medium/p12_single_element_in_a_sorted_array.rs (even/odd index-pair parity)
+- Find Peak Element  —  src/binary_search/group_1/medium/p13_find_peak_element.rs (compare to neighbors)
+- Kth Missing Positive Number  —  src/binary_search/group_2/easy/p20_kth_missing_positive_number.rs (binary search on missing-count arr[i]-(i+1))
+- Find the Row with Maximum Number of 1s  —  src/binary_search/group_3/easy/p28_find_the_row_with_maximum_number_of_1s.cpp (per-row binary search for first 1)
+
+
+--------------------------------------------------------
+Lower Bound / Upper Bound (binary search variants)
+--------------------------------------------------------
+- Implement Lower Bound  —  src/binary_search/group_1/easy/p02_implement_lower_bound.rs
+- Implement Upper Bound  —  src/binary_search/group_1/easy/p03_implement_upper_bound.rs
+- Search Insert Position  —  src/binary_search/group_1/easy/p04_search_insert_position.rs (lower-bound style)
+- Floor and Ceil in Sorted Array  —  src/binary_search/group_1/easy/p05_floor_and_ceil_in_sorted_array.rs
+- Find First and Last Occurrence  —  src/binary_search/group_1/easy/p06_find_first_and_last_occurrence.rs
+- Count Occurrences of a Number in Sorted Array  —  src/binary_search/group_1/easy/p07_count_occurrences_of_a_number_in_sorted_array.rs (last - first + 1)
+
+
+--------------------------------------------------------
+Binary Search on a Rotated Sorted Array
+--------------------------------------------------------
+- Search in Rotated Sorted Array I (No Duplicates)  —  src/binary_search/group_1/medium/p08_search_in_rotated_sorted_array_i_no_duplicates.rs
+- Search in Rotated Sorted Array II (With Duplicates)  —  src/binary_search/group_1/medium/p09_search_in_rotated_sorted_array_ii_with_duplicates.rs
+- Minimum in Rotated Sorted Array  —  src/binary_search/group_1/medium/p10_minimum_in_rotated_sorted_array.rs
+
+
+--------------------------------------------------------
+Binary Search on Answer (answer-space / parametric search)
+--------------------------------------------------------
+- Find Square Root of a Number (Floor)  —  src/binary_search/group_2/easy/p14_find_square_root_of_a_number_floor.rs
+- Koko Eating Bananas  —  src/binary_search/group_2/medium/p16_koko_eating_bananas.rs
+- Minimum Days to Make M Bouquets  —  src/binary_search/group_2/medium/p17_minimum_days_to_make_m_bouquets.rs
+- Find the Smallest Divisor Given a Threshold  —  src/binary_search/group_2/medium/p18_find_the_smallest_divisor_given_a_threshold.rs
+- Capacity to Ship Packages Within D Days  —  src/binary_search/group_2/medium/p19_capacity_to_ship_packages_within_d_days.rs
+- Aggressive Cows  —  src/binary_search/group_2/medium/p21_aggressive_cows.cpp
+- Book Allocation Problem  —  src/binary_search/group_2/medium/p22_book_allocation_problem.cpp
+- Split Array - Largest Sum  —  src/binary_search/group_2/hard/p23_split_array_largest_sum.rs
+- Painter's Partition Problem  —  src/binary_search/group_2/hard/p24_painter_s_partition_problem.rs
+
+
+--------------------------------------------------------
+Binary Search via Partition (median / kth of two sorted arrays)
+--------------------------------------------------------
+- Median of Two Sorted Arrays  —  src/binary_search/group_2/hard/p26_median_of_two_sorted_arrays.rs (partition the smaller array; maxLeft <= minRight)
+- Kth Element of Two Sorted Arrays  —  src/binary_search/group_2/hard/p27_kth_element_of_two_sorted_arrays.cpp (same partition method)
+
+
+--------------------------------------------------------
+Binary Search in a 2D Matrix
+--------------------------------------------------------
+- Search in a 2D Matrix  —  src/binary_search/group_3/medium/p29_search_in_a_2d_matrix.rs (flatten to 1D; mid/cols, mid%cols)
+- Find Peak Element in 2D Matrix  —  src/binary_search/group_3/hard/p31_find_peak_element_in_2d_matrix.rs (binary search on columns, pick global-max row)
+
+
+--------------------------------------------------------
+Matrix In-Place Manipulation (markers, layer cycles, boundaries)
+--------------------------------------------------------
+- Set Matrix Zeros  —  src/arrays/group_09/medium/p24_set_matrix_zeros.cpp (note: solved with O(m+n) row/col marker maps, not the O(1) first-row/first-column trick; two passes — record then apply)
+- Rotate Matrix by 90 Degrees  —  src/arrays/group_09/medium/p25_rotate_matrix_by_90_degrees.cpp (note: layer-by-layer 4-cycle on (i,j)→(j,n-1-i), not the transpose+reverse-rows hint; fewer writes)
+- Spiral Traversal of a Matrix  —  src/arrays/group_09/medium/p26_spiral_traversal_of_a_matrix.cpp (note: walker + -101 visited sentinel instead of the standard four shrinking boundaries; -101 is safe because the problem guarantees -100 <= a[i][j] <= 100. Destroys the input matrix)
+
+
+--------------------------------------------------------
+Merge Sort — Counting Cross-Pairs
+--------------------------------------------------------
+- Count Inversions  —  src/arrays/group_11/hard/p37_count_inversions.cpp (count folded directly into the merge comparison; halves kept sorted descending by construction — see notes/divide_and_conquer_counting.md)
+- Reverse Pairs  —  src/arrays/group_11/hard/p38_reverse_pairs.cpp (condition not monotonic with the merge comparison, so counted in a separate two-pointer prescan before merging; same descending-order convention as p37)
+
+
+========================================================
+  Other techniques (no specific named algorithm)
+========================================================
+- Largest Element in an Array  —  src/arrays/group_01/easy/p01_largest_element_in_an_array.rs (single-pass running max)
+- Second Largest Element Without Sorting  —  src/arrays/group_01/easy/p02_second_largest_element_without_sorting.rs (also .cpp) (single-pass tracking)
+- Check if the Array is Sorted  —  src/arrays/group_01/easy/p03_check_if_the_array_is_sorted.rs (adjacent-pair scan)
+- Maximum Consecutive Ones  —  src/arrays/group_03/easy/p11_maximum_consecutive_ones.rs (single-pass running count)
+
+
+========================================================
+  Not yet implemented (empty / stub / broken)
+========================================================
+- Find the Repeating and Missing Number (.cpp)  —  src/arrays/group_03/hard/p36_find_the_repeating_and_missing_number.cpp  (TODO; .rs version is done)
+- Largest Subarray with Sum 0 (.rs)  —  src/arrays/group_04/hard/p32_largest_subarray_with_sum_0.rs  (stub; .cpp version is done)
+- 4Sum Problem (.rs)  —  src/arrays/group_05/hard/p31_4sum_problem.rs  (broken stub; .cpp version is done)
+- How Many Times Array Has Been Rotated  —  src/binary_search/group_1/easy/p11_how_many_times_array_has_been_rotated.rs  (todo!())
+- Find the Nth Root of a Number  —  src/binary_search/group_2/easy/p15_find_the_nth_root_of_a_number.cpp  (empty body)
+- Search in Row-wise and Column-wise Sorted Matrix  —  src/binary_search/group_3/medium/p30_search_in_row_wise_and_column_wise_sorted_matrix.rs  (todo!(); intended: Staircase Search from top-right)
