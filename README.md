@@ -14,10 +14,15 @@ src/
 │   ├── group_02/
 │   ├── …
 │   └── group_11/
-└── binary_search/     (Step 4 · 32 problems · groups 1–3)
-    ├── group_1/       (each group has easy/ medium/ hard/)
-    ├── group_2/
-    └── group_3/
+├── binary_search/     (Step 4 · 32 problems · groups 1–3)
+│   ├── group_1/       (each group has easy/ medium/ hard/)
+│   ├── group_2/
+│   └── group_3/
+└── strings/           (Step 5 · 15 problems · groups 01–06)
+    ├── group_01/      (each group has easy/ medium/ hard/)
+    ├── group_02/
+    ├── …
+    └── group_06/
 ```
 
 ### Conventions
@@ -37,9 +42,9 @@ src/
 
 ## Tooling
 
-A CLI tool (`dsa_tool.sh`) is included. It is **multi-topic** — pick Arrays or Binary
-Search and each keeps its own module tree and its own progress file; the last-used
-topic is remembered.
+A CLI tool (`dsa_tool.sh`) is included. It is **multi-topic** — pick Arrays, Binary
+Search, or Strings and each keeps its own module tree and its own progress file;
+the last-used topic is remembered.
 
 - Switch topic from the menu, or pass it as the first argument
 - Browse problems by **group/cluster** or **difficulty**
@@ -52,6 +57,7 @@ topic is remembered.
 ./dsa_tool.sh arrays next        # Start next unsolved Arrays problem
 ./dsa_tool.sh arrays dashboard   # Arrays progress
 ./dsa_tool.sh bs next            # Continue Binary Search
+./dsa_tool.sh strings next       # Continue Strings
 ./dsa_tool.sh dashboard          # View progress (current topic)
 ./dsa_tool.sh group              # Browse by group / cluster
 ./dsa_tool.sh cheatsheet         # Pattern reference for the current topic
@@ -63,8 +69,9 @@ topic is remembered.
 |------|-------|----------|-------|--------|
 | 3 | Arrays | 40 | [ArraysReadme.md](ArraysReadme.md) | 🚧 Scaffolded & CLI-tracked — solving in progress |
 | 4 | Binary Search | 32 | [BSReadme.md](BSReadme.md) | ✅ Solved in Rust — CLI-tracked |
+| 5 | Strings | 15 | [StringsReadme.md](StringsReadme.md) | 🚧 Scaffolded & CLI-tracked — solving in progress (Step 18 deferred until after Tries/DP) |
 
-> Each guide is a self-contained study companion: per-problem core ideas, LeetCode/GFG links, pattern cheatsheets, and a recommended solve order. Both topics have a live `src/` module tree and per-topic progress tracking via `dsa_tool.sh` — generate each problem's Rust template on demand as you start it.
+> Each guide is a self-contained study companion: per-problem core ideas, LeetCode/GFG links, pattern cheatsheets, and a recommended solve order. All topics have a live `src/` module tree and per-topic progress tracking via `dsa_tool.sh` — generate each problem's Rust template on demand as you start it.
 
 ## Build & Run
 

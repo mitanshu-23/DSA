@@ -175,6 +175,13 @@ Merge Sort — Counting Cross-Pairs
 - Reverse Pairs  —  src/arrays/group_11/hard/p38_reverse_pairs.cpp (condition not monotonic with the merge comparison, so counted in a separate two-pointer prescan before merging; same descending-order convention as p37)
 
 
+--------------------------------------------------------
+Depth Counter (Bracket Nesting)
+--------------------------------------------------------
+- Remove Outermost Parentheses  —  src/strings/group_01/easy/p01_remove_outermost_parentheses.cpp (skip exactly the char where open-count transitions 0->1 or 1->0; keep everything else)
+- Maximum Nesting Depth of Parentheses  —  src/strings/group_01/easy/p09_maximum_nesting_depth_of_parentheses.cpp (same open-count as p01; track its running max instead of skipping chars)
+
+
 ========================================================
   Other techniques (no specific named algorithm)
 ========================================================
@@ -182,6 +189,7 @@ Merge Sort — Counting Cross-Pairs
 - Second Largest Element Without Sorting  —  src/arrays/group_01/easy/p02_second_largest_element_without_sorting.rs (also .cpp) (single-pass tracking)
 - Check if the Array is Sorted  —  src/arrays/group_01/easy/p03_check_if_the_array_is_sorted.rs (adjacent-pair scan)
 - Maximum Consecutive Ones  —  src/arrays/group_03/easy/p11_maximum_consecutive_ones.rs (single-pass running count)
+- Largest Odd Number in a String  —  src/strings/group_01/easy/p03_largest_odd_number_in_a_string.cpp (right-to-left scan, stop at the first odd digit)
 
 
 ========================================================
