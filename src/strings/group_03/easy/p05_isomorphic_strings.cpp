@@ -45,6 +45,35 @@ public:
 
     return true;
   }
+
+  // Worth Note Taking — standard optimal. Instead of two hash maps, store the
+  // last-seen position of each character in both strings, 1-based so that 0
+  // means "never seen". s[i] and t[i] may correspond only if they last
+  // appeared at the same index; checking that one equality enforces the
+  // bijection in both directions at once, so no second "is already mapped"
+  // table is needed. Fixed-size arrays also mean no hashing.
+  // The length guard matters: without it t[i] reads out of bounds when t is
+  // shorter than s.
+  // Time: O(n)   Space: O(1) (two 256-entry tables)
+  bool isIsomorphicStd(string s, string t) {
+    if (s.length() != t.length()) {
+      return false;
+    }
+
+    int lastS[256] = {0}, lastT[256] = {0};
+
+    for (int i = 0; i < (int)s.length(); i++) {
+      unsigned char a = s[i], b = t[i];
+      if (lastS[a] != lastT[b]) {
+        return false;
+      }
+
+      lastS[a] = i + 1;
+      lastT[b] = i + 1;
+    }
+
+    return true;
+  }
 };
 
 // ===========================================================================

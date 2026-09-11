@@ -50,6 +50,26 @@ public:
 
     return res;
   }
+
+  // Worth Note Taking — standard form. One depth counter, and every character
+  // is copied except the '(' that takes depth 0 -> 1 and the ')' that takes
+  // depth 1 -> 0. Putting the ++/-- inside the condition does the test and the
+  // update in one step, which removes the need for the `continue` branches.
+  // Time: O(n)   Space: O(n) for the result
+  string removeOuterParenthesesStd(string s) {
+    string res;
+    int depth = 0;
+
+    for (char c : s) {
+      if (c == '(' && depth++ > 0) {
+        res.push_back(c);
+      } else if (c == ')' && --depth > 0) {
+        res.push_back(c);
+      }
+    }
+
+    return res;
+  }
 };
 
 // ===========================================================================

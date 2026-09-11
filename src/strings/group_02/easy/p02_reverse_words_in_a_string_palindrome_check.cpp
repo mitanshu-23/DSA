@@ -47,6 +47,39 @@ public:
     //
     return res;
   }
+
+  // Worth Note Taking — standard optimal. Reverse the whole string, then
+  // reverse each word back in place: reversing twice restores each word's own
+  // characters while leaving the words in opposite order. A read index and a
+  // write index compact runs of spaces during the same pass, so no temporary
+  // word buffer is needed and leading/trailing spaces fall out for free.
+  // Time: O(n)   Space: O(1) extra (mutates its own copy of s)
+  string reverseWordsOrderStd(string s) {
+    reverse(s.begin(), s.end());
+
+    int n = s.size(), write = 0, i = 0;
+    while (i < n) {
+      while (i < n && s[i] == ' ') {
+        i++;
+      }
+      if (i == n) {
+        break;
+      }
+
+      if (write != 0) {
+        s[write++] = ' '; // single separator before every word but the first
+      }
+
+      int wordStart = write;
+      while (i < n && s[i] != ' ') {
+        s[write++] = s[i++];
+      }
+      reverse(s.begin() + wordStart, s.begin() + write);
+    }
+
+    s.resize(write);
+    return s;
+  }
 };
 
 // ===========================================================================

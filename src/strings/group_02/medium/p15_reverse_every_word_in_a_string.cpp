@@ -69,6 +69,28 @@ public:
 
     return s;
   }
+
+  // Worth Note Taking — standard form of reverseWordsInplace above: take each
+  // word's bounds with find(' ') and hand the range to std::reverse instead of
+  // swapping by hand. Identical O(n) time / O(1) extra space, with less index
+  // arithmetic to get wrong. Note `start <= s.size()`, not `<`: it is what
+  // makes a trailing empty word (a string ending in a space) terminate.
+  // Time: O(n)   Space: O(1) extra
+  string reverseWordsStd(string s) {
+    size_t start = 0;
+
+    while (start <= s.size()) {
+      size_t end = s.find(' ', start);
+      if (end == string::npos) {
+        end = s.size();
+      }
+
+      reverse(s.begin() + start, s.begin() + end);
+      start = end + 1;
+    }
+
+    return s;
+  }
 };
 
 // ===========================================================================

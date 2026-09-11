@@ -49,7 +49,7 @@ public:
 
   string frequencySort2(string s) {
     unordered_map<char, int> freqCount;
-    map<int, unordered_set<char>> charBucket;
+    vector<unordered_set<char>> charBucket(s.length());
 
     for (int i = 0; i < s.length(); i++) {
       int last_count = freqCount[s[i]];
@@ -59,11 +59,45 @@ public:
     }
 
     string res = "";
-    for (auto it = charBucket.rbegin(); it != charBucket.rend(); ++it) {
-      for (const auto &ch : it->second) {
-        for (int i = 0; i < it->first; i++) {
+    for (int i = s.length(); i >= 0; i--) {
+      for (const auto &ch : charBucket[i]) {
+        for (int j = 0; j < i; j++) {
           res.push_back(ch);
         }
+      }
+    }
+
+    return res;
+  }
+
+  // Worth Note Taking — standard optimal: bucket sort by frequency, which
+  // drops the comparison sort entirely. Bucket i holds every character
+  // occurring exactly i times, so walking the buckets from high to low emits
+  // whole groups in non-increasing frequency order.
+  //
+  // NOTE the bucket count, `best + 1`. Indexing a bucket *by a count* means
+  // the largest valid index is the largest count, which for "aaa" is
+  // s.length() itself — frequencySort2 above sizes its buckets s.length() and
+  // then writes to charBucket[last_count + 1], which is a heap overflow on any
+  // string made of a single repeated character.
+  // Time: O(n)   Space: O(n)
+  string frequencySortStd(string s) {
+    unordered_map<char, int> freq;
+    int best = 0;
+    for (char c : s) {
+      best = max(best, ++freq[c]);
+    }
+
+    vector<string> bucket(best + 1);
+    for (const auto &kv : freq) {
+      bucket[kv.second].push_back(kv.first);
+    }
+
+    string res;
+    res.reserve(s.size());
+    for (int f = best; f >= 1; f--) {
+      for (char ch : bucket[f]) {
+        res.append(f, ch);
       }
     }
 

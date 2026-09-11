@@ -41,6 +41,21 @@ public:
 
     return num_dup;
   }
+
+  // Worth Note Taking — standard form. Scan from the right for the last odd
+  // digit and return the prefix ending there: any longer prefix would end in
+  // an even digit, so it would be even. Same O(n) scan as above, but it takes
+  // one substring instead of pop_back()-ing a copy a character at a time.
+  // Time: O(n)   Space: O(n) for the result
+  string largestOddNumberStd(string num) {
+    for (int i = num.length() - 1; i >= 0; i--) {
+      if ((num[i] - '0') % 2 != 0) {
+        return num.substr(0, i + 1);
+      }
+    }
+
+    return "";
+  }
 };
 
 // ===========================================================================

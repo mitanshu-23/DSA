@@ -39,6 +39,27 @@ public:
 
     return ans;
   }
+
+  // Worth Note Taking — the optimal solution for this problem IS the approach
+  // above: one pass with a running depth counter, tracking the maximum. There
+  // is nothing asymptotically better, since every character must be read, and
+  // no stack is needed because only the *depth* matters, never which brackets
+  // are open. The only tightening available is cosmetic: a range-for, and
+  // folding the max into the increment.
+  // Time: O(n)   Space: O(1)
+  int maxDepthStd(string s) {
+    int open = 0, ans = 0;
+
+    for (char c : s) {
+      if (c == '(') {
+        ans = max(ans, ++open);
+      } else if (c == ')') {
+        --open;
+      }
+    }
+
+    return ans;
+  }
 };
 
 // ===========================================================================
