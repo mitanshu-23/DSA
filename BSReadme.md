@@ -623,4 +623,4 @@ Binary Search (Step 4) builds directly on **Arrays** (Step 3) — the two-pointe
 
 | ← Previous | Index | Next → |
 |---|---|---|
-| [Step 3 — Arrays](ArraysReadme.md) | [All Topics](README.md) | *Next step coming soon* |
+| [Step 3 — Arrays](ArraysReadme.md) | [All Topics](README.md) | [Step 5 — Strings](StringsReadme.md) |

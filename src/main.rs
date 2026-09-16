@@ -1,5 +1,7 @@
 #![allow(dead_code, unused_variables, unused_imports)]
 
+pub mod strings;
+
 use std::vec;
 
 pub mod arrays;
