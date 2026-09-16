@@ -182,6 +182,63 @@ Depth Counter (Bracket Nesting)
 - Maximum Nesting Depth of Parentheses  —  src/strings/group_01/easy/p09_maximum_nesting_depth_of_parentheses.cpp (same open-count as p01; track its running max instead of skipping chars)
 
 
+--------------------------------------------------------
+Word Reversal (word order vs. per-word reversal)
+--------------------------------------------------------
+- Reverse Words in a String  —  src/strings/group_02/easy/p02_reverse_words_in_a_string_palindrome_check.cpp (reverseWords: right-to-left scan building each word into a temp buffer; reverseWordsOrderStd: the standard reverse-whole-string-then-reverse-each-word-back trick, O(n) time / O(1) extra, single pass compacts spaces via read/write cursors. note: filename and problem-statement docstring also cover Valid Palindrome (LC 125), but no palindrome-check function is implemented in this file — that half is a documentation gap, not a solved problem)
+- Reverse Every Word in a String  —  src/strings/group_02/medium/p15_reverse_every_word_in_a_string.cpp (mirror of p02: reverses each word's own characters in place, keeps word ORDER unchanged; three variants in file, including an in-place two-pointer-per-word version)
+
+
+--------------------------------------------------------
+Bijective (Two-Way) Character Mapping
+--------------------------------------------------------
+- Isomorphic Strings  —  src/strings/group_03/easy/p05_isomorphic_strings.cpp (two maps s->t and t->s checked in both directions per pair, so a char can't map to two different targets in either direction)
+
+
+--------------------------------------------------------
+26-Slot Frequency Array (fixed-size alternative to a hashmap for lowercase ASCII)
+--------------------------------------------------------
+- Check if Two Strings are Anagram  —  src/strings/group_03/easy/p07_check_if_two_strings_are_anagram.cpp (increment for s, decrement for t; all-zero means anagram)
+- Sum of Beauty of All Substrings  —  src/strings/group_06/medium/p14_sum_of_beauty_of_all_substrings.cpp (for each start, expand right maintaining a 26-slot freq array; beauty = max_freq - min_nonzero_freq per substring; Theta(26*n^2). File also carries SolutionStandard, a single manual 26-loop replacing the original's two separate STL max_element/min_element scans — same complexity, ~2x fewer comparisons)
+
+
+--------------------------------------------------------
+Frequency + Sort
+--------------------------------------------------------
+- Sort Characters by Frequency  —  src/strings/group_03/medium/p08_sort_characters_by_frequency.cpp (build a frequency map, sort characters descending by count, rebuild the string; three variants in file)
+
+
+--------------------------------------------------------
+Shrinking Candidate Prefix
+--------------------------------------------------------
+- Longest Common Prefix  —  src/strings/group_04/easy/p04_longest_common_prefix.cpp (take the first string as candidate, shrink it while a later string doesn't start with it; O(n*m))
+
+
+--------------------------------------------------------
+String Concatenation Trick (rotation check via s+s)
+--------------------------------------------------------
+- Check if One String is a Rotation of Another  —  src/strings/group_04/easy/p06_check_if_one_string_is_a_rotation_of_another.cpp (goal is a rotation of s iff goal is a substring of s+s and lengths match. note: file also carries rotateStringKMP, a KMP-based substring search — KMP itself is nominally a Step 18/deferred topic, but a working instance already exists here)
+
+
+--------------------------------------------------------
+Parsing / Simulation
+--------------------------------------------------------
+- Roman Number to Integer and Vice Versa  —  src/strings/group_05/medium/p10_roman_number_to_integer_and_vice_versa.cpp (Roman->Int: left-to-right, subtract when current value < next value, else add. Int->Roman: greedy descending value-symbol table)
+- Implement atoi  —  src/strings/group_05/medium/p11_implement_atoi_string_to_integer.cpp (trim, optional sign, digits, clamp to i32 range; overflow check placed after the multiply, made safe only because the loop returns the instant the accumulator reaches INT_MAX — see file's approach note history for the full invariant)
+
+
+--------------------------------------------------------
+AtLeast(K) / AtMost(K) Two-Pointer (exactly-K via subtracting two monotonic counts)
+--------------------------------------------------------
+- Count Number of Substrings with K Distinct Characters  —  src/strings/group_06/hard/p12_count_number_of_substrings_with_k_distinct_characters.cpp (exactly(K) = atLeast(K) - atLeast(K+1); each atLeast(k) is its own O(n) two-pointer sliding window since "at least k distinct" is monotonic in window size, unlike "exactly k". note: the file's own "Core Idea" comment says atMost(K)-atMost(K-1) — that's stale/inaccurate; the implemented helper_more() computes atLeast, confirmed by code review and a 3000-case brute-force stress test. Also: the problem-statement docstring's Example 2 (`"aba", k=1 -> 4`) is itself wrong — correct answer is 3, confirmed independently by hand-enumeration, brute force, and a from-scratch atMost(K)-atMost(K-1) reference implementation, all agreeing with what the code actually returns)
+
+
+--------------------------------------------------------
+Expand Around Center (Palindrome)
+--------------------------------------------------------
+- Longest Palindromic Substring  —  src/strings/group_06/medium/p13_longest_palindromic_substring.cpp (two separate passes — odd-length centers, then even-length centers — expanding outward while characters match; Theta(n^2) worst case, O(1) extra space. File also carries SolutionStandard, the textbook single-loop version over 2n-1 virtual centers (same complexity), and SolutionManacher, the O(n) linear-time algorithm using a mirror-radius array — both verified against a brute-force oracle)
+
+
 ========================================================
   Other techniques (no specific named algorithm)
 ========================================================

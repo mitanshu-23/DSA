@@ -69,7 +69,7 @@ the last-used topic is remembered.
 |------|-------|----------|-------|--------|
 | 3 | Arrays | 40 | [ArraysReadme.md](ArraysReadme.md) | 🚧 Scaffolded & CLI-tracked — solving in progress |
 | 4 | Binary Search | 32 | [BSReadme.md](BSReadme.md) | ✅ Solved in Rust — CLI-tracked |
-| 5 | Strings | 15 | [StringsReadme.md](StringsReadme.md) | 🚧 Scaffolded & CLI-tracked — solving in progress (Step 18 deferred until after Tries/DP) |
+| 5 | Strings | 15 | [StringsReadme.md](StringsReadme.md) | ✅ Solved (C++) — CLI-tracked (Step 18 deferred until after Tries/DP) |
 
 > Each guide is a self-contained study companion: per-problem core ideas, LeetCode/GFG links, pattern cheatsheets, and a recommended solve order. All topics have a live `src/` module tree and per-topic progress tracking via `dsa_tool.sh` — generate each problem's Rust template on demand as you start it.
 

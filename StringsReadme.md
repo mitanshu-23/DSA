@@ -2,7 +2,7 @@
 
 > **Source:** [takeuforward.org — Striver's A2Z DSA Sheet](https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z)
 > **YouTube:** [takeUforward Channel](https://www.youtube.com/@takeUforward)
-> **Total Problems:** 15 (7 Easy + 8 Medium)
+> **Total Problems:** 15 (8 Easy + 6 Medium + 1 Hard)
 > **Sub-steps:** 5.1 Basic and Easy (7) · 5.2 Medium (8)
 > **Step 18 (Advanced Strings):** Deferred — do after Tries and DP
 
@@ -516,3 +516,21 @@ Step 18 is placed last intentionally — KMP and Z-function are most useful afte
 | Striver's A2Z Sheet | [takeuforward.org](https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z) |
 | YouTube — Strings Playlist | [takeUforward Channel](https://www.youtube.com/@takeUforward) |
 | takeUforward String Articles | [takeuforward.org/strings](https://takeuforward.org/category/data-structure/string/) |
+
+---
+
+## Where This Fits in the Sheet
+
+Strings (Step 5) follows Binary Search (Step 4) in the official sheet order, but
+algorithmically it reuses **Arrays (Step 3)** patterns more directly — two pointers,
+frequency/hash maps, and sliding window all carry over as-is (see "What Is New in
+Strings vs Arrays?" above). Binary Search's contribution is more indirect: the
+`s + s` rotation-check trick (problem 6) and the `atLeast/atMost K` two-pointer
+reduction (problem 12) are both instances of the same "collapse a hard predicate into
+a monotonic one" instinct Binary Search builds. Step 18 (KMP, Z-function, Rabin-Karp)
+is the true continuation of this step and is deliberately deferred until after Tries
+and DP.
+
+| ← Previous | Index | Next → |
+|---|---|---|
+| [Step 4 — Binary Search](BSReadme.md) | [All Topics](README.md) | *Next step coming soon* |
