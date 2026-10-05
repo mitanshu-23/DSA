@@ -1,5 +1,7 @@
 #![allow(dead_code, unused_variables, unused_imports)]
 
+pub mod linked_list;
+
 pub mod strings;
 
 use std::vec;

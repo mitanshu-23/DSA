@@ -2,11 +2,11 @@
 # =============================================================================
 #  DSA Practice Tool — Multi-Topic Edition
 #  Striver's A2Z DSA Sheet · Step 3 Arrays (40) · Step 4 Binary Search (32)
-#  · Step 5 + Step 18 Strings (24)
+#  · Step 5 + Step 18 Strings (24) · Step 6 Linked List (30)
 # =============================================================================
 #  Features
 #  --------
-#  • Pick a topic (Arrays / Binary Search / Strings) — each has its own problems,
+#  • Pick a topic (Arrays / Binary Search / Strings / Linked List) — each has its own problems,
 #    its own src/ module tree, and its own progress file. The last topic is
 #    remembered.
 #  • Browse every problem by Group/Cluster or by Difficulty (Easy→Medium→Hard)
@@ -379,7 +379,113 @@ STR_STATEMENTS["11"]="Implement atoi: convert a string to a 32-bit signed intege
 STR_STATEMENTS["13"]="Given a string s, return the longest palindromic substring of s.\n\nExample 1:  s = \"babad\"  →  \"bab\"  (or \"aba\")\nExample 2:  s = \"cbbd\"   →  \"bb\"\n\nKey insight: expand around every center, trying both odd-length and even-length windows; track the best span seen.\n\nConstraints:\n  1 <= s.length <= 1000"
 STR_STATEMENTS["14"]="The beauty of a string is the difference between the frequencies of its most frequent and least frequent characters. Given s, return the sum of beauty over all its substrings.\n\nExample 1:  s = \"aabcb\"  →  5\nExample 2:  s = \"aabcbaa\" →  17\n\nKey insight: for each starting index expand right while maintaining a 26-slot frequency array; beauty = max_freq - min_freq among present chars.\n\nConstraints:\n  1 <= s.length <= 500"
 
-# load_topic <bs|arr|str> — point the active globals at the chosen topic's data.
+# ── Linked List · Step 6 · 30 problems across 9 correlation clusters ───────────
+# Clusters follow the "Smart Solve Order" in LinkedList.md exactly — together
+# they partition all 30 problems from its Full Problem Table (no leftover misc
+# group needed this time). Merge K Sorted Lists and LRU Cache have moved to
+# Step 11 (Heaps) and Step 9 (Stack & Queues) respectively per the readme's own
+# "Moved to other steps" note, so neither appears here anymore.
+declare -a LL_GROUP_NAMES=(""
+  "Singly LL Basics"
+  "Doubly LL Basics"
+  "Slow / Fast Pointer"
+  "Reversal"
+  "Partition / Segregation"
+  "DLL Medium/Hard"
+  "Merge / Sort"
+  "Intersection & Clone"
+  "Hard (Rotate & Flatten)"
+)
+declare -a LL_GROUP_DIRS=(""
+  "group_01"
+  "group_02"
+  "group_03"
+  "group_04"
+  "group_05"
+  "group_06"
+  "group_07"
+  "group_08"
+  "group_09"
+)
+# Each entry: "id|name|difficulty|group|lc_url|gfg_url|cn_url|fn_signature|core_idea"
+# fn_signature uses LeetCode's own Rust node shapes (ListNode / DoublyListNode /
+# RandomListNode / MultiLevelNode) — see topic_preamble() for the shared defs
+# every generated Linked List file gets.
+declare -a LL_PROBLEMS=(
+  # ── Cluster 1 · Singly LL Basics ─────────────────────────────────────────
+  "01|Introduction to Singly LL / Insert at Head|Easy|1||https://www.geeksforgeeks.org/problems/introduction-to-linked-list/1||fn insert_at_head(head: Option<Box<ListNode>>, val: i32) -> Option<Box<ListNode>>|New node's next=head; the new node becomes the head in O(1)"
+  "02|Insertion at the Head of a Linked List|Easy|1||||fn insert_at_head(head: Option<Box<ListNode>>, val: i32) -> Option<Box<ListNode>>|Same operation as problem 1, practised standalone: new_node.next=head, return new_node"
+  "03|Deletion of the Head of LL|Easy|1|https://leetcode.com/problems/delete-node-in-a-linked-list/|https://www.geeksforgeeks.org/problems/delete-a-node-in-singly-linked-list/1||fn delete_head(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|head=head.next; handle the empty-list case"
+  "04|Find the Length of a Linked List|Easy|1||https://www.geeksforgeeks.org/problems/count-nodes-of-linked-list/1||fn length_of_linked_list(head: Option<Box<ListNode>>) -> i32|Walk from head counting nodes until curr is null"
+  "05|Search in a Linked List|Medium|1||||fn search_in_linked_list(head: Option<Box<ListNode>>, target: i32) -> bool|Linear traversal; return true the moment a node's value matches target"
+  # ── Cluster 2 · Doubly LL Basics ─────────────────────────────────────────
+  "06|Introduction to DLL / Insert Before Head|Easy|2||https://www.geeksforgeeks.org/problems/introduction-to-doubly-linked-list/1||fn insert_before_head_dll(head: Option<Rc<RefCell<DoublyListNode>>>, val: i32) -> Option<Rc<RefCell<DoublyListNode>>>|New node's next=head and head's prev points back to it; the new node becomes head"
+  "07|Delete Head of Doubly Linked List|Easy|2||||fn delete_head_dll(head: Option<Rc<RefCell<DoublyListNode>>>) -> Option<Rc<RefCell<DoublyListNode>>>|Advance head to head.next and clear its prev; handle the single-node case"
+  "08|Reverse a Doubly Linked List|Medium|2||https://www.geeksforgeeks.org/problems/reverse-a-doubly-linked-list/1||fn reverse_dll(head: Option<Rc<RefCell<DoublyListNode>>>) -> Option<Rc<RefCell<DoublyListNode>>>|Swap next and prev on every node; the old tail becomes the new head"
+  # ── Cluster 3 · Slow / Fast Pointer ───────────────────────────────────────
+  "09|Find the Middle of a Linked List|Easy|3|https://leetcode.com/problems/middle-of-the-linked-list/|https://www.geeksforgeeks.org/problems/finding-middle-element-in-a-linked-list/1||fn middle_node(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|slow moves 1 step, fast moves 2; when fast runs out slow sits at the middle"
+  "12|Detect a Cycle in a Linked List|Medium|3|https://leetcode.com/problems/linked-list-cycle/|https://www.geeksforgeeks.org/problems/detect-loop-in-linked-list/1||fn has_cycle(head: Option<Box<ListNode>>) -> bool|Floyd's: slow and fast pointers necessarily meet somewhere inside the cycle if one exists"
+  "13|Find the Starting Point of a Cycle|Medium|3|https://leetcode.com/problems/linked-list-cycle-ii/|https://www.geeksforgeeks.org/problems/find-the-first-node-of-loop-in-linked-list--170645/1||fn detect_cycle_start(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|After Floyd's phase-1 meeting point, move one pointer back to head; both advance 1 step and meet at the entry"
+  "14|Length of Loop in LL|Medium|3||https://www.geeksforgeeks.org/problems/find-length-of-loop/1||fn cycle_length(head: Option<Box<ListNode>>) -> i32|From the phase-1 meeting point, hold one pointer fixed and count steps until the other returns to it"
+  "18|Delete the Middle Node of LL|Medium|3|https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/|https://www.geeksforgeeks.org/problems/delete-middle-of-linked-list/1||fn delete_middle(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Start fast one step ahead of slow so slow lands on the node just before the middle; splice it out"
+  "17|Remove Nth Node from the End of a List|Medium|3|https://leetcode.com/problems/remove-nth-node-from-end-of-list/|https://www.geeksforgeeks.org/problems/nth-node-from-end-of-linked-list/1||fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>>|Move fast n steps ahead of slow, then advance both together until fast falls off the end"
+  "15|Check if LL is Palindrome|Medium|3|https://leetcode.com/problems/palindrome-linked-list/|https://www.geeksforgeeks.org/problems/check-if-linked-list-is-pallindrome/1||fn is_palindrome(head: Option<Box<ListNode>>) -> bool|Find the middle, reverse the second half in place, then compare both halves node by node"
+  # ── Cluster 4 · Reversal ──────────────────────────────────────────────────
+  "10|Reverse a Linked List (Iterative)|Medium|4|https://leetcode.com/problems/reverse-linked-list/|https://www.geeksforgeeks.org/problems/reverse-a-linked-list/1||fn reverse_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Classic three-pointer iterative reversal: prev, curr, next — rewire one link per step"
+  "11|Reverse a Linked List (Recursive)|Medium|4|https://leetcode.com/problems/reverse-linked-list/|https://www.geeksforgeeks.org/problems/reverse-a-linked-list/1||fn reverse_list_recursive(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Reverse the rest recursively first, then hook head.next.next=head and cut head.next"
+  "27|Reverse Nodes in K-Group|Hard|4|https://leetcode.com/problems/reverse-nodes-in-k-group/|https://www.geeksforgeeks.org/problems/reverse-a-linked-list-in-groups-of-given-size/1||fn reverse_k_group(head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>>|Check k nodes exist, reverse them, recurse on the rest, then reconnect; leave a short final group untouched"
+  # ── Cluster 5 · Partition / Segregation ───────────────────────────────────
+  "16|Segregate Odd and Even Nodes in LL|Medium|5|https://leetcode.com/problems/odd-even-linked-list/|https://www.geeksforgeeks.org/problems/segregate-even-and-odd-nodes-in-a-linked-list5035/1||fn odd_even_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Two-chain partition by index parity; interleave odd/even while traversing, then append the even chain after the odd chain"
+  "20|Sort a LL of 0s, 1s, and 2s|Medium|5||https://www.geeksforgeeks.org/problems/given-a-linked-list-of-0s-1s-and-2s-sort-it/1||fn sort_zero_one_two_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Three-chain partition (Dutch flag on a list); reconnect the 0-chain to the 1-chain to the 2-chain"
+  "22|Add One to a Number Represented by LL|Medium|5||https://www.geeksforgeeks.org/problems/add-1-to-a-number-represented-as-linked-list/1||fn add_one(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Reverse, add 1 with carry propagation, reverse back — or find the rightmost non-9 digit directly"
+  # ── Cluster 6 · DLL Medium/Hard ───────────────────────────────────────────
+  "24|Delete All Occurrences of a Key in DLL|Hard|6||https://www.geeksforgeeks.org/problems/delete-all-occurrences-of-a-given-key-in-a-doubly-linked-list/1||fn delete_all_occurrences_dll(head: Option<Rc<RefCell<DoublyListNode>>>, key: i32) -> Option<Rc<RefCell<DoublyListNode>>>|Rewire prev.next and next.prev around every matching node; update head when the head itself matches"
+  "25|Find Pairs with Given Sum in Sorted DLL|Medium|6||https://www.geeksforgeeks.org/problems/find-pairs-with-given-sum-in-doubly-linked-list/1||fn pairs_with_given_sum(head: Option<Rc<RefCell<DoublyListNode>>>, target: i32) -> Vec<(i32, i32)>|Two pointers from both ends moving inward via next/prev; only possible because a DLL allows O(1) backward steps"
+  "26|Remove Duplicates from Sorted DLL|Hard|6||https://www.geeksforgeeks.org/problems/remove-duplicates-from-a-sorted-doubly-linked-list/1||fn delete_duplicates_dll(head: Option<Rc<RefCell<DoublyListNode>>>) -> Option<Rc<RefCell<DoublyListNode>>>|Walk adjacent pairs; bypass curr.next whenever it repeats curr.val, rewiring prev on both sides"
+  # ── Cluster 7 · Merge / Sort ──────────────────────────────────────────────
+  "23|Add Two Numbers Represented as Linked Lists|Medium|7|https://leetcode.com/problems/add-two-numbers/|https://www.geeksforgeeks.org/problems/add-two-numbers-represented-by-linked-lists/1||fn add_two_numbers(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Walk both lists together adding digits with a running carry; a dummy head keeps the output construction clean"
+  "19|Sort a Linked List (Merge Sort)|Hard|7|https://leetcode.com/problems/sort-list/|https://www.geeksforgeeks.org/problems/sort-a-linked-list/1||fn sort_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Find the middle, split into two halves, recursively sort each, then merge the sorted halves"
+  # ── Cluster 8 · Intersection and Clone ────────────────────────────────────
+  "21|Find the Intersection of Two Linked Lists|Medium|8|https://leetcode.com/problems/intersection-of-two-linked-lists/|https://www.geeksforgeeks.org/problems/intersection-of-two-linked-list/1||fn get_intersection_node(head_a: Option<Box<ListNode>>, head_b: Option<Box<ListNode>>) -> Option<Box<ListNode>>|Two pointers redirect to the other list's head when they run out; they meet after len(A)+len(B) steps"
+  "30|Clone a Linked List with Random Pointer|Hard|8|https://leetcode.com/problems/copy-list-with-random-pointer/|https://www.geeksforgeeks.org/problems/clone-a-linked-list-with-next-and-random-pointer/1||fn copy_random_list(head: Option<Rc<RefCell<RandomListNode>>>) -> Option<Rc<RefCell<RandomListNode>>>|Interleave a clone after each original, wire random off the interleaved pairs, then split the two lists apart"
+  # ── Cluster 9 · Hard (Rotate & Flatten) ───────────────────────────────────
+  "28|Rotate a Linked List|Hard|9|https://leetcode.com/problems/rotate-list/|https://www.geeksforgeeks.org/problems/rotate-a-linked-list/1||fn rotate_right(head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>>|Find length and tail, normalise k%length, cut at the new pivot and reconnect the old tail to the old head"
+  "29|Flatten a Linked List (Next + Down Pointers)|Hard|9||https://www.geeksforgeeks.org/problems/flattening-a-linked-list/1||fn flatten(head: Option<Box<MultiLevelNode>>) -> Option<Box<MultiLevelNode>>|Recursively flatten next first, then merge the current child column into the already-flattened rest"
+)
+
+declare -A LL_STATEMENTS
+LL_STATEMENTS["01"]="Given a linked list (or an empty one) and a value, insert a new node holding that value at the head and return the new head.\n\nExample 1:  list = [2,3,4], val = 1  →  [1,2,3,4]\nExample 2:  list = [], val = 5        →  [5]\n\nKey insight: the new node's next points at the old head; it becomes the new head in O(1).\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["02"]="Given a linked list (or an empty one) and a value, insert a new node holding that value at the head and return the new head.\n\nExample 1:  list = [2,3,4], val = 1  →  [1,2,3,4]\nExample 2:  list = [], val = 5        →  [5]\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["03"]="Given the head of a linked list, delete the head node and return the new head.\n\nExample 1:  list = [1,2,3,4]  →  [2,3,4]\nExample 2:  list = [7]         →  []\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["04"]="Given the head of a linked list, return the number of nodes in it.\n\nExample 1:  list = [1,2,3,4,5]  →  5\nExample 2:  list = []            →  0\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["05"]="Given the head of a linked list and a target value, return true if the target exists anywhere in the list.\n\nExample 1:  list = [1,2,3,4], target = 3  →  true\nExample 2:  list = [1,2,3], target = 9     →  false\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["06"]="Given a doubly linked list (or an empty one) and a value, insert a new node holding that value before the current head and return the new head.\n\nExample 1:  list = [2,3,4], val = 1  →  [1,2,3,4]\nExample 2:  list = [], val = 5        →  [5]\n\nKey insight: wire both the new node's next (to the old head) and the old head's prev (back to the new node).\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["07"]="Given the head of a doubly linked list, delete the head node and return the new head.\n\nExample 1:  list = [1,2,3,4]  →  [2,3,4]\nExample 2:  list = [7]         →  []\n\nKey insight: advance head to head.next, then clear the new head's prev pointer.\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["08"]="Given the head of a doubly linked list, reverse it in place and return the new head.\n\nExample 1:  list = [1,2,3,4,5]  →  [5,4,3,2,1]\nExample 2:  list = [1,2]         →  [2,1]\n\nKey insight: swap each node's next and prev; the old tail becomes the new head.\n\nConstraints:\n  0 <= length <= 10^5"
+LL_STATEMENTS["09"]="Given the head of a singly linked list, return the middle node. If there are two middle nodes, return the second one.\n\nExample 1:  list = [1,2,3,4,5]    →  node with val 3\nExample 2:  list = [1,2,3,4,5,6]  →  node with val 4\n\nKey insight: slow moves 1 step, fast moves 2; when fast reaches the end, slow is at the middle.\n\nConstraints:\n  1 <= length <= 100"
+LL_STATEMENTS["12"]="Given the head of a linked list, determine if it has a cycle (some node's next eventually points back to a previously visited node).\n\nExample 1:  list = [3,2,0,-4], tail connects to node index 1  →  true\nExample 2:  list = [1,2], no cycle                              →  false\n\nKey insight: Floyd's algorithm — a slow and a fast pointer must eventually meet if the list has a cycle.\n\nConstraints:\n  0 <= length <= 10^4"
+LL_STATEMENTS["13"]="Given the head of a linked list that may contain a cycle, return the node where the cycle begins, or None if there is no cycle.\n\nExample 1:  list = [3,2,0,-4], tail connects to node index 1  →  the node with val 2\nExample 2:  list = [1], no cycle                                 →  None\n\nKey insight: after Floyd's phase-1 meeting point, resetting one pointer to head and advancing both by 1 step makes them meet exactly at the cycle's entry.\n\nConstraints:\n  0 <= length <= 10^4"
+LL_STATEMENTS["14"]="Given the head of a linked list that contains a cycle, return the number of nodes in that cycle (0 if there is no cycle).\n\nExample 1:  list = [1,2,3,4], tail connects to node index 1  →  3\nExample 2:  list = [1,2,3], no cycle                            →  0\n\nKey insight: once Floyd's phase 1 finds the meeting point, hold one pointer fixed and count steps until the other pointer returns to it.\n\nConstraints:\n  0 <= length <= 10^4"
+LL_STATEMENTS["18"]="Given the head of a singly linked list, delete the middle node and return the head of the modified list. For an even-length list, delete the second of the two middle nodes.\n\nExample 1:  list = [1,3,4,7,1,2,6]  →  [1,3,4,1,2,6]\nExample 2:  list = [1,2,3,4]         →  [1,2,4]\n\nKey insight: start fast one step ahead of slow so slow naturally lands on the node just before the middle.\n\nConstraints:\n  1 <= length <= 10^5"
+LL_STATEMENTS["17"]="Given the head of a linked list, remove the nth node from the end of the list and return its head.\n\nExample 1:  list = [1,2,3,4,5], n = 2  →  [1,2,3,5]\nExample 2:  list = [1], n = 1           →  []\n\nKey insight: move a fast pointer n steps ahead of slow, then advance both together until fast falls off the end; slow then sits just before the target. A dummy head cleanly handles removing the actual head.\n\nConstraints:\n  1 <= n <= length of the list"
+LL_STATEMENTS["15"]="Given the head of a singly linked list, return true if it reads the same forwards and backwards.\n\nExample 1:  list = [1,2,2,1]  →  true\nExample 2:  list = [1,2]       →  false\n\nKey insight: find the middle (slow/fast), reverse the second half in place, then compare the two halves node by node.\n\nConstraints:\n  1 <= length <= 10^5"
+LL_STATEMENTS["10"]="Given the head of a singly linked list, reverse the list iteratively and return the new head.\n\nExample 1:  list = [1,2,3,4,5]  →  [5,4,3,2,1]\nExample 2:  list = [1,2]         →  [2,1]\n\nKey insight: three-pointer iterative reversal — prev, curr, next — rewiring curr.next = prev at every step.\n\nConstraints:\n  0 <= length <= 5000"
+LL_STATEMENTS["11"]="Given the head of a singly linked list, reverse the list recursively and return the new head.\n\nExample 1:  list = [1,2,3,4,5]  →  [5,4,3,2,1]\nExample 2:  list = [1,2]         →  [2,1]\n\nKey insight: recurse on head.next first, then hook the old head onto the tail of the reversed rest (head.next.next = head) and cut head.next.\n\nConstraints:\n  0 <= length <= 5000"
+LL_STATEMENTS["27"]="Given the head of a linked list and an integer k, reverse the nodes of the list k at a time and return the modified list. If the number of nodes remaining is fewer than k, leave that final group as-is.\n\nExample 1:  list = [1,2,3,4,5], k = 2  →  [2,1,4,3,5]\nExample 2:  list = [1,2,3,4,5], k = 3  →  [3,2,1,4,5]\n\nKey insight: check that k nodes are available before reversing them; recurse on the rest and reconnect — the original head of each reversed group becomes the tail that links to the next group.\n\nConstraints:\n  1 <= k <= length of the list"
+LL_STATEMENTS["16"]="Given the head of a singly linked list, group all nodes at odd indices together followed by all nodes at even indices (1-indexed by position, not by value), and return the reordered list. Do it in O(1) extra space.\n\nExample 1:  list = [1,2,3,4,5]  →  [1,3,5,2,4]\nExample 2:  list = [2,1,3,5,6,4,7]  →  [2,3,6,7,1,5,4]\n\nKey insight: maintain an odd-chain and an even-chain pointer, interleaving them while traversing, then append the even chain after the odd chain's tail.\n\nConstraints:\n  0 <= length <= 10^4"
+LL_STATEMENTS["20"]="Given the head of a linked list containing only the values 0, 1, and 2, sort it in-place by rearranging links only (not by changing node values).\n\nExample 1:  list = [1,2,2,1,2,0,2,2]  →  [0,1,1,2,2,2,2,2]\nExample 2:  list = [2,2,0,1]            →  [0,1,2,2]\n\nKey insight: a Dutch-flag-style three-chain partition — maintain separate 0/1/2 chains while traversing once, then splice 0-chain -> 1-chain -> 2-chain together.\n\nConstraints:\n  1 <= length <= 10^5"
+LL_STATEMENTS["22"]="Given the head of a linked list representing a non-negative integer (most significant digit first), add one to the number and return the head of the resulting list.\n\nExample 1:  list = [1,2,3]  →  [1,2,4]\nExample 2:  list = [9,9]     →  [1,0,0]\n\nKey insight: reverse the list, add 1 propagating carry node by node, then reverse back — or directly find the rightmost digit that isn't 9 and increment it, zeroing everything after.\n\nConstraints:\n  1 <= length <= 10^5"
+LL_STATEMENTS["24"]="Given the head of a doubly linked list and a key, delete every node whose value equals key and return the new head.\n\nExample 1:  list = [1,2,1,3,1], key = 1  →  [2,3]\nExample 2:  list = [4,5,6], key = 9       →  [4,5,6]  (unchanged)\n\nKey insight: for every match, rewire node.prev.next and node.next.prev around it; update the head pointer whenever the head itself is deleted.\n\nConstraints:\n  0 <= length <= 10^4"
+LL_STATEMENTS["25"]="Given the head of a sorted (ascending) doubly linked list and a target sum, return all pairs of values that add up to target.\n\nExample 1:  list = [1,2,4,5,6,8,9], target = 7  →  [(1,6),(2,5)]\nExample 2:  list = [1,2,3,4], target = 100       →  []\n\nKey insight: two pointers starting at head and tail, moving inward via next/prev based on the sum comparison — only possible because a DLL allows O(1) backward steps.\n\nConstraints:\n  list is sorted in non-decreasing order."
+LL_STATEMENTS["26"]="Given the head of a sorted doubly linked list, delete all duplicate nodes so each value appears only once, and return the new head.\n\nExample 1:  list = [1,1,2]        →  [1,2]\nExample 2:  list = [1,1,2,3,3]     →  [1,2,3]\n\nKey insight: walk adjacent pairs; whenever curr.next repeats curr.val, bypass it by rewiring both curr.next and the successor's prev.\n\nConstraints:\n  0 <= length <= 300\n  list is sorted in non-decreasing order."
+LL_STATEMENTS["23"]="You are given two non-empty linked lists representing two non-negative integers, digits stored in reverse order. Add the two numbers and return the sum as a linked list in the same format.\n\nExample 1:  l1 = [2,4,3], l2 = [5,6,4]  →  [7,0,8]   (342 + 465 = 807)\nExample 2:  l1 = [9,9], l2 = [1]         →  [0,0,1]   (99 + 1 = 100)\n\nKey insight: walk both lists together, adding digits plus a running carry; a dummy head keeps the output construction clean.\n\nConstraints:\n  1 <= length of each list <= 100\n  0 <= digit <= 9"
+LL_STATEMENTS["19"]="Given the head of a linked list, sort it in ascending order and return the sorted list.\n\nExample 1:  list = [4,2,1,3]    →  [1,2,3,4]\nExample 2:  list = [-1,5,3,4,0]  →  [-1,0,3,4,5]\n\nKey insight: find the middle (slow/fast), split into two halves, recursively sort each, then merge the two sorted halves with a dummy-node anchor.\n\nConstraints:\n  0 <= length <= 5*10^4"
+LL_STATEMENTS["21"]="Given the heads of two singly linked lists, return the node at which the two lists intersect, or None if they don't intersect. The two lists share no cycle.\n\nExample 1:  A = [4,1,8,4,5], B = [5,6,1,8,4,5], intersecting at the node with val 8  →  that node\nExample 2:  A = [2,6,4], B = [1,5]  →  None\n\nKey insight: two pointers redirect to the other list's head the moment they run out; they meet after len(A)+len(B) steps because both traverse the same total distance.\n\nConstraints:\n  The intersected part (if any) has the same length in both lists from that node onward."
+LL_STATEMENTS["30"]="A linked list of length n is given where each node has an additional random pointer that could point to any node in the list, or null. Construct a deep copy of the list.\n\nExample 1:  list = [[7,null],[13,0],[11,4],[10,2],[1,0]]  →  a fully independent deep copy with the same structure\n\nKey insight: interleave a clone after each original node, wire every clone's random pointer off the interleaved pair, then split the two lists apart. O(1) extra space.\n\nConstraints:\n  0 <= n <= 1000"
+LL_STATEMENTS["28"]="Given the head of a linked list and an integer k, rotate the list to the right by k places and return the new head.\n\nExample 1:  list = [1,2,3,4,5], k = 2  →  [4,5,1,2,3]\nExample 2:  list = [0,1,2], k = 4       →  [2,0,1]\n\nKey insight: find the length and the tail, normalise k to k % length, then cut the list at the new pivot and reconnect the old tail to the old head.\n\nConstraints:\n  0 <= length <= 500\n  0 <= k <= 2*10^9"
+LL_STATEMENTS["29"]="Given a linked list where every node has a next pointer and a child (down) pointer to another sorted linked list, flatten it into a single sorted linked list using only the next pointers.\n\nExample 1:  1 -> 2 with 2 having a child list 3 -> 4  →  1 -> 2 -> 3 -> 4 (all sorted, merged)\n\nKey insight: recursively flatten head.next first, then merge the current column (head down to head.down) with the already-flattened rest — reusing the merge-two-sorted routine.\n\nConstraints:\n  Every individual list (main and child) is itself sorted."
+
+# load_topic <bs|arr|str|ll> — point the active globals at the chosen topic's data.
 load_topic() {
   local key="${1:-bs}"
   case "${key}" in
@@ -404,6 +510,17 @@ load_topic() {
       PROBLEM_STATEMENTS=()
       local _k
       for _k in "${!STR_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${STR_STATEMENTS[${_k}]}"; done
+      ;;
+    ll|linked_list|6)
+      TOPIC="ll"; TOPIC_MOD="linked_list"; TOPIC_DIR="${SRC_DIR}/linked_list"
+      TOPIC_LABEL="Linked List"; TOPIC_STEP="6"
+      PROGRESS_FILE="${SCRIPT_DIR}/.dsa_progress_linked_list"
+      PROBLEMS=("${LL_PROBLEMS[@]}")
+      GROUP_NAMES=("${LL_GROUP_NAMES[@]}")
+      GROUP_DIRS=("${LL_GROUP_DIRS[@]}")
+      PROBLEM_STATEMENTS=()
+      local _k
+      for _k in "${!LL_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${LL_STATEMENTS[${_k}]}"; done
       ;;
     *)
       TOPIC="bs"; TOPIC_MOD="binary_search"; TOPIC_DIR="${SRC_DIR}/binary_search"
@@ -697,6 +814,67 @@ split_statement() {
   SPLIT_HINTS="${SPLIT_HINTS%$'\n'}"
 }
 
+# Topic-specific type definitions shared by every generated file for that
+# topic. Only Linked List needs this today — its node shapes (singly, doubly,
+# random-pointer, multi-level) recur across problems, so every generated file
+# gets the full set rather than re-deriving one per problem. Unused ones are
+# harmless: #![allow(dead_code)] already covers them.
+topic_preamble() {
+  if [[ "${TOPIC_MOD}" == "linked_list" ]]; then
+    cat <<'EOF'
+// Shared node types for this topic — LeetCode's own Rust ListNode plus the
+// three extra shapes DLL / clone-with-random / flatten problems need.
+
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct ListNode {
+    pub val: i32,
+    pub next: Option<Box<ListNode>>,
+}
+
+impl ListNode {
+    #[inline]
+    pub fn new(val: i32) -> Self {
+        ListNode { next: None, val }
+    }
+}
+
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
+// `next` owns forward; `prev` is a non-owning back-link (Weak) so the two
+// directions never fight over ownership of the same node.
+pub struct DoublyListNode {
+    pub val: i32,
+    pub next: Option<Rc<RefCell<DoublyListNode>>>,
+    pub prev: Option<Weak<RefCell<DoublyListNode>>>,
+}
+
+impl DoublyListNode {
+    pub fn new(val: i32) -> Rc<RefCell<DoublyListNode>> {
+        Rc::new(RefCell::new(DoublyListNode { val, next: None, prev: None }))
+    }
+}
+
+// Clone-with-random-pointer: `random` may alias any node (including itself or
+// a later node), so it can't be owned — Rc<RefCell<_>> instead of Box.
+pub struct RandomListNode {
+    pub val: i32,
+    pub next: Option<Rc<RefCell<RandomListNode>>>,
+    pub random: Option<Rc<RefCell<RandomListNode>>>,
+}
+
+// Flatten a Multilevel List: `child` is exclusively owned (no aliasing), so
+// plain Box works here, same as ListNode.
+pub struct MultiLevelNode {
+    pub val: i32,
+    pub next: Option<Box<MultiLevelNode>>,
+    pub child: Option<Box<MultiLevelNode>>,
+}
+
+EOF
+  fi
+}
+
 # ─── Rust Template Generator ─────────────────────────────────────────────────
 create_rust_template() {
   local p="${1}" platform="${2:-LC}"
@@ -742,6 +920,7 @@ create_rust_template() {
     echo ""
     echo "#![allow(dead_code)]"
     echo ""
+    topic_preamble
     echo "pub struct Solution;"
     echo ""
     echo "impl Solution {"
@@ -818,7 +997,7 @@ get_lang_file() {
 # A minimal, language-appropriate skeleton emitted below the header comment.
 lang_skeleton() {
   case "${1}" in
-    "C++")              printf 'class Solution {\npublic:\n    // TODO: implement\n};\n' ;;
+    "C++")              printf '#include <bits/stdc++.h>\nusing namespace std;\n\nclass Solution {\npublic:\n    // TODO: implement\n};\n' ;;
     "Java"|"Kotlin"|"Swift") printf 'class Solution {\n    // TODO: implement\n}\n' ;;
     "C#")               printf 'public class Solution {\n    // TODO: implement\n}\n' ;;
     "Python3"|"Python") printf 'class Solution:\n    # TODO: implement\n    pass\n' ;;
@@ -1049,6 +1228,16 @@ print_study_order() {
     printf '  %bProblems 10,11%b     Parsing / simulation (atoi is edge-case heavy)\n' "${YELLOW}" "${NC}"
     printf '  %bProblems 12,13,14%b  Substring problems (atMost-K, expand around center)\n' "${RED}" "${NC}"
     printf '  %b(Step 18 deferred)%b Advanced strings (KMP, Z-function, Rabin-Karp) — after Tries and DP\n' "${DIM}" "${NC}"
+  elif [[ "${TOPIC}" == "ll" ]]; then
+    printf '  %bProblems 01-05%b     Singly LL basics — pointer rewiring, dummy node trick\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 06-08%b     Doubly LL basics — prev/next wiring\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 09,12,13,14,18,17,15%b  Slow/fast pointer family — do all seven together, same mental model\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 10,11,27%b  Reversal family — three-pointer skeleton (iterative + recursive), then K-group\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 16,20,22%b  Partition / segregation — two-chain, three-chain, reverse+carry\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 24,25,26%b  DLL medium/hard — delete-by-key, sorted two-pointer, dedup\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 23,19%b     Merge/sort family — add-two-numbers, then merge sort on a list\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 21,30%b     Intersection & clone — redirect trick, interleave trick\n' "${RED}" "${NC}"
+    printf '  %bProblems 28,29%b     Hard — rotate (find tail + reconnect), flatten (recursive merge) — last\n' "${RED}" "${NC}"
   else
     printf '  %bProblems 1-7%b    Bounds & occurrences — master the two templates\n' "${GREEN}" "${NC}"
     printf '  %bProblems 8-13%b   Rotated arrays, peak, single element\n' "${GREEN}" "${NC}"
@@ -1548,6 +1737,16 @@ show_cheatsheet() {
       "6. Exactly K -> AtMost K|Count substrings with exactly K distinct chars|count(exactly K) = count(atmost K) - count(atmost K-1)"
     )
     printf '  %b(Step 18 patterns — KMP/LPS, Z-function, Rabin-Karp — are deferred; see StringsReadme.md)%b\n\n' "${DIM}" "${NC}"
+  elif [[ "${TOPIC}" == "ll" ]]; then
+    patterns=(
+      "1. Three-Pointer Reversal|Reverse a list / partial reversal / K-groups|prev,curr=None,head; loop: next=curr.next; curr.next=prev; prev=curr; curr=next"
+      "2. Slow / Fast Pointer|Find middle / detect cycle / palindrome check|slow+=1, fast+=2 per step; fast (or fast.next) hitting null means slow is at the middle"
+      "3. Floyd's Cycle Detection|Detect a cycle / find its start / its length|slow==fast means a cycle; then reset slow=head and advance both by 1 to find the entry"
+      "4. Dummy Node Anchor|Any list-building or head-mutating operation|dummy.next=head; operate through dummy so deleting/replacing the real head is never a special case"
+      "5. Merge Two Sorted (Dummy Anchor)|Building block inside Sort LL (merge sort)|attach the smaller of l1,l2 to curr.next each step; curr.next=whichever list remains"
+      "6. Fast-N-Ahead|Remove the Nth node / delete the middle node|advance fast n steps first (or 1 step for delete-middle), then move slow and fast together until fast falls off the end"
+      "7. Two/Three-Chain Partition|Segregate odd/even nodes / sort a list of 0s,1s,2s|maintain separate chain heads+tails per bucket while traversing once, then splice the chains together in order"
+    )
   else
     patterns=(
       "1. Exact Search (classic)|Find target X in sorted array|lo=0 hi=n-1; while lo<=hi; if arr[mid]==x return; else shrink"
@@ -1587,7 +1786,7 @@ main_menu() {
     echo "  [4]  Show All Problems"
     echo "  [5]  Progress Dashboard"
     echo "  [6]  Pattern Cheatsheet"
-    echo "  [7]  Switch Topic          (Arrays ⇄ Binary Search ⇄ Strings)"
+    echo "  [7]  Switch Topic          (Arrays ⇄ Binary Search ⇄ Strings ⇄ Linked List)"
     echo "  [0]  Exit"
     echo ""
     local choice
@@ -1645,6 +1844,7 @@ switch_topic() {
   printf '  [1]  %bArrays%b          Step 3      · %s problems\n' "${CYAN}" "${NC}" "${#ARR_PROBLEMS[@]}"
   printf '  [2]  %bBinary Search%b   Step 4      · %s problems\n' "${CYAN}" "${NC}" "${#BS_PROBLEMS[@]}"
   printf '  [3]  %bStrings%b        Step 5      · %s problems\n' "${CYAN}" "${NC}" "${#STR_PROBLEMS[@]}"
+  printf '  [4]  %bLinked List%b    Step 6      · %s problems\n' "${CYAN}" "${NC}" "${#LL_PROBLEMS[@]}"
   echo "  [0]  Back"
   echo ""
   local c
@@ -1653,20 +1853,21 @@ switch_topic() {
     1) activate_topic arr ;;
     2) activate_topic bs ;;
     3) activate_topic str ;;
+    4) activate_topic ll ;;
     *) return ;;
   esac
 }
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────
 # Usage: dsa_tool.sh [topic] [mode]
-#   topic (optional): arr | arrays | bs | binary_search | str | strings
+#   topic (optional): arr | arrays | bs | binary_search | str | strings | ll | linked_list
 #   mode  (optional): next | group | difficulty | all | dashboard | cheatsheet
 # tasks.json passes just a mode, so a bare first arg is treated as the mode and
 # the topic falls back to the last-used one (.dsa_topic), defaulting to bs.
 main() {
   local first="${1:-}" topic_arg="" mode=""
   case "${first}" in
-    arr|arrays|bs|binary_search|str|strings) topic_arg="${first}"; mode="${2:-}" ;;
+    arr|arrays|bs|binary_search|str|strings|ll|linked_list) topic_arg="${first}"; mode="${2:-}" ;;
     *)                                       mode="${first}" ;;
   esac
 

@@ -43,8 +43,8 @@ src/
 ## Tooling
 
 A CLI tool (`dsa_tool.sh`) is included. It is **multi-topic** — pick Arrays, Binary
-Search, or Strings and each keeps its own module tree and its own progress file;
-the last-used topic is remembered.
+Search, Strings, or Linked List and each keeps its own module tree and its own
+progress file; the last-used topic is remembered.
 
 - Switch topic from the menu, or pass it as the first argument
 - Browse problems by **group/cluster** or **difficulty**
@@ -58,6 +58,7 @@ the last-used topic is remembered.
 ./dsa_tool.sh arrays dashboard   # Arrays progress
 ./dsa_tool.sh bs next            # Continue Binary Search
 ./dsa_tool.sh strings next       # Continue Strings
+./dsa_tool.sh ll next            # Continue Linked List
 ./dsa_tool.sh dashboard          # View progress (current topic)
 ./dsa_tool.sh group              # Browse by group / cluster
 ./dsa_tool.sh cheatsheet         # Pattern reference for the current topic
@@ -70,6 +71,7 @@ the last-used topic is remembered.
 | 3 | Arrays | 40 | [ArraysReadme.md](ArraysReadme.md) | 🚧 Scaffolded & CLI-tracked — solving in progress |
 | 4 | Binary Search | 32 | [BSReadme.md](BSReadme.md) | ✅ Solved in Rust — CLI-tracked |
 | 5 | Strings | 15 | [StringsReadme.md](StringsReadme.md) | ✅ Solved (C++) — CLI-tracked (Step 18 deferred until after Tries/DP) |
+| 6 | Linked List | 30 | [LinkedList.md](LinkedList.md) | 🚧 Scaffolded & CLI-tracked — solving in progress |
 
 > Each guide is a self-contained study companion: per-problem core ideas, LeetCode/GFG links, pattern cheatsheets, and a recommended solve order. All topics have a live `src/` module tree and per-topic progress tracking via `dsa_tool.sh` — generate each problem's Rust template on demand as you start it.
 
