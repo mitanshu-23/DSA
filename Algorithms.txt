@@ -239,6 +239,31 @@ Expand Around Center (Palindrome)
 - Longest Palindromic Substring  —  src/strings/group_06/medium/p13_longest_palindromic_substring.cpp (two separate passes — odd-length centers, then even-length centers — expanding outward while characters match; Theta(n^2) worst case, O(1) extra space. File also carries SolutionStandard, the textbook single-loop version over 2n-1 virtual centers (same complexity), and SolutionManacher, the O(n) linear-time algorithm using a mirror-radius array — both verified against a brute-force oracle)
 
 
+--------------------------------------------------------
+Linked List Construction (running tail pointer)
+--------------------------------------------------------
+- Introduction to Singly LL / Insert at Head  —  src/linked_list/group_01/easy/p01_introduction_to_singly_ll_insert_at_head.cpp (single pass over the array: track `head` and a running `last` tail pointer, append each new node to `last->next`. note: the problem-statement header says "insert at head," but the actual GFG judge behind this link is "array → linked list" (`arrayToList`) — the code correctly targets the real judge problem, the mismatch is only in the scaffolded description text)
+- Introduction to DLL / Insert Before Head  —  src/linked_list/group_02/easy/p06_introduction_to_dll_insert_before_head.cpp (identical running-tail pattern as p01, extended to also wire each new node's `prev` back to the tail. note: header now carries the real GFG statement "Doubly Linked List from an Array" with its actual constraint `1 <= length <= 10^5` — an initial review flagged `arr[0]` as a crash on empty input, confirmed via AddressSanitizer, but that's moot once the real non-empty constraint is in effect)
+
+
+--------------------------------------------------------
+Delete Node via Value-Copy (no predecessor access)
+--------------------------------------------------------
+- Deletion of the Head of LL  —  src/linked_list/group_01/easy/p03_deletion_of_the_head_of_ll.cpp (classic LC 237 trick: with no way to reach the predecessor, copy the next node's value into the current node, then splice the next node out. Only valid because the problem guarantees the given node is never the last one — verified by test: deleting the node holding 5 from `4->5->1->9` yields `4->1->9`)
+
+
+--------------------------------------------------------
+Doubly Linked List Reversal (swap prev/next per node)
+--------------------------------------------------------
+- Reverse a Doubly Linked List  —  src/linked_list/group_02/medium/p08_reverse_a_doubly_linked_list.cpp (walk the list once, swap each node's `next`/`prev`, return the old tail as the new head. note: the first version never advanced past the head node — it saved `next` into a temp but then checked the loop condition against `temp->next`, which had just been overwritten by the swap, so only the head node was ever touched and the function was a complete no-op (verified: reversing `1<->2<->3<->4<->5` returned it unchanged). Fixed 2026-10-06 by advancing `temp` to the saved `next` pointer at the end of the loop body; re-verified correct — forward AND backward traversal — on odd-length, even-length, 2-node, and 1-node lists)
+
+
+--------------------------------------------------------
+Slow / Fast Pointer (Floyd's Tortoise and Hare)
+--------------------------------------------------------
+- Find the Middle of a Linked List  —  src/linked_list/group_03/easy/p09_find_the_middle_of_a_linked_list.cpp (slow advances 1 step, fast advances 2; when fast (or fast->next) hits null, slow is at the middle. Returns the second of the two middle nodes for even-length lists, matching LC 876's definition exactly — verified for both odd and even lengths. This is the anchor pattern for the rest of the Linked List slow/fast cluster: cycle detection, palindrome check, delete-the-middle-node, remove-nth-from-end)
+
+
 ========================================================
   Other techniques (no specific named algorithm)
 ========================================================
@@ -247,11 +272,15 @@ Expand Around Center (Palindrome)
 - Check if the Array is Sorted  —  src/arrays/group_01/easy/p03_check_if_the_array_is_sorted.rs (adjacent-pair scan)
 - Maximum Consecutive Ones  —  src/arrays/group_03/easy/p11_maximum_consecutive_ones.rs (single-pass running count)
 - Largest Odd Number in a String  —  src/strings/group_01/easy/p03_largest_odd_number_in_a_string.cpp (right-to-left scan, stop at the first odd digit)
+- Find the Length of a Linked List  —  src/linked_list/group_01/easy/p04_find_the_length_of_a_linked_list.cpp (single-pass counter; walks to null)
+- Search in a Linked List  —  src/linked_list/group_01/medium/p05_search_in_a_linked_list.cpp (linear scan, early-exit the moment a node matches)
+- Delete Head of Doubly Linked List  —  src/linked_list/group_02/easy/p07_delete_head_of_doubly_linked_list.cpp (advance past the old head, clear the new head's `prev`. note: an initial version crashed — null-dereferenced `head->next->prev` on a single-node list, confirmed via an actual segfault — resolved once the problem's real constraint was clarified to `size >= 2`, which puts that input out of scope)
 
 
 ========================================================
   Not yet implemented (empty / stub / broken)
 ========================================================
+- Insertion at the Head of a Linked List  —  src/linked_list/group_01/easy/p02_insertion_at_the_head_of_a_linked_list.cpp  (empty `// TODO: implement` stub; same operation as p01, meant to be practiced standalone)
 - Find the Repeating and Missing Number (.cpp)  —  src/arrays/group_03/hard/p36_find_the_repeating_and_missing_number.cpp  (TODO; .rs version is done)
 - Largest Subarray with Sum 0 (.rs)  —  src/arrays/group_04/hard/p32_largest_subarray_with_sum_0.rs  (stub; .cpp version is done)
 - 4Sum Problem (.rs)  —  src/arrays/group_05/hard/p31_4sum_problem.rs  (broken stub; .cpp version is done)
