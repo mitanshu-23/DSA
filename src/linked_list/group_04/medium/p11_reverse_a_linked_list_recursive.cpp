@@ -40,6 +40,7 @@ public:
 
     ListNode *reverse = reverseRecursive(curr->next);
     reverse->next = curr;
+    curr->next = nullptr;
     return curr;
   }
 
@@ -48,8 +49,7 @@ public:
       return head;
     }
 
-    ListNode *reverse = reverseRecursive(head);
-    reverse->next = nullptr;
+    reverseRecursive(head);
     return reverseHead;
   }
 };

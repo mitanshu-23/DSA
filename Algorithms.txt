@@ -262,6 +262,29 @@ Doubly Linked List Reversal (swap prev/next per node)
 Slow / Fast Pointer (Floyd's Tortoise and Hare)
 --------------------------------------------------------
 - Find the Middle of a Linked List  —  src/linked_list/group_03/easy/p09_find_the_middle_of_a_linked_list.cpp (slow advances 1 step, fast advances 2; when fast (or fast->next) hits null, slow is at the middle. Returns the second of the two middle nodes for even-length lists, matching LC 876's definition exactly — verified for both odd and even lengths. This is the anchor pattern for the rest of the Linked List slow/fast cluster: cycle detection, palindrome check, delete-the-middle-node, remove-nth-from-end)
+- Detect a Cycle in a Linked List  —  src/linked_list/group_03/medium/p12_detect_a_cycle_in_a_linked_list.cpp (reference form of Floyd's phase 1: fast gains 2 steps to slow's 1, net gap closure of 1 per iteration once both are inside the cycle, so they must coincide within at most one lap)
+- Find the Starting Point of a Cycle  —  src/linked_list/group_03/medium/p13_find_the_starting_point_of_a_cycle.cpp (phase 2: after the phase-1 meeting point, reset one pointer to head and advance both by 1 step — they meet at the cycle entry because distance(head, entry) ≡ distance(meeting point, entry) mod cycle-length)
+- Length of Loop in LL  —  src/linked_list/group_03/medium/p14_length_of_loop_in_ll.cpp (from the phase-1 meeting point, hold one pointer fixed and count steps until the other returns to it. note: the first version advanced `fast` by only one step instead of two in phase 1, so `slow == fast` was true after the very first iteration on ANY list with 2+ nodes regardless of a real cycle — confirmed crashing on a plain acyclic `1->2->3`. Fixed 2026-10-08 — `fast = fast->next->next;` — re-verified on acyclic, cyclic, single-node, and empty lists)
+- Delete the Middle Node of LL  —  src/linked_list/group_03/medium/p18_delete_the_middle_node_of_ll.cpp (same slow/fast skeleton, with a third pointer trailing one step behind slow so the predecessor is available to splice out; correctly returns null for a single-node list rather than the untouched node)
+
+
+--------------------------------------------------------
+Fast Pointer N-Ahead (fixed-gap two-pointer)
+--------------------------------------------------------
+- Remove Nth Node from the End of a List  —  src/linked_list/group_03/medium/p17_remove_nth_node_from_the_end_of_a_list.cpp (walk a pointer n steps ahead first; if that runs off the end exactly, the head itself is the target; otherwise advance both pointers together until the lead one reaches the last node, leaving the trailing one just before the target)
+
+
+--------------------------------------------------------
+Three-Pointer / Recursive Linked List Reversal
+--------------------------------------------------------
+- Reverse a Linked List (Iterative)  —  src/linked_list/group_04/medium/p10_reverse_a_linked_list_iterative.cpp (three-pointer rewiring, one link per step. note: the empty-list guard originally checked `head->next` without first checking `head` itself, crashing on `reverseList(nullptr)` — confirmed by an actual segfault. Fixed 2026-10-08 by adding the `head == nullptr` check; re-verified on empty, single-node, and multi-node lists)
+- Reverse a Linked List (Recursive)  —  src/linked_list/group_04/medium/p11_reverse_a_linked_list_recursive.cpp (recurse to the tail first, then hook `head.next.next = head` and cut `head.next` on the way back up; the new head is threaded back via a class-member side-channel set once in the base case, rather than through the recursive return value — correct, but see the file's approach note for a variant that returns the new head directly instead)
+
+
+--------------------------------------------------------
+Auxiliary Stack (LIFO comparison)
+--------------------------------------------------------
+- Check if LL is Palindrome  —  src/linked_list/group_03/medium/p15_check_if_ll_is_palindrome.cpp (push the first half's values onto a stack, skip the middle node on odd length, then compare the second half against values popped off the stack — correct, O(n) time / O(n) space; trades the O(1)-space "reverse the second half in place" standard approach for not needing to mutate-then-restore the list's links)
 
 
 ========================================================
