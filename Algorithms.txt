@@ -279,12 +279,19 @@ Three-Pointer / Recursive Linked List Reversal
 --------------------------------------------------------
 - Reverse a Linked List (Iterative)  —  src/linked_list/group_04/medium/p10_reverse_a_linked_list_iterative.cpp (three-pointer rewiring, one link per step. note: the empty-list guard originally checked `head->next` without first checking `head` itself, crashing on `reverseList(nullptr)` — confirmed by an actual segfault. Fixed 2026-10-08 by adding the `head == nullptr` check; re-verified on empty, single-node, and multi-node lists)
 - Reverse a Linked List (Recursive)  —  src/linked_list/group_04/medium/p11_reverse_a_linked_list_recursive.cpp (recurse to the tail first, then hook `head.next.next = head` and cut `head.next` on the way back up; the new head is threaded back via a class-member side-channel set once in the base case, rather than through the recursive return value — correct, but see the file's approach note for a variant that returns the new head directly instead)
+- Reverse Nodes in K-Group  —  src/linked_list/group_04/hard/p27_reverse_nodes_in_k_group.cpp (count k nodes ahead before committing to reverse a group — a short final group is left untouched; each full group is reversed via the same recursive skeleton as p11, applied per-group rather than to the whole list, then the caller relinks groups using the saved original head/tail of each. note: the recursive helper's return value is actually dead code — the in-group reversal happens entirely as a side effect of the recursion, and the caller re-derives the correct links itself from the group's original head/tail; functionally correct, verified on both of the file's own examples plus k=1, k=length, and a single node — see the approach note for the return-value subtlety and a cleaner variant)
 
 
 --------------------------------------------------------
 Auxiliary Stack (LIFO comparison)
 --------------------------------------------------------
 - Check if LL is Palindrome  —  src/linked_list/group_03/medium/p15_check_if_ll_is_palindrome.cpp (push the first half's values onto a stack, skip the middle node on odd length, then compare the second half against values popped off the stack — correct, O(n) time / O(n) space; trades the O(1)-space "reverse the second half in place" standard approach for not needing to mutate-then-restore the list's links)
+
+
+--------------------------------------------------------
+Two-Chain Partition (index parity)
+--------------------------------------------------------
+- Segregate Odd and Even Nodes in LL  —  src/linked_list/group_05/medium/p16_segregate_odd_and_even_nodes_in_ll.cpp (maintain separate odd-chain and even-chain tail pointers while traversing once, alternating which chain each node is appended to, then splice the even chain onto the end of the odd chain; O(1) extra space, matching the problem's own requirement. Verified against both of the file's own examples plus empty/1-node/2-node lists)
 
 
 ========================================================
