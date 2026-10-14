@@ -20,6 +20,7 @@ Boyer-Moore (Moore's) Voting Algorithm
 Dutch National Flag Algorithm
 --------------------------------------------------------
 - Sort Array of 0s, 1s, and 2s  —  src/arrays/group_05/medium/p15_sort_array_of_0s_1s_and_2s.cpp
+- Sort a LL of 0s, 1s, and 2s  —  src/linked_list/group_05/medium/p20_sort_a_ll_of_0s_1s_and_2s.cpp (same three-way partition, on linked-list chains instead of array swaps: build separate 0/1/2 chains in one pass by detaching and appending each node, then splice 0-chain -> 1-chain -> 2-chain, handling every combination of empty buckets explicitly. O(n) time, O(1) extra space — verified against every missing-bucket combination)
 
 
 --------------------------------------------------------
@@ -280,6 +281,7 @@ Three-Pointer / Recursive Linked List Reversal
 - Reverse a Linked List (Iterative)  —  src/linked_list/group_04/medium/p10_reverse_a_linked_list_iterative.cpp (three-pointer rewiring, one link per step. note: the empty-list guard originally checked `head->next` without first checking `head` itself, crashing on `reverseList(nullptr)` — confirmed by an actual segfault. Fixed 2026-10-08 by adding the `head == nullptr` check; re-verified on empty, single-node, and multi-node lists)
 - Reverse a Linked List (Recursive)  —  src/linked_list/group_04/medium/p11_reverse_a_linked_list_recursive.cpp (recurse to the tail first, then hook `head.next.next = head` and cut `head.next` on the way back up; the new head is threaded back via a class-member side-channel set once in the base case, rather than through the recursive return value — correct, but see the file's approach note for a variant that returns the new head directly instead)
 - Reverse Nodes in K-Group  —  src/linked_list/group_04/hard/p27_reverse_nodes_in_k_group.cpp (count k nodes ahead before committing to reverse a group — a short final group is left untouched; each full group is reversed via the same recursive skeleton as p11, applied per-group rather than to the whole list, then the caller relinks groups using the saved original head/tail of each. note: the recursive helper's return value is actually dead code — the in-group reversal happens entirely as a side effect of the recursion, and the caller re-derives the correct links itself from the group's original head/tail; functionally correct, verified on both of the file's own examples plus k=1, k=length, and a single node — see the approach note for the return-value subtlety and a cleaner variant)
+- Add One to a Number Represented by LL  —  src/linked_list/group_05/medium/p22_add_one_to_a_number_represented_by_ll.cpp (reversal used as a building block rather than the end goal: reverse to get least-significant-digit-first, walk zeroing every 9 while propagating the +1 carry until a non-9 digit absorbs it, prepend a new leading node if the carry runs off the end, then reverse back. Verified on the carry-overflow case, a partial-carry case, a no-carry case, and the degenerate `[0]` input)
 
 
 --------------------------------------------------------
