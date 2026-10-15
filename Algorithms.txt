@@ -296,6 +296,19 @@ Two-Chain Partition (index parity)
 - Segregate Odd and Even Nodes in LL  —  src/linked_list/group_05/medium/p16_segregate_odd_and_even_nodes_in_ll.cpp (maintain separate odd-chain and even-chain tail pointers while traversing once, alternating which chain each node is appended to, then splice the even chain onto the end of the odd chain; O(1) extra space, matching the problem's own requirement. Verified against both of the file's own examples plus empty/1-node/2-node lists)
 
 
+--------------------------------------------------------
+DLL In-Place Rewiring (prev/next kept consistent on both sides)
+--------------------------------------------------------
+- Delete All Occurrences of a Key in DLL  —  src/linked_list/group_06/hard/p24_delete_all_occurrences_of_a_key_in_dll.cpp (tracks the last KEPT node rather than the original predecessor, with a dedicated branch for skipping leading matches before any node has been kept yet — correctly collapses runs of consecutive matches and empties the list entirely when every node matches. Both next and prev links verified consistent by walking a result backward from its tail)
+- Remove Duplicates from Sorted DLL  —  src/linked_list/group_06/hard/p26_remove_duplicates_from_sorted_dll.cpp (adjacent-run scan exploiting sortedness: an inner loop skips an entire run of equal values before splicing `prev->next` past all of them at once, correctly collapsing a run of any length down to its first node. note: crashes on an empty list — `headRef->data` is dereferenced with no null check on the very first line, and the file's own constraints explicitly allow `0 <= length <= 300`; confirmed via an actual segfault. Needs a one-line `if (headRef == nullptr) return nullptr;` guard)
+
+
+--------------------------------------------------------
+Two-Pointer Narrowing on a Sorted DLL (both ends inward)
+--------------------------------------------------------
+- Find Pairs with Given Sum in Sorted DLL  —  src/linked_list/group_06/medium/p25_find_pairs_with_given_sum_in_sorted_dll.cpp (first/last pointers start at the two ends; move last backward when the sum is too high, first forward when too low, and move both inward on a match — breaking immediately once they'd cross or coincide. Matches both of the file's own examples and correctly excludes an odd list's middle element from pairing with itself. note: crashes on an empty list (`last->next` dereferenced with no null check before the main loop) — confirmed via an actual segfault; whether this is in-scope depends on the real GFG judge's constraint, which the stored problem statement doesn't pin down (unlike p06/p07, where the real constraint was later found to exclude the crashing input entirely). Also worth knowing: with duplicate values on both sides it reports one pair per two-pointer pass rather than every index-combination that happens to sum to target — this is the expected behavior of the canonical technique, not a divergence)
+
+
 ========================================================
   Other techniques (no specific named algorithm)
 ========================================================
