@@ -309,6 +309,12 @@ Two-Pointer Narrowing on a Sorted DLL (both ends inward)
 - Find Pairs with Given Sum in Sorted DLL  —  src/linked_list/group_06/medium/p25_find_pairs_with_given_sum_in_sorted_dll.cpp (first/last pointers start at the two ends; move last backward when the sum is too high, first forward when too low, and move both inward on a match — breaking immediately once they'd cross or coincide. Matches both of the file's own examples and correctly excludes an odd list's middle element from pairing with itself. note: crashes on an empty list (`last->next` dereferenced with no null check before the main loop) — confirmed via an actual segfault; whether this is in-scope depends on the real GFG judge's constraint, which the stored problem statement doesn't pin down (unlike p06/p07, where the real constraint was later found to exclude the crashing input entirely). Also worth knowing: with duplicate values on both sides it reports one pair per two-pointer pass rather than every index-combination that happens to sum to target — this is the expected behavior of the canonical technique, not a divergence)
 
 
+--------------------------------------------------------
+Merge Sort on a Linked List (position-counted, not physically split)
+--------------------------------------------------------
+- Sort a Linked List (Merge Sort)  —  src/linked_list/group_07/hard/p19_sort_a_linked_list_merge_sort.cpp (a non-textbook but correct variant: instead of physically cutting the list in half with `mid->next = nullptr`, recursion is driven entirely by 1-indexed `(start, end)` position ranges, and `merge` is told exactly how many nodes to consume from each side (`left_count`/`right_count`) rather than relying on `nullptr` termination — the stale `.next` pointers left over from before each merge are simply never read past their count, and `merge`'s own `prev->next = nullptr` at the end always fixes the final terminator. Verified against both of the file's own examples, a battery of edge cases (empty, single node, all-equal, already-sorted, reverse-sorted at odd and even lengths), and a 2000-trial randomized stress test against `std::sort` with zero mismatches)
+
+
 ========================================================
   Other techniques (no specific named algorithm)
 ========================================================
