@@ -315,6 +315,18 @@ Merge Sort on a Linked List (position-counted, not physically split)
 - Sort a Linked List (Merge Sort)  —  src/linked_list/group_07/hard/p19_sort_a_linked_list_merge_sort.cpp (a non-textbook but correct variant: instead of physically cutting the list in half with `mid->next = nullptr`, recursion is driven entirely by 1-indexed `(start, end)` position ranges, and `merge` is told exactly how many nodes to consume from each side (`left_count`/`right_count`) rather than relying on `nullptr` termination — the stale `.next` pointers left over from before each merge are simply never read past their count, and `merge`'s own `prev->next = nullptr` at the end always fixes the final terminator. Verified against both of the file's own examples, a battery of edge cases (empty, single node, all-equal, already-sorted, reverse-sorted at odd and even lengths), and a 2000-trial randomized stress test against `std::sort` with zero mismatches)
 
 
+--------------------------------------------------------
+Linked List Intersection (length difference / redirect to other head)
+--------------------------------------------------------
+- Find the Intersection of Two Linked Lists  —  src/linked_list/group_08/medium/p21_find_the_intersection_of_two_linked_lists.cpp (count both lengths, advance the longer list's pointer by the difference, then walk both together until they coincide. note: the "advance by the difference" loop originally never decremented its counter (`while (diff > 0) { tempA = tempA->next; }` — no `diff--`), so it ran off the end of the list and crashed on ANY pair of different-length lists, including the file's own Example 1 (lengths 5 and 6); confirmed via an actual segfault, then fixed 2026-10-19 by adding `diff--;` to both branches — re-verified on both of the file's own examples, equal-length, and B-longer-than-A. The redirect-to-other-head two-pointer trick (`a = a ? a->next : headB; b = b ? b->next : headA;` until `a == b`) is the equivalent standard technique that needs no length pre-computation at all — also verified correct)
+
+
+--------------------------------------------------------
+Interleave Clone (random-pointer linked list)
+--------------------------------------------------------
+- Clone a Linked List with Random Pointer  —  src/linked_list/group_08/hard/p30_clone_a_linked_list_with_random_pointer.cpp (hashmap approach: associate each original node with its clone, then resolve `random` through that map. note: the first pass's loop — building the clone chain — originally never advanced its own loop variable (`while (given_temp != nullptr) { ... }` with no `given_temp = given_temp->next;`), so it ran forever allocating nodes for any list with 2+ nodes; confirmed hanging (killed after a 5s timeout), then fixed 2026-10-19 by adding the missing advance — re-verified on the file's own example (correct values, correct random-pointer targets, a genuine deep copy), a single-node list, and an empty list. The file's own hints name the asymptotically-better interleave trick (clone spliced in directly after each original, random wired off the interleaved pair, then the two lists split apart) as the intended O(1)-extra-space technique — also implemented and verified against the file's own example: same results, with the original list's links fully restored afterward)
+
+
 ========================================================
   Other techniques (no specific named algorithm)
 ========================================================
