@@ -327,6 +327,18 @@ Interleave Clone (random-pointer linked list)
 - Clone a Linked List with Random Pointer  —  src/linked_list/group_08/hard/p30_clone_a_linked_list_with_random_pointer.cpp (hashmap approach: associate each original node with its clone, then resolve `random` through that map. note: the first pass's loop — building the clone chain — originally never advanced its own loop variable (`while (given_temp != nullptr) { ... }` with no `given_temp = given_temp->next;`), so it ran forever allocating nodes for any list with 2+ nodes; confirmed hanging (killed after a 5s timeout), then fixed 2026-10-19 by adding the missing advance — re-verified on the file's own example (correct values, correct random-pointer targets, a genuine deep copy), a single-node list, and an empty list. The file's own hints name the asymptotically-better interleave trick (clone spliced in directly after each original, random wired off the interleaved pair, then the two lists split apart) as the intended O(1)-extra-space technique — also implemented and verified against the file's own example: same results, with the original list's links fully restored afterward)
 
 
+--------------------------------------------------------
+Rotate via Split-and-Reattach (length normalisation + pivot cut)
+--------------------------------------------------------
+- Rotate a Linked List  —  src/linked_list/group_09/hard/p28_rotate_a_linked_list.cpp (count the length, normalise k to k % length, walk to the new pivot, then join the old tail back to the old head. note: two confirmed bugs, both unfixed as of 2026-10-21 — (1) `k % len` divides by zero on an empty list despite the file's own constraint explicitly allowing `0 <= length <= 500`, confirmed via a SIGFPE; (2) the node just before the pivot is never cut from the pivot, so the "rotated" list loops back through that stale link and never terminates — confirmed by printing a capped traversal of the file's own Example 1, which cycles `4 5 1 2 3 4 5 1 2 3 ...` instead of ending after `4 5 1 2 3`. The values/order ARE correct; only the missing empty-guard and the missing cut need fixing)
+
+
+--------------------------------------------------------
+Flatten via Repeated Pairwise Merge vs. Divide-and-Conquer
+--------------------------------------------------------
+- Flatten a Linked List (Next + Down Pointers)  —  src/linked_list/group_09/hard/p29_flatten_a_linked_list_next_down_pointers.cpp (two implementations in one file. `Solution` — an insertion-sort-like approach: repeatedly merge the rightmost two columns of the `next`-chain, len-1 times. note: two confirmed bugs, both unfixed as of 2026-10-21 — (1) `flatten`'s length-counting loop never advances its cursor, so it never terminates for any non-empty list (confirmed hanging); (2) `flatten_two`'s merge loop uses `||` instead of `&&` with no drain loops afterward, so it dereferences a null pointer the moment one side is exhausted while the other still has nodes (confirmed via an isolated segfault). Patching both (advance the cursor; `&&` plus two drain loops, mirroring `Solution2`) makes the overall left-to-right merge approach fully correct — verified against a 3-column case, a single column, the file's own example, and a 4-column uneven-length case. `Solution2` — divide-and-conquer (split the `next`-chain with slow/fast, recursively flatten each half, merge): correct as written, verified against the same four cases, and asymptotically better than `Solution` once fixed — O(n log k) vs. roughly O(k²) in the number of columns k)
+
+
 ========================================================
   Other techniques (no specific named algorithm)
 ========================================================
