@@ -533,4 +533,4 @@ and DP.
 
 | ← Previous | Index | Next → |
 |---|---|---|
-| [Step 4 — Binary Search](BSReadme.md) | [All Topics](README.md) | *Next step coming soon* |
+| [Step 4 — Binary Search](BSReadme.md) | [All Topics](README.md) | [Step 6 — Linked List](LinkedList.md) |

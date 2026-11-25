@@ -1,0 +1,9 @@
+# Style for the C++ solution files in this repo.
+#
+# The existing .cpp files were already written in clang-format's LLVM default
+# style (2-space indent, 80-column limit), so this pins that rather than
+# introducing a new one — reformatting is a no-op on committed code.
+#
+# Note: this file only takes effect if your editor's C++ formatter is told to
+# use it. See .vscode/settings.json in this repo.
+BasedOnStyle: LLVM
