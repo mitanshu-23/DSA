@@ -76,9 +76,20 @@ right after the file appears mid-conversation).
 
 1. Read the user's `## My Approach` **and** the actual solution code for that problem.
 2. **Correctness:** trace edge cases, look for bugs / off-by-one / overflow / UB.
-3. **Proof:** give a short justification (loop invariant or reasoning) for *why* the
-   approach is correct, plus **time & space complexity**. Where useful, include a
-   concrete trace or test evidence as "proof".
+3. **Proof (mathematical, not just tests):** for the user's approach **and**, when
+   it differs, the standard/optimal one, give a real proof of *why* it is correct:
+   - state the claim precisely (what the function/loop returns or maintains);
+   - prove it with the fitting tool — induction (on n, input size, or recursion
+     depth), a loop invariant (initialisation → maintenance → termination), an
+     exchange/greedy-choice argument, a recurrence (optimal substructure +
+     overlapping subproblems for DP), or a bijection/counting argument;
+   - cover termination (what strictly decreases) and the base case(s);
+   - derive **time & space complexity** from the recurrence or counting
+     (e.g. T(n) = T(n/2) + O(1) ⇒ O(log n)), not just state it;
+   - if the approach is wrong, give the counterexample and point to the exact
+     proof step that fails.
+   Test evidence (traces, stress tests) goes **after** the proof as confirmation,
+   never in place of it.
 4. **Comparison:** compare the user's approach to the standard/optimal approach —
    what's the same, what's better/worse, trade-offs.
 5. **Improvements:** concrete, actionable suggestions; also explicitly call out
