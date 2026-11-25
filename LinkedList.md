@@ -821,3 +821,6 @@ Problems where implementation details fade fastest: **13 (Floyd's phase 2)**, **
 | Striver's A2Z Sheet (updated) | [takeuforward.org](https://takeuforward.org/prep-hub/strivers-a2z-dsa-sheet) |
 | YouTube — LL Playlist | [takeUforward Channel](https://www.youtube.com/@takeUforward) |
 | takeUforward LL Articles | [takeuforward.org/linked-list](https://takeuforward.org/blogs/linked-list) |
+---
+
+**Next →** [Steps 7 + 16 — Recursion & DP](RecursionDP.md)

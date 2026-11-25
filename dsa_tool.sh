@@ -2,11 +2,11 @@
 # =============================================================================
 #  DSA Practice Tool — Multi-Topic Edition
 #  Striver's A2Z DSA Sheet · Step 3 Arrays (40) · Step 4 Binary Search (32)
-#  · Step 5 + Step 18 Strings (24) · Step 6 Linked List (30)
+#  · Step 5 + Step 18 Strings (24) · Step 6 Linked List (30) · Step 7 + Step 16 Recursion & DP (73)
 # =============================================================================
 #  Features
 #  --------
-#  • Pick a topic (Arrays / Binary Search / Strings / Linked List) — each has its own problems,
+#  • Pick a topic (Arrays / Binary Search / Strings / Linked List / Recursion & DP) — each has its own problems,
 #    its own src/ module tree, and its own progress file. The last topic is
 #    remembered.
 #  • Browse every problem by Group/Cluster or by Difficulty (Easy→Medium→Hard)
@@ -485,7 +485,211 @@ LL_STATEMENTS["30"]="A linked list of length n is given where each node has an a
 LL_STATEMENTS["28"]="Given the head of a linked list and an integer k, rotate the list to the right by k places and return the new head.\n\nExample 1:  list = [1,2,3,4,5], k = 2  →  [4,5,1,2,3]\nExample 2:  list = [0,1,2], k = 4       →  [2,0,1]\n\nKey insight: find the length and the tail, normalise k to k % length, then cut the list at the new pivot and reconnect the old tail to the old head.\n\nConstraints:\n  0 <= length <= 500\n  0 <= k <= 2*10^9"
 LL_STATEMENTS["29"]="Given a linked list where every node has a next pointer and a child (down) pointer to another sorted linked list, flatten it into a single sorted linked list using only the next pointers.\n\nExample 1:  1 -> 2 with 2 having a child list 3 -> 4  →  1 -> 2 -> 3 -> 4 (all sorted, merged)\nExample 2 (the classic worked example):  5->10->19->28, with child lists 5:[7,8,30], 10:[20], 19:[22,50], 28:[35,40,45,50]  →  5,7,8,10,19,20,22,28,30,35,40,45,50,50\n\nKey insight: recursively flatten head.next first, then merge the current column (head down to head.down) with the already-flattened rest — reusing the merge-two-sorted routine.\n\nConstraints:\n  The main list is itself sorted (node values/column heads are non-decreasing left to right along next), AND every child (down) list is itself sorted — both horizontally and vertically, as in Example 2 above."
 
-# load_topic <bs|arr|str|ll> — point the active globals at the chosen topic's data.
+# ── Recursion & DP · Step 7 + Step 16 · 73 problems across 13 clusters ────────
+# DP is recursion + memoization, so both steps share one topic: problems 01-21
+# are Step 7 Recursion (clusters 1-5), problems 22-73 are Step 16 DP (6-13).
+# Problem list, LeetCode links, and cluster grouping extracted from a saved
+# snapshot of the live takeuforward sheet (see RecursionDP.md). Difficulty here is
+# LeetCode's own Easy/Medium/Hard (needed for the easy/medium/hard folders); the
+# sheet's own Core/Pro tier is recorded in RecursionDP.md. Problems with no
+# LeetCode link in the source have no link here either (no GFG column exists in
+# the live sheet data any more).
+declare -a REC_GROUP_NAMES=(""
+  "Implementation Problems"
+  "Subsequence Pattern Problems"
+  "FAQs (Medium)"
+  "Hard"
+  "FAQs (Hard)"
+  "DP · 1D DP"
+  "DP · 2D DP"
+  "DP · DP on Grids"
+  "DP · DP on Stocks"
+  "DP · DP on Subsequences"
+  "DP · Longest Increasing Subsequence"
+  "DP · DP on Strings"
+  "DP · Partition DP (MCM)"
+)
+declare -a REC_GROUP_DIRS=(""
+  "group_01"
+  "group_02"
+  "group_03"
+  "group_04"
+  "group_05"
+  "group_06"
+  "group_07"
+  "group_08"
+  "group_09"
+  "group_10"
+  "group_11"
+  "group_12"
+  "group_13"
+)
+# Each entry: "id|name|difficulty|group|lc_url|gfg_url|cn_url|fn_signature|core_idea"
+declare -a REC_PROBLEMS=(
+  # ── Cluster 1 · Implementation Problems ───────────────────────────────────
+  "01|Pow(x, n)|Medium|1|https://leetcode.com/problems/powx-n/|||fn my_pow(x: f64, n: i32) -> f64|x^n = (x^(n/2))^2; halve n each call, peel off one x when n is odd, invert for negative n"
+  "02|Generate Parentheses|Medium|1|https://leetcode.com/problems/generate-parentheses/|||fn generate_parenthesis(n: i32) -> Vec<String>|Build the string one char at a time: add '(' while opens remain, ')' while closes < opens; record at length 2n, then backtrack"
+  "03|Power Set|Medium|1|https://leetcode.com/problems/subsets/|||fn subsets(nums: Vec<i32>) -> Vec<Vec<i32>>|Pick/don't-pick: for each element recurse once without it and once with it; record the path at the base case"
+  "04|Count Good Numbers|Medium|1|https://leetcode.com/problems/count-good-numbers/|||fn count_good_numbers(n: i64) -> i32|Answer is 5^ceil(n/2) * 4^floor(n/2) mod 1e9+7; compute each power with Pow(x,n)'s halving recursion under a modulus"
+  "05|Reverse a Stack|Easy|1||||fn reverse_stack(stack: &mut Vec<i32>)|Pop the top, recursively reverse the rest, then insert the popped element at the bottom via a second small recursion"
+  # ── Cluster 2 · Subsequence Pattern Problems ──────────────────────────────
+  "06|Check if There Exists a Subsequence with Sum K|Easy|2||||fn check_subsequence_sum(arr: Vec<i32>, k: i32) -> bool|Pick/don't-pick returning true the moment a branch reaches sum == k; short-circuit the second branch on success"
+  "07|Count All Subsequences with Sum K|Medium|2||||fn count_subsequences_with_sum_k(arr: Vec<i32>, k: i32) -> i32|Same recursion tree as the existence check, but return leftCount + rightCount instead of leftFound || rightFound"
+  "08|Generate Binary Strings Without Consecutive 1s|Easy|2||||fn generate_binary_strings(n: i32) -> Vec<String>|Always allow appending '0'; allow '1' only if the previous character placed was not '1'"
+  # ── Cluster 3 · FAQs (Medium) ─────────────────────────────────────────────
+  "09|Combination Sum|Medium|3|https://leetcode.com/problems/combination-sum/|||fn combination_sum(candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>>|Picking a candidate does NOT advance the index (unlimited reuse); not picking does; prune once the sum exceeds target"
+  "10|Combination Sum II|Medium|3|https://leetcode.com/problems/combination-sum-ii/|||fn combination_sum2(candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>>|Sort; each element used at most once; at each recursion level skip a candidate equal to the previous sibling candidate"
+  "11|Subsets I|Medium|3|https://leetcode.com/problems/subsets/|||fn subsets(nums: Vec<i32>) -> Vec<Vec<i32>>|Identical to Power Set — pick/don't-pick over every element"
+  "12|Subsets II|Medium|3|https://leetcode.com/problems/subsets-ii/|||fn subsets_with_dup(nums: Vec<i32>) -> Vec<Vec<i32>>|Subsets I plus Combination Sum II's trick: sort, then skip a candidate equal to the previous sibling at the same level"
+  "13|Combination Sum III|Medium|3|https://leetcode.com/problems/combination-sum-iii/|||fn combination_sum3(k: i32, n: i32) -> Vec<Vec<i32>>|Choose from 1..9, each at most once, exactly k numbers summing to n; prune on sum overflow and on running out of picks"
+  # ── Cluster 4 · Hard ──────────────────────────────────────────────────────
+  "14|Letter Combinations of a Phone Number|Medium|4|https://leetcode.com/problems/letter-combinations-of-a-phone-number/|||fn letter_combinations(digits: String) -> Vec<String>|Recurse one digit at a time, branching once per letter mapped to that digit; record when the path covers every digit"
+  # ── Cluster 5 · FAQs (Hard) ───────────────────────────────────────────────
+  "15|Palindrome Partitioning|Medium|5|https://leetcode.com/problems/palindrome-partitioning/|||fn partition(s: String) -> Vec<Vec<String>>|From the current index, try every next cut; only recurse when the cut-off substring is a palindrome"
+  "16|Word Search|Medium|5|https://leetcode.com/problems/word-search/|||fn exist(board: Vec<Vec<char>>, word: String) -> bool|DFS from each cell into 4 neighbours matching the next char; mark visited before recursing, unmark after"
+  "17|N Queens|Hard|5|https://leetcode.com/problems/n-queens/|||fn solve_n_queens(n: i32) -> Vec<Vec<String>>|One queen per row; try every column, recurse only if the column and both diagonals are free; undo after"
+  "18|Rat in a Maze|Medium|5||||fn find_paths(maze: Vec<Vec<i32>>) -> Vec<String>|DFS from (0,0) trying D,L,R,U in order; mark visited before recursing, unmark after; record the path at (n-1,n-1)"
+  "19|M-Coloring Problem|Medium|5||||fn graph_coloring(n: i32, edges: Vec<Vec<i32>>, m: i32) -> bool|Color vertices in order; try each of m colors, recurse only if no already-colored neighbour shares it"
+  "20|Sudoku Solver|Hard|5|https://leetcode.com/problems/sudoku-solver/|||fn solve_sudoku(board: &mut Vec<Vec<char>>)|Find the next empty cell, try 1..9 checking row/column/3x3 box, recurse, reset the cell on failure"
+  "21|Expression Add Operators|Hard|5|https://leetcode.com/problems/expression-add-operators/|||fn add_operators(num: String, target: i32) -> Vec<String>|Choose each next operand's length and operator; track the running value and the last operand so '*' can undo the previous term; skip leading zeros"
+  # ── Cluster 6 · 1D DP ───────────────────────────────────────────────────────
+  "22|Climbing Stairs|Easy|6|https://leetcode.com/problems/climbing-stairs/|||fn climb_stairs(n: i32) -> i32|ways(i) = ways(i-1) + ways(i-2) — Fibonacci; memoize, then tabulate, then keep just two variables"
+  "23|Frog Jump|Easy|6||||fn frog_jump(heights: Vec<i32>) -> i32|dp[i] = min(dp[i-1] + ORh[i]-h[i-1]OR, dp[i-2] + ORh[i]-h[i-2]OR); the greedy cheapest-next-step choice is wrong, which is why DP is needed"
+  "24|Frog Jump with K Distances|Medium|6||||fn frog_jump_k(heights: Vec<i32>, k: i32) -> i32|Frog Jump generalised: dp[i] = min over j in 1..=k of dp[i-j] + ORh[i]-h[i-j]OR — O(n·k)"
+  "25|Maximum Sum of Non-Adjacent Elements (House Robber)|Medium|6|https://leetcode.com/problems/house-robber/|||fn rob(nums: Vec<i32>) -> i32|dp[i] = max(nums[i] + dp[i-2], dp[i-1]) — the recursion-step pick/don't-pick tree, memoized"
+  "26|House Robber II|Medium|6|https://leetcode.com/problems/house-robber-ii/|||fn rob(nums: Vec<i32>) -> i32|Houses are in a circle, so first and last can't both be robbed: answer = max(rob(nums[0..n-1]), rob(nums[1..n])); n == 1 is a special case"
+  # ── Cluster 7 · 2D DP ───────────────────────────────────────────────────────
+  "27|Ninja's Training|Medium|7||||fn ninja_training(points: Vec<Vec<i32>>) -> i32|dp[day][last] = max over task != last of points[day][task] + dp[day-1][task]; the extra 'last task' dimension is what makes it 2D"
+  # ── Cluster 8 · DP on Grids ─────────────────────────────────────────────────
+  "28|Grid Unique Paths|Medium|8|https://leetcode.com/problems/unique-paths/|||fn unique_paths(m: i32, n: i32) -> i32|dp[i][j] = dp[i-1][j] + dp[i][j-1] with the first row/column = 1; space-optimise to one row"
+  "29|Unique Paths II|Medium|8|https://leetcode.com/problems/unique-paths-ii/|||fn unique_paths_with_obstacles(obstacle_grid: Vec<Vec<i32>>) -> i32|Unique Paths, but a cell with an obstacle contributes 0 paths; careful: an obstacle in the first row/column blocks everything after it"
+  "30|Minimum Falling Path Sum|Medium|8|https://leetcode.com/problems/minimum-falling-path-sum/|||fn min_falling_path_sum(matrix: Vec<Vec<i32>>) -> i32|dp[i][j] = matrix[i][j] + min(dp[i-1][j-1], dp[i-1][j], dp[i-1][j+1]); answer is the min of the last row (any start, any end)"
+  "31|Triangle|Medium|8|https://leetcode.com/problems/triangle/|||fn minimum_total(triangle: Vec<Vec<i32>>) -> i32|Go bottom-up: dp[i][j] = tri[i][j] + min(dp[i+1][j], dp[i+1][j+1]); the answer lands in dp[0][0] with no min-over-last-row needed"
+  "32|Cherry Pickup II|Hard|8|https://leetcode.com/problems/cherry-pickup-ii/|||fn cherry_pickup(grid: Vec<Vec<i32>>) -> i32|Move both robots one row at a time: state (row, c1, c2), 9 move combinations per step; if c1 == c2 count the cell once — 3D DP"
+  "33|Count Square Submatrices with All Ones|Medium|8|https://leetcode.com/problems/count-square-submatrices-with-all-ones/|||fn count_squares(matrix: Vec<Vec<i32>>) -> i32|dp[i][j] = largest all-ones square with bottom-right corner (i,j) = 1 + min(top, left, top-left) when the cell is 1; sum every dp[i][j]"
+  # ── Cluster 9 · DP on Stocks ────────────────────────────────────────────────
+  "34|Best Time to Buy and Sell Stock|Easy|9|https://leetcode.com/problems/best-time-to-buy-and-sell-stock/|||fn max_profit(prices: Vec<i32>) -> i32|One transaction: track the minimum price so far and the best price - min_so_far — the 'DP' is just remembering one value from the past"
+  "35|Best Time to Buy and Sell Stock II|Medium|9|https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/|||fn max_profit(prices: Vec<i32>) -> i32|Unlimited transactions: dp[i][buy] — if allowed to buy, max(-p + dp[i+1][0], dp[i+1][1]); if holding, max(p + dp[i+1][1], dp[i+1][0]). This (day, canBuy) template powers the rest of the group"
+  "36|Best Time to Buy and Sell Stock III|Hard|9|https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/|||fn max_profit(prices: Vec<i32>) -> i32|Stock II with a third dimension: transactions remaining (cap 2); a sale decrements it. Equivalent compact form: 4 states buy1/sell1/buy2/sell2"
+  "37|Best Time to Buy and Sell Stock IV|Hard|9|https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/|||fn max_profit(k: i32, prices: Vec<i32>) -> i32|Stock III with the cap 2 replaced by k — same 3D DP, O(n·k)"
+  "38|Best Time to Buy and Sell Stock with Transaction Fee|Medium|9|https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/|||fn max_profit(prices: Vec<i32>, fee: i32) -> i32|Stock II, subtracting fee once per completed transaction (on the sell)"
+  "39|Best Time to Buy and Sell Stock with Cooldown|Medium|9|https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/|||fn max_profit(prices: Vec<i32>) -> i32|Stock II, except a sale on day i jumps to day i+2 (the cooldown) instead of i+1"
+  # ── Cluster 10 · DP on Subsequences ──────────────────────────────────────────
+  "40|Subset Sum Equal to Target|Medium|10||||fn is_subset_sum(arr: Vec<i32>, target: i32) -> bool|Recursion's 'subsequence with sum K exists', memoized on (index, remaining target): dp[i][t] = dp[i-1][t] OROR dp[i-1][t-arr[i]]"
+  "41|Partition Equal Subset Sum|Medium|10|https://leetcode.com/problems/partition-equal-subset-sum/|||fn can_partition(nums: Vec<i32>) -> bool|Odd total → false; otherwise run Subset Sum with target = total / 2"
+  "42|Partition a Set into Two Subsets with Minimum Absolute Sum Difference|Medium|10|https://leetcode.com/problems/last-stone-weight-ii/|||fn last_stone_weight_ii(stones: Vec<i32>) -> i32|Fill the Subset Sum table for target = total; every reachable s1 gives diff ORtotal - 2·s1OR; take the minimum. (LC 1049 is the same problem: smashing stones = giving each a + or - sign)"
+  "43|Count Subsets with Sum K|Medium|10||||fn perfect_sum(arr: Vec<i32>, target: i32) -> i32|Recursion's 'count subsequences with sum K', memoized: dp[i][t] = dp[i-1][t] + dp[i-1][t-arr[i]]. Zeros matter — the base case at index 0 must count both picking and skipping a 0"
+  "44|Count Partitions with Given Difference|Medium|10||||fn count_partitions(arr: Vec<i32>, d: i32) -> i32|s1 - s2 = d and s1 + s2 = total ⇒ s2 = (total - d) / 2; reject if negative or odd, otherwise it's Count Subsets with Sum K"
+  "45|0/1 Knapsack|Medium|10||||fn knapsack(w: i32, val: Vec<i32>, wt: Vec<i32>) -> i32|dp[i][cap] = max(dp[i-1][cap], val[i] + dp[i-1][cap-wt[i]]) — THE template for this whole group; space-optimise to one row iterating capacity right-to-left"
+  "46|Minimum Coins (Coin Change)|Medium|10|https://leetcode.com/problems/coin-change/|||fn coin_change(coins: Vec<i32>, amount: i32) -> i32|Unbounded pick: taking a coin stays on the same index. dp[i][amt] = min(dp[i-1][amt], 1 + dp[i][amt-coin[i]]); unreachable → -1"
+  "47|Target Sum|Medium|10|https://leetcode.com/problems/target-sum/|||fn find_target_sum_ways(nums: Vec<i32>, target: i32) -> i32|Assigning +/- splits nums into P and N with P - N = target — exactly Count Partitions with Given Difference"
+  "48|Coin Change II|Medium|10|https://leetcode.com/problems/coin-change-ii/|||fn change(amount: i32, coins: Vec<i32>) -> i32|Counting version of Minimum Coins: dp[i][amt] = dp[i-1][amt] + dp[i][amt-coin[i]] — iterating coins in the outer loop counts combinations, not permutations"
+  "49|Unbounded Knapsack|Medium|10||||fn unbounded_knapsack(capacity: i32, val: Vec<i32>, wt: Vec<i32>) -> i32|0/1 Knapsack, but taking an item stays on the same index: dp[i][cap] = max(dp[i-1][cap], val[i] + dp[i][cap-wt[i]]); one-row version iterates capacity left-to-right"
+  "50|Rod Cutting|Medium|10||||fn cut_rod(price: Vec<i32>) -> i32|Unbounded Knapsack with piece length i+1 as the weight, price[i] as the value, and n as the capacity"
+  # ── Cluster 11 · Longest Increasing Subsequence ──────────────────────────────
+  "51|Longest Increasing Subsequence|Medium|11|https://leetcode.com/problems/longest-increasing-subsequence/|||fn length_of_lis(nums: Vec<i32>) -> i32|dp[i] = 1 + max dp[j] over j < i with nums[j] < nums[i] (O(n²)); the optimal O(n log n) keeps a 'tails' array updated by lower_bound"
+  "52|Print Longest Increasing Subsequence|Medium|11||||fn print_lis(arr: Vec<i32>) -> Vec<i32>|O(n²) LIS while storing parent[i] = the j that gave dp[i]; walk parent pointers back from the best index and reverse"
+  "53|Largest Divisible Subset|Medium|11|https://leetcode.com/problems/largest-divisible-subset/|||fn largest_divisible_subset(nums: Vec<i32>) -> Vec<i32>|Sort, then Print-LIS with 'nums[i] % nums[j] == 0' in place of 'nums[j] < nums[i]' — divisibility chains are transitive once sorted"
+  "54|Longest String Chain|Medium|11|https://leetcode.com/problems/longest-string-chain/|||fn longest_str_chain(words: Vec<String>) -> i32|Sort words by length, then LIS where 'j precedes i' means words[i] is words[j] with exactly one letter inserted (two-pointer check)"
+  "55|Longest Bitonic Subsequence|Medium|11||||fn longest_bitonic_sequence(nums: Vec<i32>) -> i32|LIS ending at i (left-to-right) + LIS starting at i (right-to-left) - 1, maximised over i"
+  "56|Number of Longest Increasing Subsequences|Medium|11|https://leetcode.com/problems/number-of-longest-increasing-subsequence/|||fn find_number_of_lis(nums: Vec<i32>) -> i32|Alongside dp[i] (LIS length ending at i) keep cnt[i]: a strictly longer extension copies cnt[j], an equal-length one adds cnt[j]"
+  # ── Cluster 12 · DP on Strings ───────────────────────────────────────────────
+  "57|Longest Common Subsequence|Medium|12|https://leetcode.com/problems/longest-common-subsequence/|||fn longest_common_subsequence(text1: String, text2: String) -> i32|dp[i][j] = 1 + dp[i-1][j-1] on a match, else max(dp[i-1][j], dp[i][j-1]) — THE anchor for this whole group (use 1-based indices so the base row/column is 0)"
+  "58|Longest Common Substring|Medium|12||||fn longest_common_substr(s1: String, s2: String) -> i32|LCS, but a mismatch resets dp[i][j] to 0 (contiguity breaks); the answer is the max over all cells, not dp[n][m]"
+  "59|Longest Palindromic Subsequence|Medium|12|https://leetcode.com/problems/longest-palindromic-subsequence/|||fn longest_palindrome_subseq(s: String) -> i32|A palindromic subsequence is a common subsequence of s and its reverse — answer = LCS(s, rev(s))"
+  "60|Minimum Insertions to Make a String Palindrome|Hard|12|https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/|||fn min_insertions(s: String) -> i32|Keep the longest palindromic subsequence untouched and mirror every other character: answer = n - LPS(s)"
+  "61|Minimum Insertions/Deletions to Convert String A to B|Medium|12|https://leetcode.com/problems/delete-operation-for-two-strings/|||fn min_distance(word1: String, word2: String) -> i32|Keep the LCS, delete the rest of A, insert the rest of B: (n - LCS) + (m - LCS). LC 583 (delete from both strings) has the same answer"
+  "62|Shortest Common Supersequence|Hard|12|https://leetcode.com/problems/shortest-common-supersequence/|||fn shortest_common_supersequence(str1: String, str2: String) -> String|Length = n + m - LCS; to build the string, walk the LCS table back from (n,m): emit a matched char once, otherwise emit the char from the side you move away from, then reverse"
+  "63|Distinct Subsequences|Hard|12|https://leetcode.com/problems/distinct-subsequences/|||fn num_distinct(s: String, t: String) -> i32|dp[i][j] = ways to form t[..j] from s[..i]: on a match dp[i-1][j-1] + dp[i-1][j] (use it or skip it), else dp[i-1][j]; dp[i][0] = 1"
+  "64|Edit Distance|Medium|12|https://leetcode.com/problems/edit-distance/|||fn min_distance(word1: String, word2: String) -> i32|Match → dp[i-1][j-1]; else 1 + min(insert dp[i][j-1], delete dp[i-1][j], replace dp[i-1][j-1]); base rows are i and j"
+  "65|Wildcard Matching|Hard|12|https://leetcode.com/problems/wildcard-matching/|||fn is_match(s: String, p: String) -> bool|'?' or equal char → dp[i-1][j-1]; '*' → dp[i][j-1] (matches empty) OROR dp[i-1][j] (eats one more char); base case: an all-'*' pattern prefix matches the empty string"
+  "66|Word Break|Medium|12|https://leetcode.com/problems/word-break/|||fn word_break(s: String, word_dict: Vec<String>) -> bool|dp[i] = true if some dictionary word w ends at i with dp[i - ORwOR] true; dp[0] = true — a 1D DP over string prefixes"
+  "67|Count Palindromic Subsequences (length 5)|Hard|12|https://leetcode.com/problems/count-palindromic-subsequences/|||fn count_palindromes(s: String) -> i32|Fix the middle character; a length-5 palindrome is pair (a,b) on the left + mirrored (b,a) on the right. Precompute prefix counts of each digit-pair and suffix counts, then sum over 100 pairs per middle"
+  # ── Cluster 13 · Partition DP (MCM) ──────────────────────────────────────────
+  "68|Matrix Chain Multiplication|Hard|13||||fn matrix_multiplication(arr: Vec<i32>) -> i32|f(i,j) = min over k in i..j of f(i,k) + f(k+1,j) + arr[i-1]·arr[k]·arr[j] — the partition-DP template: try every split point of a range"
+  "69|Burst Balloons|Hard|13|https://leetcode.com/problems/burst-balloons/|||fn max_coins(nums: Vec<i32>) -> i32|Pad with 1 at both ends and think of the LAST balloon k burst in (i,j): f(i,j) = max over k of nums[i-1]·nums[k]·nums[j+1] + f(i,k-1) + f(k+1,j)"
+  "70|Palindrome Partitioning II|Hard|13|https://leetcode.com/problems/palindrome-partitioning-ii/|||fn min_cut(s: String) -> i32|Front partition: f(i) = min over j >= i with s[i..=j] a palindrome of 1 + f(j+1); answer is f(0) - 1 (the last 'cut' is past the end)"
+  "71|Partition Array for Maximum Sum|Medium|13|https://leetcode.com/problems/partition-array-for-maximum-sum/|||fn max_sum_after_partitioning(arr: Vec<i32>, k: i32) -> i32|Front partition: f(i) = max over len in 1..=k of max(arr[i..i+len])·len + f(i+len)"
+  "72|Minimum Cost to Cut a Stick|Hard|13|https://leetcode.com/problems/minimum-cost-to-cut-a-stick/|||fn min_cost(n: i32, cuts: Vec<i32>) -> i32|Sort cuts and add 0 and n as ends; f(i,j) = min over k in i..=j of (cuts[j+1] - cuts[i-1]) + f(i,k-1) + f(k+1,j) — MCM shape again"
+  "73|Evaluate Boolean Expression to True|Hard|13||||fn count_ways(s: String) -> i32|f(i, j, wantTrue): split at every operator k and combine the (true, false) counts of the two sides according to &, OR or ^"
+)
+
+declare -A REC_STATEMENTS
+REC_STATEMENTS["01"]="Implement pow(x, n), which calculates x raised to the power n.\n\nExample 1:  x = 2.00000, n = 10  →  1024.00000\nExample 2:  x = 2.00000, n = -2  →  0.25000\n\nKey insight: x^n = (x^(n/2))^2 — halve n each call for O(log n); handle odd n and negative n separately.\n\nConstraints:\n  -100.0 < x < 100.0\n  -2^31 <= n <= 2^31 - 1"
+REC_STATEMENTS["02"]="Given n pairs of parentheses, generate all combinations of well-formed parentheses.\n\nExample 1:  n = 3  →  [\"((()))\",\"(()())\",\"(())()\",\"()(())\",\"()()()\"]\nExample 2:  n = 1  →  [\"()\"]\n\nKey insight: add '(' while opens remain; add ')' only while closes placed < opens placed.\n\nConstraints:\n  1 <= n <= 8"
+REC_STATEMENTS["03"]="Given an integer array nums of unique elements, return all possible subsets (the power set), in any order, with no duplicate subsets.\n\nExample 1:  nums = [1,2,3]  →  [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]\nExample 2:  nums = [0]      →  [[],[0]]\n\nKey insight: for each element, recurse once without it and once with it (pick / don't pick).\n\nConstraints:\n  1 <= nums.length <= 10\n  All elements are unique."
+REC_STATEMENTS["04"]="A digit string is good if digits at even indices (0-indexed) are even and digits at odd indices are prime (2, 3, 5, or 7). Given n, return the number of good digit strings of length n, modulo 10^9 + 7.\n\nExample 1:  n = 1  →  5\nExample 2:  n = 4  →  400\n\nKey insight: the answer is 5^ceil(n/2) * 4^floor(n/2); compute each power with recursive fast exponentiation under the modulus.\n\nConstraints:\n  1 <= n <= 10^15"
+REC_STATEMENTS["05"]="Reverse a stack using recursion only — no loops and no additional data structure besides the call stack.\n\nExample 1:  stack (bottom→top) = [1,2,3,4]  →  [4,3,2,1]\nExample 2:  stack = [5]                    →  [5]\n\nKey insight: pop the top, reverse the rest recursively, then insert the popped element at the bottom with a second recursive helper."
+REC_STATEMENTS["06"]="Given an array of positive integers and an integer k, return true if some subsequence of the array sums to exactly k.\n\nExample 1:  arr = [1,2,3], k = 5   →  true  ([2,3])\nExample 2:  arr = [1,2],   k = 10  →  false\n\nKey insight: pick / don't-pick, returning true as soon as any branch reaches sum k."
+REC_STATEMENTS["07"]="Given an array of integers and an integer k, count the subsequences whose elements sum to exactly k.\n\nExample 1:  arr = [1,2,1], k = 2  →  2  ([2] and [1,1])\nExample 2:  arr = [4,9],   k = 3  →  0\n\nKey insight: same recursion tree as the existence check, but add up the counts from both branches instead of short-circuiting."
+REC_STATEMENTS["08"]="Given n, generate all binary strings of length n that contain no two consecutive 1s, in increasing order.\n\nExample 1:  n = 3  →  [\"000\",\"001\",\"010\",\"100\",\"101\"]\nExample 2:  n = 1  →  [\"0\",\"1\"]\n\nKey insight: '0' can always be appended; '1' only if the previous character is not '1'."
+REC_STATEMENTS["09"]="Given an array of distinct integers candidates and a target, return all unique combinations of candidates that sum to target. The same number may be chosen an unlimited number of times.\n\nExample 1:  candidates = [2,3,6,7], target = 7  →  [[2,2,3],[7]]\nExample 2:  candidates = [2,3,5],   target = 8  →  [[2,2,2,2],[2,3,3],[3,5]]\n\nKey insight: picking a candidate keeps the index (reuse allowed); not picking advances it; prune when the sum overshoots.\n\nConstraints:\n  1 <= candidates.length <= 30\n  1 <= target <= 40"
+REC_STATEMENTS["10"]="Given a collection of candidates (may contain duplicates) and a target, return all unique combinations that sum to target. Each number may be used at most once, and the result must not contain duplicate combinations.\n\nExample 1:  candidates = [10,1,2,7,6,1,5], target = 8  →  [[1,1,6],[1,2,5],[1,7],[2,6]]\nExample 2:  candidates = [2,5,2,1,2],      target = 5  →  [[1,2,2],[5]]\n\nKey insight: sort first; at each level, skip a candidate equal to the previous candidate tried at that same level.\n\nConstraints:\n  1 <= candidates.length <= 100\n  1 <= target <= 30"
+REC_STATEMENTS["11"]="Given an integer array nums of unique elements, return all possible subsets (the power set), in any order.\n\nExample 1:  nums = [1,2,3]  →  [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]\nExample 2:  nums = [0]      →  [[],[0]]\n\nConstraints:\n  1 <= nums.length <= 10"
+REC_STATEMENTS["12"]="Given an integer array nums that may contain duplicates, return all possible subsets without duplicate subsets, in any order.\n\nExample 1:  nums = [1,2,2]  →  [[],[1],[1,2],[1,2,2],[2],[2,2]]\nExample 2:  nums = [0]      →  [[],[0]]\n\nKey insight: sort, then skip a value equal to the previous sibling at the same recursion level.\n\nConstraints:\n  1 <= nums.length <= 10"
+REC_STATEMENTS["13"]="Find all valid combinations of k numbers that sum to n, using only the numbers 1 through 9, each at most once.\n\nExample 1:  k = 3, n = 7  →  [[1,2,4]]\nExample 2:  k = 3, n = 9  →  [[1,2,6],[1,3,5],[2,3,4]]\n\nKey insight: prune on both sum overflow and running out of remaining picks before reaching k numbers.\n\nConstraints:\n  2 <= k <= 9\n  1 <= n <= 60"
+REC_STATEMENTS["14"]="Given a string of digits 2-9, return all letter combinations the number could represent on a phone keypad.\n\nExample 1:  digits = \"23\"  →  [\"ad\",\"ae\",\"af\",\"bd\",\"be\",\"bf\",\"cd\",\"ce\",\"cf\"]\nExample 2:  digits = \"\"    →  []\n\nKey insight: recurse digit by digit, branching once per letter for the current digit.\n\nConstraints:\n  0 <= digits.length <= 4"
+REC_STATEMENTS["15"]="Given a string s, partition s such that every substring of the partition is a palindrome. Return all possible palindrome partitionings.\n\nExample 1:  s = \"aab\"  →  [[\"a\",\"a\",\"b\"],[\"aa\",\"b\"]]\nExample 2:  s = \"a\"    →  [[\"a\"]]\n\nKey insight: from the current index try every cut; recurse only when the cut-off piece is a palindrome.\n\nConstraints:\n  1 <= s.length <= 16"
+REC_STATEMENTS["16"]="Given an m x n grid of characters and a word, return true if the word exists in the grid. The word is built from sequentially adjacent (horizontal/vertical) cells, and a cell may not be used more than once.\n\nExample 1:  board = [[A,B,C,E],[S,F,C,S],[A,D,E,E]], word = \"ABCCED\"  →  true\nExample 2:  same board, word = \"ABCB\"                                  →  false\n\nKey insight: DFS with a visited mark set before recursing and cleared after (backtrack).\n\nConstraints:\n  1 <= m, n <= 6\n  1 <= word.length <= 15"
+REC_STATEMENTS["17"]="Place n queens on an n x n chessboard so that no two queens attack each other. Return all distinct solutions, each as a list of row strings using 'Q' and '.'.\n\nExample 1:  n = 4  →  [[\".Q..\",\"...Q\",\"Q...\",\"..Q.\"],[\"..Q.\",\"Q...\",\"...Q\",\".Q..\"]]\nExample 2:  n = 1  →  [[\"Q\"]]\n\nKey insight: one queen per row; recurse only into columns whose column and both diagonals are free.\n\nConstraints:\n  1 <= n <= 9"
+REC_STATEMENTS["18"]="A rat starts at (0,0) of an n x n maze (1 = open, 0 = blocked) and must reach (n-1,n-1), moving Up/Down/Left/Right without revisiting a cell. Return all paths as direction strings in lexicographic order.\n\nExample 1:  maze = [[1,0,0,0],[1,1,0,1],[1,1,0,0],[0,1,1,1]]  →  [\"DDRDRR\",\"DRDDRR\"]\nExample 2:  maze = [[1,0],[1,0]]                              →  []\n\nKey insight: DFS trying D, L, R, U in that order; mark visited before recursing, unmark after."
+REC_STATEMENTS["19"]="Given an undirected graph with n vertices and an integer m, determine whether the graph can be colored with at most m colors so that no two adjacent vertices share a color.\n\nExample 1:  n = 4, edges = [[0,1],[1,2],[2,3],[3,0],[0,2]], m = 3  →  true\nExample 2:  n = 3, edges = [[0,1],[1,2],[0,2]],             m = 2  →  false\n\nKey insight: color vertices in order, trying each color and recursing only if no colored neighbour already uses it."
+REC_STATEMENTS["20"]="Write a program to solve a Sudoku puzzle by filling the empty cells ('.'). Each digit 1-9 must appear exactly once in each row, column, and 3x3 sub-box. The input has exactly one solution.\n\nExample:  a standard 9x9 board with '.' blanks  →  the board filled in-place\n\nKey insight: for the next empty cell try 1-9, checking row/column/box; recurse, and reset the cell if the attempt fails.\n\nConstraints:\n  board is 9 x 9"
+REC_STATEMENTS["21"]="Given a string num of digits and an integer target, return all ways to insert the binary operators '+', '-', '*' between the digits so the expression evaluates to target. Operands may not have leading zeros.\n\nExample 1:  num = \"123\", target = 6  →  [\"1*2*3\",\"1+2+3\"]\nExample 2:  num = \"232\", target = 8  →  [\"2*3+2\",\"2+3*2\"]\n\nKey insight: carry the running value and the last operand so a '*' can subtract the previous term and re-add it multiplied.\n\nConstraints:\n  1 <= num.length <= 10"
+REC_STATEMENTS["22"]="You are climbing a staircase of n steps. Each time you can climb 1 or 2 steps. In how many distinct ways can you reach the top?\n\nExample 1:  n = 2  →  2  (1+1, 2)\nExample 2:  n = 3  →  3  (1+1+1, 1+2, 2+1)\n\nConstraints:\n  1 <= n <= 45"
+REC_STATEMENTS["23"]="A frog stands on stair 0 of n stairs with heights[]. From stair i it can jump to i+1 or i+2, paying |heights[i] - heights[j]| energy. Return the minimum total energy to reach stair n-1.\n\nExample 1:  heights = [10,20,30,10]        →  20  (0→1→3)\nExample 2:  heights = [30,10,60,10,60,50]  →  40  (0→2→4→5)\n\nConstraints:\n  1 <= n <= 10^5\n  0 <= heights[i] <= 10^4"
+REC_STATEMENTS["24"]="Same as Frog Jump, but from stair i the frog may jump to any of i+1, i+2, ..., i+k. Return the minimum total energy to reach stair n-1.\n\nExample 1:  heights = [10,30,40,50,20], k = 3  →  30  (0→1→4)\nExample 2:  heights = [10,20,10],       k = 1  →  20\n\nConstraints:\n  1 <= n <= 10^5\n  1 <= k <= 100"
+REC_STATEMENTS["25"]="Given an array nums, return the maximum sum of a subsequence in which no two chosen elements are adjacent in the array (houses that can be robbed without robbing two neighbours).\n\nExample 1:  nums = [1,2,3,1]    →  4   (1 + 3)\nExample 2:  nums = [2,7,9,3,1]  →  12  (2 + 9 + 1)\n\nConstraints:\n  1 <= nums.length <= 100\n  0 <= nums[i] <= 400"
+REC_STATEMENTS["26"]="Same as House Robber, but the houses are arranged in a circle — the first and last house are adjacent. Return the maximum amount you can rob.\n\nExample 1:  nums = [2,3,2]    →  3\nExample 2:  nums = [1,2,3,1]  →  4\n\nConstraints:\n  1 <= nums.length <= 100\n  0 <= nums[i] <= 1000"
+REC_STATEMENTS["27"]="A ninja trains for n days. Each day they do exactly one of 3 tasks, earning points[day][task], and may not do the same task on two consecutive days. Return the maximum total points.\n\nExample 1:  points = [[1,2,5],[3,1,1],[3,3,3]]           →  11   (5 + 3 + 3)\nExample 2:  points = [[10,40,70],[20,50,80],[30,60,90]]  →  210  (70 + 50 + 90)\n\nConstraints:\n  1 <= n <= 10^5\n  points[i].length == 3"
+REC_STATEMENTS["28"]="A robot at the top-left of an m x n grid can only move right or down. How many unique paths reach the bottom-right corner?\n\nExample 1:  m = 3, n = 7  →  28\nExample 2:  m = 3, n = 2  →  3\n\nConstraints:\n  1 <= m, n <= 100"
+REC_STATEMENTS["29"]="Same as Grid Unique Paths, but some cells are obstacles (1) the robot cannot step on; free cells are 0. Return the number of unique paths.\n\nExample 1:  grid = [[0,0,0],[0,1,0],[0,0,0]]  →  2\nExample 2:  grid = [[0,1],[0,0]]              →  1\n\nConstraints:\n  1 <= m, n <= 100\n  grid[i][j] is 0 or 1"
+REC_STATEMENTS["30"]="Given an n x n matrix, a falling path starts at any cell in the first row and moves to the next row's cell directly below or diagonally left/right. Return the minimum sum of a falling path.\n\nExample 1:  matrix = [[2,1,3],[6,5,4],[7,8,9]]  →  13\nExample 2:  matrix = [[-19,57],[-40,-5]]       →  -59\n\nConstraints:\n  1 <= n <= 100\n  -100 <= matrix[i][j] <= 100"
+REC_STATEMENTS["31"]="Given a triangle array, return the minimum path sum from top to bottom. From index j in row i you may move to index j or j+1 in row i+1.\n\nExample 1:  triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]  →  11  (2+3+5+1)\nExample 2:  triangle = [[-10]]                      →  -10\n\nConstraints:\n  1 <= triangle.length <= 200"
+REC_STATEMENTS["32"]="Two robots start at the top-left (0,0) and top-right (0,cols-1) of a grid of cherries. Each step both move down one row to column c-1, c, or c+1. A robot picks all cherries on its cell; if both stand on the same cell only one takes them. Return the maximum cherries collected when both reach the bottom row.\n\nExample 1:  grid = [[3,1,1],[2,5,1],[1,5,5],[2,1,1]]  →  24\nExample 2:  grid = [[1,1],[1,1]]                     →  4\n\nConstraints:\n  2 <= rows, cols <= 70\n  0 <= grid[i][j] <= 100"
+REC_STATEMENTS["33"]="Given an m x n matrix of 0s and 1s, return how many square submatrices consist entirely of 1s.\n\nExample 1:  matrix = [[0,1,1,1],[1,1,1,1],[0,1,1,1]]  →  15\nExample 2:  matrix = [[1,0,1],[1,1,0],[1,1,0]]       →  7\n\nConstraints:\n  1 <= m, n <= 300"
+REC_STATEMENTS["34"]="Given prices[i] = stock price on day i, choose one day to buy and a later day to sell to maximise profit. Return the maximum profit (0 if no profit is possible).\n\nExample 1:  prices = [7,1,5,3,6,4]  →  5\nExample 2:  prices = [7,6,4,3,1]    →  0\n\nConstraints:\n  1 <= prices.length <= 10^5"
+REC_STATEMENTS["35"]="Same prices array, but you may complete as many transactions as you like (hold at most one share at a time). Return the maximum profit.\n\nExample 1:  prices = [7,1,5,3,6,4]  →  7\nExample 2:  prices = [1,2,3,4,5]    →  4\n\nConstraints:\n  1 <= prices.length <= 3 * 10^4"
+REC_STATEMENTS["36"]="Same prices array, but you may complete at most two transactions. Return the maximum profit.\n\nExample 1:  prices = [3,3,5,0,0,3,1,4]  →  6\nExample 2:  prices = [1,2,3,4,5]        →  4\n\nConstraints:\n  1 <= prices.length <= 10^5"
+REC_STATEMENTS["37"]="Same prices array, but you may complete at most k transactions. Return the maximum profit.\n\nExample 1:  k = 2, prices = [2,4,1]        →  2\nExample 2:  k = 2, prices = [3,2,6,5,0,3]  →  7\n\nConstraints:\n  1 <= k <= 100\n  1 <= prices.length <= 1000"
+REC_STATEMENTS["38"]="Unlimited transactions, but each completed transaction costs a fee. Return the maximum profit.\n\nExample 1:  prices = [1,3,2,8,4,9],  fee = 2  →  8\nExample 2:  prices = [1,3,7,5,10,3], fee = 3  →  6\n\nConstraints:\n  1 <= prices.length <= 5 * 10^4\n  0 <= fee < 5 * 10^4"
+REC_STATEMENTS["39"]="Unlimited transactions, but after you sell you cannot buy on the next day (one-day cooldown). Return the maximum profit.\n\nExample 1:  prices = [1,2,3,0,2]  →  3  (buy, sell, cooldown, buy, sell)\nExample 2:  prices = [1]          →  0\n\nConstraints:\n  1 <= prices.length <= 5000"
+REC_STATEMENTS["40"]="Given an array of non-negative integers and a target, return true if some subset sums to exactly target.\n\nExample 1:  arr = [3,34,4,12,5,2], target = 9   →  true  (4 + 5)\nExample 2:  arr = [3,34,4,12,5,2], target = 30  →  false\n\nConstraints:\n  1 <= arr.length <= 200\n  1 <= target <= 10^4"
+REC_STATEMENTS["41"]="Given an array of positive integers, return true if it can be split into two subsets with equal sums.\n\nExample 1:  nums = [1,5,11,5]  →  true  ([1,5,5] and [11])\nExample 2:  nums = [1,2,3,5]   →  false\n\nConstraints:\n  1 <= nums.length <= 200\n  1 <= nums[i] <= 100"
+REC_STATEMENTS["42"]="Split the array of positive integers into two subsets so that the absolute difference of their sums is minimal; return that difference. The sheet links LeetCode 1049 (Last Stone Weight II), which is the same problem in disguise.\n\nExample 1:  arr = [1,6,11,5]          →  1  ([1,5,6] vs [11])\nExample 2:  stones = [2,7,4,1,8,1]    →  1\n\nConstraints (LC 1049):\n  1 <= stones.length <= 30\n  1 <= stones[i] <= 100"
+REC_STATEMENTS["43"]="Given an array of non-negative integers and a target, count the subsets whose sum is exactly target (modulo 10^9 + 7).\n\nExample 1:  arr = [5,2,3,10,6,8], target = 10  →  3  ([5,2,3], [2,8], [10])\nExample 2:  arr = [2,5,1,4,3],    target = 10  →  3\n\nConstraints:\n  1 <= arr.length <= 1000\n  0 <= arr[i] <= 1000\n  1 <= target <= 1000"
+REC_STATEMENTS["44"]="Count the ways to split the array into two subsets S1 and S2 with sum(S1) - sum(S2) = d and sum(S1) >= sum(S2) (modulo 10^9 + 7).\n\nExample 1:  arr = [5,2,6,4], d = 3  →  1  ({6,4} vs {5,2})\nExample 2:  arr = [1,1,1,1], d = 0  →  6\n\nConstraints:\n  1 <= arr.length <= 50\n  0 <= arr[i] <= 6"
+REC_STATEMENTS["45"]="Given n items with weights wt[] and values val[], and a knapsack of capacity W, choose items (each at most once) to maximise total value without exceeding W.\n\nExample 1:  W = 4, val = [1,2,3], wt = [4,5,1]  →  3\nExample 2:  W = 3, val = [1,2,3], wt = [4,5,6]  →  0\n\nConstraints:\n  1 <= n <= 1000\n  1 <= W <= 1000"
+REC_STATEMENTS["46"]="Given coin denominations (unlimited supply of each) and an amount, return the fewest coins that make up the amount, or -1 if impossible.\n\nExample 1:  coins = [1,2,5], amount = 11  →  3  (5+5+1)\nExample 2:  coins = [2],     amount = 3   →  -1\n\nConstraints:\n  1 <= coins.length <= 12\n  0 <= amount <= 10^4"
+REC_STATEMENTS["47"]="Put '+' or '-' before every number in nums and concatenate into an expression. Return how many such expressions evaluate to target.\n\nExample 1:  nums = [1,1,1,1,1], target = 3  →  5\nExample 2:  nums = [1],         target = 1  →  1\n\nConstraints:\n  1 <= nums.length <= 20\n  0 <= nums[i] <= 1000"
+REC_STATEMENTS["48"]="Given coin denominations (unlimited supply) and an amount, return the number of combinations that make up the amount.\n\nExample 1:  amount = 5, coins = [1,2,5]  →  4\nExample 2:  amount = 3, coins = [2]      →  0\n\nConstraints:\n  1 <= coins.length <= 300\n  0 <= amount <= 5000"
+REC_STATEMENTS["49"]="Same as 0/1 Knapsack, but each item may be taken any number of times.\n\nExample 1:  capacity = 8, val = [10,40,50,70], wt = [1,3,4,5]  →  110  (40 + 70)\nExample 2:  capacity = 3, val = [1,1],         wt = [2,1]      →  3\n\nConstraints:\n  1 <= n <= 1000\n  1 <= capacity <= 1000"
+REC_STATEMENTS["50"]="A rod of length n and price[i] = price of a piece of length i+1. Cut the rod into pieces (any number of each length) to maximise total price.\n\nExample 1:  price = [1,5,8,9,10,17,17,20]  →  22  (lengths 2 + 6)\nExample 2:  price = [3,5,8,9,10,17,17,20]  →  24  (eight pieces of length 1)\n\nConstraints:\n  1 <= n <= 1000"
+REC_STATEMENTS["51"]="Given an integer array nums, return the length of the longest strictly increasing subsequence.\n\nExample 1:  nums = [10,9,2,5,3,7,101,18]  →  4  ([2,3,7,101])\nExample 2:  nums = [0,1,0,3,2,3]         →  4\n\nConstraints:\n  1 <= nums.length <= 2500"
+REC_STATEMENTS["52"]="Return one longest strictly increasing subsequence of arr itself (not just its length). If several exist, return the one that ends earliest.\n\nExample 1:  arr = [5,4,11,1,16,8]  →  [5,11,16]\nExample 2:  arr = [1,2,2]          →  [1,2]\n\nConstraints:\n  1 <= arr.length <= 1000"
+REC_STATEMENTS["53"]="Given a set of distinct positive integers, return the largest subset in which every pair (a, b) satisfies a % b == 0 or b % a == 0. Any valid answer is accepted.\n\nExample 1:  nums = [1,2,3]    →  [1,2]  (or [1,3])\nExample 2:  nums = [1,2,4,8]  →  [1,2,4,8]\n\nConstraints:\n  1 <= nums.length <= 1000"
+REC_STATEMENTS["54"]="Word a is a predecessor of b if inserting exactly one letter anywhere in a gives b. Return the length of the longest chain w1, w2, ... where each word is a predecessor of the next.\n\nExample 1:  words = [\"a\",\"b\",\"ba\",\"bca\",\"bda\",\"bdca\"]  →  4  (a → ba → bda → bdca)\nExample 2:  words = [\"abcd\",\"dbqca\"]                    →  1\n\nConstraints:\n  1 <= words.length <= 1000\n  1 <= words[i].length <= 16"
+REC_STATEMENTS["55"]="A subsequence is bitonic if it first strictly increases and then strictly decreases (Striver's version allows either part to be empty). Return the length of the longest bitonic subsequence. Note: GFG's version requires both parts to be non-empty and returns 0 otherwise.\n\nExample 1:  nums = [1,11,2,10,4,5,2,1]  →  6  ([1,2,10,4,2,1])\nExample 2:  nums = [1,2,5,3,2]          →  5\n\nConstraints:\n  1 <= nums.length <= 1000"
+REC_STATEMENTS["56"]="Given an integer array nums, return the number of longest strictly increasing subsequences.\n\nExample 1:  nums = [1,3,5,4,7]  →  2  ([1,3,4,7] and [1,3,5,7])\nExample 2:  nums = [2,2,2,2,2]  →  5\n\nConstraints:\n  1 <= nums.length <= 2000"
+REC_STATEMENTS["57"]="Given two strings, return the length of their longest common subsequence (0 if none).\n\nExample 1:  text1 = \"abcde\", text2 = \"ace\"  →  3  (\"ace\")\nExample 2:  text1 = \"abc\",   text2 = \"def\"  →  0\n\nConstraints:\n  1 <= text1.length, text2.length <= 1000"
+REC_STATEMENTS["58"]="Given two strings, return the length of the longest substring (contiguous) that appears in both.\n\nExample 1:  s1 = \"ABCDGH\", s2 = \"ACDGHR\"  →  4  (\"CDGH\")\nExample 2:  s1 = \"abc\",    s2 = \"acb\"     →  1\n\nConstraints:\n  1 <= s1.length, s2.length <= 1000"
+REC_STATEMENTS["59"]="Given a string s, return the length of its longest palindromic subsequence.\n\nExample 1:  s = \"bbbab\"  →  4  (\"bbbb\")\nExample 2:  s = \"cbbd\"   →  2  (\"bb\")\n\nConstraints:\n  1 <= s.length <= 1000"
+REC_STATEMENTS["60"]="Return the minimum number of characters to insert anywhere in s to make it a palindrome.\n\nExample 1:  s = \"zzazz\"     →  0\nExample 2:  s = \"mbadm\"     →  2\nExample 3:  s = \"leetcode\"  →  5\n\nConstraints:\n  1 <= s.length <= 500"
+REC_STATEMENTS["61"]="Return the minimum number of single-character insertions and deletions to turn string A into string B (equivalently, LC 583: deletions from either string to make them equal).\n\nExample 1:  word1 = \"sea\",      word2 = \"eat\"   →  2\nExample 2:  word1 = \"leetcode\", word2 = \"etco\"  →  4\n\nConstraints:\n  1 <= word1.length, word2.length <= 500"
+REC_STATEMENTS["62"]="Return the shortest string that has both str1 and str2 as subsequences. Any valid answer is accepted.\n\nExample 1:  str1 = \"abac\",     str2 = \"cab\"       →  \"cabac\"\nExample 2:  str1 = \"aaaaaaaa\", str2 = \"aaaaaaaa\"  →  \"aaaaaaaa\"\n\nConstraints:\n  1 <= str1.length, str2.length <= 1000"
+REC_STATEMENTS["63"]="Return the number of distinct subsequences of s that equal t.\n\nExample 1:  s = \"rabbbit\", t = \"rabbit\"  →  3\nExample 2:  s = \"babgbag\", t = \"bag\"     →  5\n\nConstraints:\n  1 <= s.length, t.length <= 1000\n  The answer fits in a 32-bit signed integer."
+REC_STATEMENTS["64"]="Return the minimum number of insert / delete / replace operations to convert word1 into word2.\n\nExample 1:  word1 = \"horse\",     word2 = \"ros\"        →  3\nExample 2:  word1 = \"intention\", word2 = \"execution\"  →  5\n\nConstraints:\n  0 <= word1.length, word2.length <= 500"
+REC_STATEMENTS["65"]="Implement wildcard matching where '?' matches any single character and '*' matches any sequence (including empty). The match must cover the whole of s.\n\nExample 1:  s = \"aa\", p = \"a\"   →  false\nExample 2:  s = \"aa\", p = \"*\"   →  true\nExample 3:  s = \"cb\", p = \"?a\"  →  false\n\nConstraints:\n  0 <= s.length, p.length <= 2000"
+REC_STATEMENTS["66"]="Return true if s can be split into a space-separated sequence of one or more dictionary words (words may be reused).\n\nExample 1:  s = \"leetcode\",  wordDict = [\"leet\",\"code\"]                    →  true\nExample 2:  s = \"catsandog\", wordDict = [\"cats\",\"dog\",\"sand\",\"and\",\"cat\"]  →  false\n\nConstraints:\n  1 <= s.length <= 300\n  1 <= wordDict.length <= 1000"
+REC_STATEMENTS["67"]="The sheet links LeetCode 2484: given a string of digits, return the number of palindromic subsequences of length 5, modulo 10^9 + 7.\n\nExample 1:  s = \"103301\"      →  2\nExample 2:  s = \"0000000\"     →  21\nExample 3:  s = \"9999900000\"  →  2\n\nConstraints:\n  1 <= s.length <= 10^4\n  s consists of digits."
+REC_STATEMENTS["68"]="Matrix i has dimensions arr[i-1] x arr[i]. Return the minimum number of scalar multiplications needed to multiply the whole chain.\n\nExample 1:  arr = [40,20,30,10,30]  →  26000\nExample 2:  arr = [10,20,30]        →  6000\n\nConstraints:\n  2 <= arr.length <= 100"
+REC_STATEMENTS["69"]="Bursting balloon i earns nums[i-1] * nums[i] * nums[i+1] coins (out-of-range neighbours count as 1), and then its neighbours become adjacent. Return the maximum coins from bursting all balloons.\n\nExample 1:  nums = [3,1,5,8]  →  167\nExample 2:  nums = [1,5]      →  10\n\nConstraints:\n  1 <= nums.length <= 300\n  0 <= nums[i] <= 100"
+REC_STATEMENTS["70"]="Return the minimum number of cuts so that every piece of s is a palindrome.\n\nExample 1:  s = \"aab\"  →  1  (\"aa\" | \"b\")\nExample 2:  s = \"a\"    →  0\nExample 3:  s = \"ab\"   →  1\n\nConstraints:\n  1 <= s.length <= 2000"
+REC_STATEMENTS["71"]="Partition arr into contiguous subarrays of length at most k. Each subarray's values are all replaced by that subarray's maximum. Return the largest possible sum afterwards.\n\nExample 1:  arr = [1,15,7,9,2,5,10],        k = 3  →  84\nExample 2:  arr = [1,4,1,5,7,3,6,1,9,9,3], k = 4  →  83\n\nConstraints:\n  1 <= arr.length <= 500\n  1 <= k <= arr.length"
+REC_STATEMENTS["72"]="A stick of length n has positions cuts[] where it must be cut, in any order you choose. Each cut costs the current length of the piece being cut. Return the minimum total cost.\n\nExample 1:  n = 7, cuts = [1,3,4,5]    →  16\nExample 2:  n = 9, cuts = [5,6,1,4,2]  →  22\n\nConstraints:\n  2 <= n <= 10^6\n  1 <= cuts.length <= min(n - 1, 100)"
+REC_STATEMENTS["73"]="Given a boolean expression of T/F symbols separated by &, | and ^ operators, count the ways to parenthesise it so that it evaluates to true (modulo 10^9 + 7 in Striver's version). Note: the sheet's LeetCode link (1106 Parsing a Boolean Expression) points to a different problem, so no link is stored here.\n\nExample 1:  s = \"T|T&F^T\"  →  4\nExample 2:  s = \"T^F|F\"    →  2\n\nConstraints:\n  1 <= s.length <= 200"
+
+# load_topic <bs|arr|str|ll|rec|dp> — point the active globals at the chosen topic's data.
 load_topic() {
   local key="${1:-bs}"
   case "${key}" in
@@ -521,6 +725,17 @@ load_topic() {
       PROBLEM_STATEMENTS=()
       local _k
       for _k in "${!LL_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${LL_STATEMENTS[${_k}]}"; done
+      ;;
+    rec|recursion|dp|recursion_dp|7|16)
+      TOPIC="rec"; TOPIC_MOD="recursion_dp"; TOPIC_DIR="${SRC_DIR}/recursion_dp"
+      TOPIC_LABEL="Recursion & DP"; TOPIC_STEP="7 + 16"
+      PROGRESS_FILE="${SCRIPT_DIR}/.dsa_progress_recursion_dp"
+      PROBLEMS=("${REC_PROBLEMS[@]}")
+      GROUP_NAMES=("${REC_GROUP_NAMES[@]}")
+      GROUP_DIRS=("${REC_GROUP_DIRS[@]}")
+      PROBLEM_STATEMENTS=()
+      local _k
+      for _k in "${!REC_STATEMENTS[@]}"; do PROBLEM_STATEMENTS["${_k}"]="${REC_STATEMENTS[${_k}]}"; done
       ;;
     *)
       TOPIC="bs"; TOPIC_MOD="binary_search"; TOPIC_DIR="${SRC_DIR}/binary_search"
@@ -1238,6 +1453,20 @@ print_study_order() {
     printf '  %bProblems 23,19%b     Merge/sort family — add-two-numbers, then merge sort on a list\n' "${YELLOW}" "${NC}"
     printf '  %bProblems 21,30%b     Intersection & clone — redirect trick, interleave trick\n' "${RED}" "${NC}"
     printf '  %bProblems 28,29%b     Hard — rotate (find tail + reconnect), flatten (recursive merge) — last\n' "${RED}" "${NC}"
+  elif [[ "${TOPIC}" == "rec" ]]; then
+    printf '  %bProblems 01-05%b     Implementation — halving recursion, build-path + backtrack, pick/don'"'"'t-pick\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 06-08%b     Subsequence pattern — watch the theory lesson first; early-exit vs count vs gated\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 09-13%b     Combination/subset family — do together; same skeleton, different reuse + dup-skip rules\n' "${YELLOW}" "${NC}"
+    printf '  %bProblem  14%b        Letter combinations — per-digit branching\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 15-21%b     Hard backtracking — grids, constraint satisfaction, Expression Add Operators last\n' "${RED}" "${NC}"
+    printf '  %b── DP (Step 16) — each problem: recursion → memoize → tabulate → space-optimise ──%b\n' "${DIM}" "${NC}"
+    printf '  %bProblems 22-27%b     1D + 2D DP — Fibonacci shape, pick/not-pick, (day, last-choice) state\n' "${GREEN}" "${NC}"
+    printf '  %bProblems 28-33%b     Grids — fixed vs variable start/end, then 3D (Cherry Pickup II)\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 34-39%b     Stocks — one (day, canBuy[, txns]) template for all six\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 40-50%b     Subsequences — subset sum → knapsack → unbounded pick; do in order\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 51-56%b     LIS — O(n²) dp + parent/count arrays, binary-search variant\n' "${YELLOW}" "${NC}"
+    printf '  %bProblems 57-67%b     Strings — LCS anchors everything; then edit distance & wildcard\n' "${RED}" "${NC}"
+    printf '  %bProblems 68-73%b     Partition DP — f(i,j) over every split point; last\n' "${RED}" "${NC}"
   else
     printf '  %bProblems 1-7%b    Bounds & occurrences — master the two templates\n' "${GREEN}" "${NC}"
     printf '  %bProblems 8-13%b   Rotated arrays, peak, single element\n' "${GREEN}" "${NC}"
@@ -1747,6 +1976,21 @@ show_cheatsheet() {
       "6. Fast-N-Ahead|Remove the Nth node / delete the middle node|advance fast n steps first (or 1 step for delete-middle), then move slow and fast together until fast falls off the end"
       "7. Two/Three-Chain Partition|Segregate odd/even nodes / sort a list of 0s,1s,2s|maintain separate chain heads+tails per bucket while traversing once, then splice the chains together in order"
     )
+  elif [[ "${TOPIC}" == "rec" ]]; then
+    patterns=(
+      "1. Halving Recursion|Pow(x,n) / fast exponentiation|f(n) = f(n/2)^2, times x if n is odd; O(log n) calls"
+      "2. Pick / Don't-Pick|Subsets, subsequences, combination sums|recurse(i+1) without arr[i]; push arr[i], recurse(i+1), pop"
+      "3. Duplicate Skip at Same Level|Combination Sum II / Subsets II|sort; in the per-level loop, skip j if j > start and arr[j] == arr[j-1]"
+      "4. Validity-Gated Branch|Binary strings w/o 11, palindrome partitioning|only recurse into a branch when the partial path stays valid (prune early)"
+      "5. Grid Backtracking|Word Search / Rat in a Maze|mark visited -> recurse into 4 neighbours -> unmark visited"
+      "6. Constraint Satisfaction|N-Queens / M-Coloring / Sudoku|for each candidate: if isSafe -> place, recurse, unplace"
+      "7. Memoize the Recursion|Any DP problem (start here)|write f(state) recursively, add dp[state] = -1 init, return cached value if set"
+      "8. Tabulate + Space-Optimise|Turn memo into loops|base cases first, loop states in dependency order; keep only the previous row if dp[i] needs only dp[i-1]"
+      "9. Pick / Not-Pick on (i, target)|Subset sum, knapsack, coin change|not = f(i-1,t); pick = f(i-1,t-a[i]) (0/1) or f(i,t-a[i]) (unbounded)"
+      "10. Two-String Match/Skip|LCS, edit distance, wildcard|match -> f(i-1,j-1); else combine f(i-1,j), f(i,j-1) (and f(i-1,j-1) for replace)"
+      "11. Stock State Machine|Buy/sell stock I-VI|f(day, canBuy[, cap]) = max(buy/sell now, skip); fee/cooldown tweak one transition"
+      "12. Partition DP|MCM, burst balloons, cut stick|f(i,j) = best over k in i..j of f(i,k) + f(k+1,j) + cost(i,k,j)"
+    )
   else
     patterns=(
       "1. Exact Search (classic)|Find target X in sorted array|lo=0 hi=n-1; while lo<=hi; if arr[mid]==x return; else shrink"
@@ -1786,7 +2030,7 @@ main_menu() {
     echo "  [4]  Show All Problems"
     echo "  [5]  Progress Dashboard"
     echo "  [6]  Pattern Cheatsheet"
-    echo "  [7]  Switch Topic          (Arrays ⇄ Binary Search ⇄ Strings ⇄ Linked List)"
+    echo "  [7]  Switch Topic          (Arrays ⇄ Binary Search ⇄ Strings ⇄ Linked List ⇄ Recursion & DP)"
     echo "  [0]  Exit"
     echo ""
     local choice
@@ -1845,6 +2089,7 @@ switch_topic() {
   printf '  [2]  %bBinary Search%b   Step 4      · %s problems\n' "${CYAN}" "${NC}" "${#BS_PROBLEMS[@]}"
   printf '  [3]  %bStrings%b        Step 5      · %s problems\n' "${CYAN}" "${NC}" "${#STR_PROBLEMS[@]}"
   printf '  [4]  %bLinked List%b    Step 6      · %s problems\n' "${CYAN}" "${NC}" "${#LL_PROBLEMS[@]}"
+  printf '  [5]  %bRecursion & DP%b Step 7 + 16 · %s problems\n' "${CYAN}" "${NC}" "${#REC_PROBLEMS[@]}"
   echo "  [0]  Back"
   echo ""
   local c
@@ -1854,20 +2099,21 @@ switch_topic() {
     2) activate_topic bs ;;
     3) activate_topic str ;;
     4) activate_topic ll ;;
+    5) activate_topic rec ;;
     *) return ;;
   esac
 }
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────
 # Usage: dsa_tool.sh [topic] [mode]
-#   topic (optional): arr | arrays | bs | binary_search | str | strings | ll | linked_list
+#   topic (optional): arr | arrays | bs | binary_search | str | strings | ll | linked_list | rec | recursion | dp
 #   mode  (optional): next | group | difficulty | all | dashboard | cheatsheet
 # tasks.json passes just a mode, so a bare first arg is treated as the mode and
 # the topic falls back to the last-used one (.dsa_topic), defaulting to bs.
 main() {
   local first="${1:-}" topic_arg="" mode=""
   case "${first}" in
-    arr|arrays|bs|binary_search|str|strings|ll|linked_list) topic_arg="${first}"; mode="${2:-}" ;;
+    arr|arrays|bs|binary_search|str|strings|ll|linked_list|rec|recursion|dp|recursion_dp) topic_arg="${first}"; mode="${2:-}" ;;
     *)                                       mode="${first}" ;;
   esac
 
