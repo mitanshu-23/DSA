@@ -75,6 +75,11 @@ progress file; the last-used topic is remembered.
 
 > Each guide is a self-contained study companion: per-problem core ideas, LeetCode/GFG links, pattern cheatsheets, and a recommended solve order. All topics have a live `src/` module tree and per-topic progress tracking via `dsa_tool.sh` — generate each problem's Rust template on demand as you start it.
 
+## Algorithm Index & Notes
+
+- **[Algorithms.md](Algorithms.md)** — a cross-topic index of every named algorithm/technique used by a completed solution, grouped by technique rather than by topic. Each entry links the problem to its file and records what the review actually found: bugs caught and fixed (with before/after proof), edge cases verified, and how the implemented approach compares to the standard/optimal one.
+- **[notes/](notes/README.md)** — standalone write-ups of a technique or pattern that's reusable across many problems (the "why/how it works" layer), separate from each problem's own approach note.
+
 ## Build & Run
 
 ```bash

@@ -1,0 +1,495 @@
+# Algorithms Encountered — DSA Sheet
+
+An index of the named algorithms / notable techniques used across the
+completed solutions. Each section starts with a short description of the
+technique itself, followed by the problems that use it. Format per entry:
+
+```
+Problem Name — file path
+```
+
+Where a problem was solved with an approach that differs from its filename
+or in-file notes, that is called out with a `(note: ...)`.
+
+## Boyer-Moore (Moore's) Voting Algorithm
+
+Finds the majority element (one appearing more than n/⌈k⌉ times) in O(n)
+time and O(1) space by maintaining one or more candidate/count pairs:
+increment the count on a match, decrement on a mismatch, and swap in a new
+candidate when a count hits zero. A final verification pass confirms the
+surviving candidate(s) actually qualify.
+
+- Majority Element (n/2 times) — `src/arrays/group_06/medium/p16_majority_element_n_2_times.cpp`
+
+## Dutch National Flag Algorithm
+
+Partitions a collection into three buckets (e.g., 0s/1s/2s) in a single
+O(n) pass using three pointers (`low`, `mid`, `high`): elements equal to
+the pivot stay put, smaller ones swap toward `low`, larger ones swap toward
+`high`, without any extra space.
+
+- Sort Array of 0s, 1s, and 2s — `src/arrays/group_05/medium/p15_sort_array_of_0s_1s_and_2s.cpp`
+- Sort a LL of 0s, 1s, and 2s — `src/linked_list/group_05/medium/p20_sort_a_ll_of_0s_1s_and_2s.cpp` (same three-way partition, on linked-list chains instead of array swaps: build separate 0/1/2 chains in one pass by detaching and appending each node, then splice 0-chain -> 1-chain -> 2-chain, handling every combination of empty buckets explicitly. O(n) time, O(1) extra space — verified against every missing-bucket combination)
+
+## Two Pointers
+
+Two indices/cursors walk through a structure — often from both ends, or
+one ahead of the other — to avoid an O(n²) nested scan, typically
+exploiting sortedness or a read/write-cursor split to do the work in one
+O(n) pass with O(1) extra space.
+
+- Remove Duplicates from Sorted Array — `src/arrays/group_01/easy/p04_remove_duplicates_from_sorted_array.rs`
+- Move Zeros to End — `src/arrays/group_01/easy/p07_move_zeros_to_end.rs`
+- Find the Union of Two Sorted Arrays — `src/arrays/group_02/easy/p09_find_the_union_of_two_sorted_arrays.rs` (also .cpp)
+- Merge Two Sorted Arrays Without Extra Space — `src/arrays/group_02/hard/p35_merge_two_sorted_arrays_without_extra_space.rs` (note: active code is the 3-pointer merge-from-the-back, not the "Gap method" the notes mention)
+- 3Sum Problem — `src/arrays/group_05/hard/p30_3sum_problem.cpp` (sort + fix i + two pointers)
+- 4Sum Problem — `src/arrays/group_05/hard/p31_4sum_problem.cpp` (sort + fix i,j + two pointers)
+- Rearrange Array Elements by Sign — `src/arrays/group_10/medium/p20_rearrange_array_elements_by_sign.cpp` (two monotonic READ cursors, one per sign, gathering into a new vector; Theta(n) with 2n reads. note: the standard form is the dual — one sequential read pass with two WRITE cursors at 2j / 2j+1, n reads, ~3x faster measured; and `result` is never reserve()d. The file also carries rearrangeArray_worelativeorder: in-place slot filling by swaps, Theta(n) time / O(1) space, correct but NOT order-preserving, so it answers the GFG phrasing, not LC 2149. Both variants assume equal +/- counts and no zeros — a zero would be emitted twice since the two scans test `< 0` and `> 0`, which are not complements. see notes/two_pointers.md)
+
+## Sliding Window
+
+Maintain a contiguous window over the array, expanding the right edge and
+contracting the left edge based on a running condition (sum, count,
+distinct elements), so each element enters and leaves the window once —
+O(n) overall instead of re-scanning every window from scratch.
+
+- Minimum Size Subarray Sum (LC 209) — `src/arrays/group_04/medium/p13v_minimum_size_subarray_sum_lc209.rs`
+
+## Prefix Sum + HashMap
+
+Precompute running prefix sums (or prefix XORs) while storing each
+prefix's first-seen index or running count in a hashmap; a subarray with a
+target sum/XOR is found by looking up `prefix - target` among prior
+prefixes, turning an O(n²) subarray search into O(n).
+
+- Largest Subarray with Sum 0 — `src/arrays/group_04/hard/p32_largest_subarray_with_sum_0.cpp`
+- Longest Subarray with Sum K (Positives) — `src/arrays/group_04/medium/p13_longest_subarray_with_sum_k_positives.cpp` (note: notes say sliding window; code is prefix sum + hashmap)
+- Longest Subarray with Sum K (Positives + Negatives) — `src/arrays/group_04/medium/p14_longest_subarray_with_sum_k_positives_negatives.cpp`
+- Count Subarrays with Given Sum — `src/arrays/group_04/medium/p27_count_subarrays_with_given_sum.rs`
+- Count Subarrays with Given XOR K — `src/arrays/group_04/hard/p33_count_subarrays_with_given_xor_k.cpp` (prefix-XOR + hashmap)
+
+## XOR Trick
+
+Exploits `a ^ a = 0` and `a ^ 0 = a`: XOR-folding a set of values cancels
+out pairs, isolating whichever value doesn't have a partner (a missing
+number, a single non-duplicate, or the XOR of two "odd ones out" that can
+then be split by a differing bit).
+
+- Find Missing Number in an Array — `src/arrays/group_03/easy/p10_find_missing_number_in_an_array.rs` (XOR of indices vs elements)
+- Find the Number That Appears Once — `src/arrays/group_03/easy/p12_find_the_number_that_appears_once.rs` (XOR-fold; pairs cancel)
+- Find the Repeating and Missing Number — `src/arrays/group_03/hard/p36_find_the_repeating_and_missing_number.rs` (XOR, then split by a differing set bit)
+
+## Array Reversal Trick (rotation)
+
+Rotating an array by `d` places in O(1) extra space: reverse the first `d`
+elements, reverse the rest, then reverse the whole array — three
+reversals compose into the rotation.
+
+- Left Rotate an Array by One Place — `src/arrays/group_01/easy/p05_left_rotate_an_array_by_one_place.cpp`
+- Left Rotate an Array by D Places — `src/arrays/group_01/easy/p06_left_rotate_an_array_by_d_places.rs` (reverse [0,k), reverse [k,n), reverse all)
+
+## Next Permutation (lexicographic successor)
+
+Find the rightmost ascending pair `a[i] < a[i+1]` (the pivot), swap `a[i]`
+with the smallest suffix value greater than it, then reverse (or sort) the
+suffix to put it in ascending order — the smallest permutation strictly
+greater than the current one.
+
+- Next Permutation — `src/arrays/group_08/medium/p21_next_permutation.cpp` (pivot = rightmost a[i]<a[i+1], swap with smallest suffix value > pivot, then reorder suffix ascending; note: code sorts the suffix instead of the O(n) reverse — see notes/next_permutation.md)
+
+## Interval Merging (sort by start + sweep)
+
+Sort intervals by start time, then sweep left to right: extend the last
+kept interval's end if the next one overlaps it, otherwise start a new
+interval — O(n log n), dominated by the sort.
+
+- Merge Overlapping Subintervals — `src/arrays/group_08/hard/p34_merge_overlapping_subintervals.cpp` (sort by start; extend result.back() end via max when result.back().end >= next.start, else push; see notes/intervals.md)
+
+## HashMap Complement Lookup (Two Sum hashing)
+
+For each element, check whether its complement (`target - x`) has already
+been seen via a hashmap before inserting the current element — turns the
+classic O(n²) pair-search into a single O(n) pass.
+
+- 2Sum Problem — `src/arrays/group_05/hard/p39_2sum_problem.cpp` (one-pass hashmap for target - x; see notes/hashing.md)
+
+## Hash-Set Endpoint-Anchored Chain Scan (amortised O(n))
+
+Put all values in a hash set, then only start counting a consecutive run
+from a value whose predecessor (`x-1`) is absent — every element is
+visited as part of at most one run, giving amortised O(n) despite the
+nested-looking loop.
+
+- Longest Consecutive Sequence — `src/arrays/group_10/medium/p23_longest_consecutive_sequence.cpp` (hash map used as a set; count only from a chain endpoint — this file anchors at the TAIL, x+1 absent, and walks down, the mirror of the usual head-anchored form. Theta(n) amortised. note: the driving loop originally iterated nums rather than the deduplicated keys, making it Theta(n^2) — 7.7s at n=1e5; fixed 2026-08-24 by looping over the map, now 2.9ms. see notes/hashing.md §3)
+
+## Pascal's Triangle / Binomial Coefficients
+
+Each entry is the sum of the two entries above it
+(`C(r,k) = C(r-1,k-1) + C(r-1,k)`), so a full triangle can be built
+row-by-row in Θ(n²), or a single row can be built directly with a running
+product `C(r,k+1) = C(r,k)·(r-k)/(k+1)` in Θ(r).
+
+- Pascal's Triangle — `src/arrays/group_09/hard/p28_pascal_s_triangle.cpp` (each row from the previous via C(r,k)=C(r-1,k-1)+C(r-1,k); Theta(N^2), optimal. note: first version returned [[1]] for every input — the new row was never pushed into result AND the interior sum indexed with the outer loop variable i instead of j, two bugs that masked each other; both fixed 2026-08-24, verified against C(r,c) for all numRows 1..30. A dead generate_helper + result_n_1 member is still in the file. see notes/pascals_triangle.md)
+- (variant, not yet solved) single row / single element: C(r,k+1) = C(r,k)*(r-k)/(k+1) running product — Theta(r) time, Theta(1) space, no previous row needed; multiply BEFORE dividing or the integer division truncates. see notes/pascals_triangle.md §2
+
+## Max-Heap / Priority-Queue Greedy
+
+Repeatedly act on the current worst/largest element via a heap (e.g.,
+always split the largest gap), so each greedy step costs O(log n) instead
+of an O(n) linear scan to find the target element.
+
+- Minimise Maximum Distance Between Gas Stations — `src/binary_search/group_2/hard/p25_minimise_maximum_distance_between_gas_stations.rs` (note: lives in binary_search tree, but the implementation is a max-heap greedy that repeatedly splits the largest gap)
+
+## Binary Search (plain, on a sorted array)
+
+Repeatedly halve the search space by comparing the middle element to the
+target, discarding the half that can't contain it — O(log n) instead of a
+linear scan, requires the array to be sorted.
+
+- Binary Search to Find X in Sorted Array — `src/binary_search/group_1/easy/p01_binary_search_to_find_x_in_sorted_array.rs`
+- Linear Search — `src/arrays/group_01/easy/p08_linear_search.cpp` (note: filename says linear search; code actually implements binary search)
+- Single Element in a Sorted Array — `src/binary_search/group_1/medium/p12_single_element_in_a_sorted_array.rs` (even/odd index-pair parity)
+- Find Peak Element — `src/binary_search/group_1/medium/p13_find_peak_element.rs` (compare to neighbors)
+- Kth Missing Positive Number — `src/binary_search/group_2/easy/p20_kth_missing_positive_number.rs` (binary search on missing-count arr[i]-(i+1))
+- Find the Row with Maximum Number of 1s — `src/binary_search/group_3/easy/p28_find_the_row_with_maximum_number_of_1s.cpp` (per-row binary search for first 1)
+
+## Lower Bound / Upper Bound (binary search variants)
+
+Binary search for the first index where a predicate becomes true
+(`arr[i] >= x` for lower bound, `arr[i] > x` for upper bound) rather than
+for an exact match — the building block for first/last-occurrence and
+insert-position problems.
+
+- Implement Lower Bound — `src/binary_search/group_1/easy/p02_implement_lower_bound.rs`
+- Implement Upper Bound — `src/binary_search/group_1/easy/p03_implement_upper_bound.rs`
+- Search Insert Position — `src/binary_search/group_1/easy/p04_search_insert_position.rs` (lower-bound style)
+- Floor and Ceil in Sorted Array — `src/binary_search/group_1/easy/p05_floor_and_ceil_in_sorted_array.rs`
+- Find First and Last Occurrence — `src/binary_search/group_1/easy/p06_find_first_and_last_occurrence.rs`
+- Count Occurrences of a Number in Sorted Array — `src/binary_search/group_1/easy/p07_count_occurrences_of_a_number_in_sorted_array.rs` (last - first + 1)
+
+## Binary Search on a Rotated Sorted Array
+
+At each step, at least one half of the current range is guaranteed to be
+properly sorted; check whether the target lies within that sorted half's
+range and recurse there, otherwise recurse on the other half — still
+O(log n) despite the rotation.
+
+- Search in Rotated Sorted Array I (No Duplicates) — `src/binary_search/group_1/medium/p08_search_in_rotated_sorted_array_i_no_duplicates.rs`
+- Search in Rotated Sorted Array II (With Duplicates) — `src/binary_search/group_1/medium/p09_search_in_rotated_sorted_array_ii_with_duplicates.rs`
+- Minimum in Rotated Sorted Array — `src/binary_search/group_1/medium/p10_minimum_in_rotated_sorted_array.rs`
+
+## Binary Search on Answer (answer-space / parametric search)
+
+Binary search not over array indices but over the space of possible
+*answers* (a speed, a capacity, a distance), using a monotonic feasibility
+check (`can(mid)`) to decide which half of the answer range to keep —
+turns an optimization problem into O(log(range) × check-cost).
+
+- Find Square Root of a Number (Floor) — `src/binary_search/group_2/easy/p14_find_square_root_of_a_number_floor.rs`
+- Koko Eating Bananas — `src/binary_search/group_2/medium/p16_koko_eating_bananas.rs`
+- Minimum Days to Make M Bouquets — `src/binary_search/group_2/medium/p17_minimum_days_to_make_m_bouquets.rs`
+- Find the Smallest Divisor Given a Threshold — `src/binary_search/group_2/medium/p18_find_the_smallest_divisor_given_a_threshold.rs`
+- Capacity to Ship Packages Within D Days — `src/binary_search/group_2/medium/p19_capacity_to_ship_packages_within_d_days.rs`
+- Aggressive Cows — `src/binary_search/group_2/medium/p21_aggressive_cows.cpp`
+- Book Allocation Problem — `src/binary_search/group_2/medium/p22_book_allocation_problem.cpp`
+- Split Array - Largest Sum — `src/binary_search/group_2/hard/p23_split_array_largest_sum.rs`
+- Painter's Partition Problem — `src/binary_search/group_2/hard/p24_painter_s_partition_problem.rs`
+
+## Binary Search via Partition (median / kth of two sorted arrays)
+
+Binary search a partition point on the smaller array such that the
+combined left partition has exactly the right number of elements and
+`maxLeft <= minRight` on both sides — finds the median/kth element in
+O(log(min(m,n))) without merging the arrays.
+
+- Median of Two Sorted Arrays — `src/binary_search/group_2/hard/p26_median_of_two_sorted_arrays.rs` (partition the smaller array; maxLeft <= minRight)
+- Kth Element of Two Sorted Arrays — `src/binary_search/group_2/hard/p27_kth_element_of_two_sorted_arrays.cpp` (same partition method)
+
+## Binary Search in a 2D Matrix
+
+Treat a row-and-column-sorted matrix as a single sorted sequence (map a
+virtual index to `(i/cols, i%cols)`) and binary search it directly, or
+exploit the staircase property (start at a corner, eliminate a full
+row/column per step) for O(m+n).
+
+- Search in a 2D Matrix — `src/binary_search/group_3/medium/p29_search_in_a_2d_matrix.rs` (flatten to 1D; mid/cols, mid%cols)
+- Find Peak Element in 2D Matrix — `src/binary_search/group_3/hard/p31_find_peak_element_in_2d_matrix.rs` (binary search on columns, pick global-max row)
+
+## Matrix In-Place Manipulation (markers, layer cycles, boundaries)
+
+Mutate a matrix without extra space by reusing part of the matrix itself
+as markers (e.g., row 0/column 0), decomposing a rotation into independent
+4-cycles per layer, or walking a spiral via four shrinking boundary
+indices.
+
+- Set Matrix Zeros — `src/arrays/group_09/medium/p24_set_matrix_zeros.cpp` (note: solved with O(m+n) row/col marker maps, not the O(1) first-row/first-column trick; two passes — record then apply)
+- Rotate Matrix by 90 Degrees — `src/arrays/group_09/medium/p25_rotate_matrix_by_90_degrees.cpp` (note: layer-by-layer 4-cycle on (i,j)→(j,n-1-i), not the transpose+reverse-rows hint; fewer writes)
+- Spiral Traversal of a Matrix — `src/arrays/group_09/medium/p26_spiral_traversal_of_a_matrix.cpp` (note: walker + -101 visited sentinel instead of the standard four shrinking boundaries; -101 is safe because the problem guarantees -100 <= a[i][j] <= 100. Destroys the input matrix)
+
+## Merge Sort — Counting Cross-Pairs
+
+Fold a counting step (inversions, reverse pairs) directly into merge
+sort's merge step: because both halves are already sorted, the number of
+cross-half pairs satisfying a condition can be counted in the same
+O(n log n) pass instead of an O(n²) brute force.
+
+- Count Inversions — `src/arrays/group_11/hard/p37_count_inversions.cpp` (count folded directly into the merge comparison; halves kept sorted descending by construction — see notes/divide_and_conquer_counting.md)
+- Reverse Pairs — `src/arrays/group_11/hard/p38_reverse_pairs.cpp` (condition not monotonic with the merge comparison, so counted in a separate two-pointer prescan before merging; same descending-order convention as p37)
+
+## Depth Counter (Bracket Nesting)
+
+Track nesting depth with a single counter (increment on open, decrement on
+close); the depth transitions (0→1, 1→0) or running maximum directly
+answer "is this the outermost bracket" or "what's the maximum nesting" in
+one O(n) pass.
+
+- Remove Outermost Parentheses — `src/strings/group_01/easy/p01_remove_outermost_parentheses.cpp` (skip exactly the char where open-count transitions 0->1 or 1->0; keep everything else)
+- Maximum Nesting Depth of Parentheses — `src/strings/group_01/easy/p09_maximum_nesting_depth_of_parentheses.cpp` (same open-count as p01; track its running max instead of skipping chars)
+
+## Word Reversal (word order vs. per-word reversal)
+
+Two related but distinct operations on whitespace-separated words:
+reversing the *order* of words (split, reverse the list, rejoin — or
+reverse the whole string then re-reverse each word in place) versus
+reversing the *characters within* each word while keeping their order.
+
+- Reverse Words in a String — `src/strings/group_02/easy/p02_reverse_words_in_a_string_palindrome_check.cpp` (reverseWords: right-to-left scan building each word into a temp buffer; reverseWordsOrderStd: the standard reverse-whole-string-then-reverse-each-word-back trick, O(n) time / O(1) extra, single pass compacts spaces via read/write cursors. note: filename and problem-statement docstring also cover Valid Palindrome (LC 125), but no palindrome-check function is implemented in this file — that half is a documentation gap, not a solved problem)
+- Reverse Every Word in a String — `src/strings/group_02/medium/p15_reverse_every_word_in_a_string.cpp` (mirror of p02: reverses each word's own characters in place, keeps word ORDER unchanged; three variants in file, including an in-place two-pointer-per-word version)
+
+## Bijective (Two-Way) Character Mapping
+
+Maintain two maps (forward and backward) between characters of two
+strings, checking both directions on every pair, so a character can't map
+to two different targets in either direction — the standard structure for
+isomorphism-style checks.
+
+- Isomorphic Strings — `src/strings/group_03/easy/p05_isomorphic_strings.cpp` (two maps s->t and t->s checked in both directions per pair, so a char can't map to two different targets in either direction)
+
+## 26-Slot Frequency Array (fixed-size alternative to a hashmap for lowercase ASCII)
+
+For lowercase-ASCII-only inputs, a fixed-size `int[26]` array is a faster,
+allocation-free substitute for a hashmap when counting or comparing
+character frequencies.
+
+- Check if Two Strings are Anagram — `src/strings/group_03/easy/p07_check_if_two_strings_are_anagram.cpp` (increment for s, decrement for t; all-zero means anagram)
+- Sum of Beauty of All Substrings — `src/strings/group_06/medium/p14_sum_of_beauty_of_all_substrings.cpp` (for each start, expand right maintaining a 26-slot freq array; beauty = max_freq - min_nonzero_freq per substring; Theta(26*n^2). File also carries SolutionStandard, a single manual 26-loop replacing the original's two separate STL max_element/min_element scans — same complexity, ~2x fewer comparisons)
+
+## Frequency + Sort
+
+Count each character's frequency, then sort characters by that frequency
+(descending) and rebuild the output — turns "arrange by frequency" into a
+counting pass plus a sort.
+
+- Sort Characters by Frequency — `src/strings/group_03/medium/p08_sort_characters_by_frequency.cpp` (build a frequency map, sort characters descending by count, rebuild the string; three variants in file)
+
+## Shrinking Candidate Prefix
+
+Start with the first string as the candidate common prefix, then shrink
+it character-by-character whenever a later string doesn't start with the
+current candidate — O(n·m) in the worst case but simple and exits early.
+
+- Longest Common Prefix — `src/strings/group_04/easy/p04_longest_common_prefix.cpp` (take the first string as candidate, shrink it while a later string doesn't start with it; O(n*m))
+
+## String Concatenation Trick (rotation check via s+s)
+
+A string `t` is a rotation of `s` if and only if `t` is a substring of
+`s+s` (and they're the same length) — reduces a rotation check to a
+single substring search.
+
+- Check if One String is a Rotation of Another — `src/strings/group_04/easy/p06_check_if_one_string_is_a_rotation_of_another.cpp` (goal is a rotation of s iff goal is a substring of s+s and lengths match. note: file also carries rotateStringKMP, a KMP-based substring search — KMP itself is nominally a Step 18/deferred topic, but a working instance already exists here)
+
+## Parsing / Simulation
+
+Walk the input left to right applying the problem's stated rules directly
+(digit-by-digit arithmetic, symbol-value lookups, sign/overflow handling)
+rather than a named algorithm — correctness comes from covering every edge
+case the rules imply.
+
+- Roman Number to Integer and Vice Versa — `src/strings/group_05/medium/p10_roman_number_to_integer_and_vice_versa.cpp` (Roman->Int: left-to-right, subtract when current value < next value, else add. Int->Roman: greedy descending value-symbol table)
+- Implement atoi — `src/strings/group_05/medium/p11_implement_atoi_string_to_integer.cpp` (trim, optional sign, digits, clamp to i32 range; overflow check placed after the multiply, made safe only because the loop returns the instant the accumulator reaches INT_MAX — see file's approach note history for the full invariant)
+
+## AtLeast(K) / AtMost(K) Two-Pointer (exactly-K via subtracting two monotonic counts)
+
+"Exactly K" conditions are often not monotonic in window size and so don't
+support a direct two-pointer scan, but "at least K" / "at most K" are
+monotonic — compute `exactly(K) = atLeast(K) - atLeast(K+1)` (or the
+`atMost` equivalent), each sub-count being its own O(n) sliding window.
+
+- Count Number of Substrings with K Distinct Characters — `src/strings/group_06/hard/p12_count_number_of_substrings_with_k_distinct_characters.cpp` (exactly(K) = atLeast(K) - atLeast(K+1); each atLeast(k) is its own O(n) two-pointer sliding window since "at least k distinct" is monotonic in window size, unlike "exactly k". note: the file's own "Core Idea" comment says atMost(K)-atMost(K-1) — that's stale/inaccurate; the implemented helper_more() computes atLeast, confirmed by code review and a 3000-case brute-force stress test. Also: the problem-statement docstring's Example 2 (`"aba", k=1 -> 4`) is itself wrong — correct answer is 3, confirmed independently by hand-enumeration, brute force, and a from-scratch atMost(K)-atMost(K-1) reference implementation, all agreeing with what the code actually returns)
+
+## Expand Around Center (Palindrome)
+
+For every possible center (each index, and each gap between indices, to
+cover odd and even length), expand outward while the characters on both
+sides match — Θ(n²) worst case but simple; Manacher's algorithm achieves
+the same result in O(n) using a mirror-radius array.
+
+- Longest Palindromic Substring — `src/strings/group_06/medium/p13_longest_palindromic_substring.cpp` (two separate passes — odd-length centers, then even-length centers — expanding outward while characters match; Theta(n^2) worst case, O(1) extra space. File also carries SolutionStandard, the textbook single-loop version over 2n-1 virtual centers (same complexity), and SolutionManacher, the O(n) linear-time algorithm using a mirror-radius array — both verified against a brute-force oracle)
+
+## Linked List Construction (running tail pointer)
+
+Build a new list by tracking both the head and a running tail pointer;
+append each new node to the tail's `next` and advance the tail, avoiding
+the O(n) "walk to the end" cost on every insertion.
+
+- Introduction to Singly LL / Insert at Head — `src/linked_list/group_01/easy/p01_introduction_to_singly_ll_insert_at_head.cpp` (single pass over the array: track `head` and a running `last` tail pointer, append each new node to `last->next`. note: the problem-statement header says "insert at head," but the actual GFG judge behind this link is "array → linked list" (`arrayToList`) — the code correctly targets the real judge problem, the mismatch is only in the scaffolded description text)
+- Introduction to DLL / Insert Before Head — `src/linked_list/group_02/easy/p06_introduction_to_dll_insert_before_head.cpp` (identical running-tail pattern as p01, extended to also wire each new node's `prev` back to the tail. note: header now carries the real GFG statement "Doubly Linked List from an Array" with its actual constraint `1 <= length <= 10^5` — an initial review flagged `arr[0]` as a crash on empty input, confirmed via AddressSanitizer, but that's moot once the real non-empty constraint is in effect)
+
+## Delete Node via Value-Copy (no predecessor access)
+
+When given only the node to delete (not its predecessor), copy the next
+node's value into the current node, then splice the next node out — valid
+only when the given node is guaranteed not to be the last one.
+
+- Deletion of the Head of LL — `src/linked_list/group_01/easy/p03_deletion_of_the_head_of_ll.cpp` (classic LC 237 trick: with no way to reach the predecessor, copy the next node's value into the current node, then splice the next node out. Only valid because the problem guarantees the given node is never the last one — verified by test: deleting the node holding 5 from `4->5->1->9` yields `4->1->9`)
+
+## Doubly Linked List Reversal (swap prev/next per node)
+
+Walk the list once, swapping each node's `prev` and `next` pointers; the
+old tail becomes the new head once every node has been visited.
+
+- Reverse a Doubly Linked List — `src/linked_list/group_02/medium/p08_reverse_a_doubly_linked_list.cpp` (walk the list once, swap each node's `next`/`prev`, return the old tail as the new head. note: the first version never advanced past the head node — it saved `next` into a temp but then checked the loop condition against `temp->next`, which had just been overwritten by the swap, so only the head node was ever touched and the function was a complete no-op (verified: reversing `1<->2<->3<->4<->5` returned it unchanged). Fixed 2026-10-06 by advancing `temp` to the saved `next` pointer at the end of the loop body; re-verified correct — forward AND backward traversal — on odd-length, even-length, 2-node, and 1-node lists)
+
+## Slow / Fast Pointer (Floyd's Tortoise and Hare)
+
+Two pointers advance through a list at different speeds (1 step vs. 2);
+this single setup finds the middle (fast reaches the end first), detects a
+cycle (they must meet inside one), and — with a second phase resetting one
+pointer to the head — locates the cycle's entry point.
+
+- Find the Middle of a Linked List — `src/linked_list/group_03/easy/p09_find_the_middle_of_a_linked_list.cpp` (slow advances 1 step, fast advances 2; when fast (or fast->next) hits null, slow is at the middle. Returns the second of the two middle nodes for even-length lists, matching LC 876's definition exactly — verified for both odd and even lengths. This is the anchor pattern for the rest of the Linked List slow/fast cluster: cycle detection, palindrome check, delete-the-middle-node, remove-nth-from-end)
+- Detect a Cycle in a Linked List — `src/linked_list/group_03/medium/p12_detect_a_cycle_in_a_linked_list.cpp` (reference form of Floyd's phase 1: fast gains 2 steps to slow's 1, net gap closure of 1 per iteration once both are inside the cycle, so they must coincide within at most one lap)
+- Find the Starting Point of a Cycle — `src/linked_list/group_03/medium/p13_find_the_starting_point_of_a_cycle.cpp` (phase 2: after the phase-1 meeting point, reset one pointer to head and advance both by 1 step — they meet at the cycle entry because distance(head, entry) ≡ distance(meeting point, entry) mod cycle-length)
+- Length of Loop in LL — `src/linked_list/group_03/medium/p14_length_of_loop_in_ll.cpp` (from the phase-1 meeting point, hold one pointer fixed and count steps until the other returns to it. note: the first version advanced `fast` by only one step instead of two in phase 1, so `slow == fast` was true after the very first iteration on ANY list with 2+ nodes regardless of a real cycle — confirmed crashing on a plain acyclic `1->2->3`. Fixed 2026-10-08 — `fast = fast->next->next;` — re-verified on acyclic, cyclic, single-node, and empty lists)
+- Delete the Middle Node of LL — `src/linked_list/group_03/medium/p18_delete_the_middle_node_of_ll.cpp` (same slow/fast skeleton, with a third pointer trailing one step behind slow so the predecessor is available to splice out; correctly returns null for a single-node list rather than the untouched node)
+
+## Fast Pointer N-Ahead (fixed-gap two-pointer)
+
+Advance one pointer N steps ahead of the other first, then move both
+together until the lead pointer falls off the end — the trailing pointer
+lands exactly N nodes from the end in a single pass, no length
+pre-computation needed.
+
+- Remove Nth Node from the End of a List — `src/linked_list/group_03/medium/p17_remove_nth_node_from_the_end_of_a_list.cpp` (walk a pointer n steps ahead first; if that runs off the end exactly, the head itself is the target; otherwise advance both pointers together until the lead one reaches the last node, leaving the trailing one just before the target)
+
+## Three-Pointer / Recursive Linked List Reversal
+
+Reverse a list's links in place using `prev`/`curr`/`next` pointers
+(iteratively), or equivalently by recursing to the tail first and hooking
+each node's `next` back as the recursion unwinds — both rewire every link
+exactly once, O(n) time.
+
+- Reverse a Linked List (Iterative) — `src/linked_list/group_04/medium/p10_reverse_a_linked_list_iterative.cpp` (three-pointer rewiring, one link per step. note: the empty-list guard originally checked `head->next` without first checking `head` itself, crashing on `reverseList(nullptr)` — confirmed by an actual segfault. Fixed 2026-10-08 by adding the `head == nullptr` check; re-verified on empty, single-node, and multi-node lists)
+- Reverse a Linked List (Recursive) — `src/linked_list/group_04/medium/p11_reverse_a_linked_list_recursive.cpp` (recurse to the tail first, then hook `head.next.next = head` and cut `head.next` on the way back up; the new head is threaded back via a class-member side-channel set once in the base case, rather than through the recursive return value — correct, but see the file's approach note for a variant that returns the new head directly instead)
+- Reverse Nodes in K-Group — `src/linked_list/group_04/hard/p27_reverse_nodes_in_k_group.cpp` (count k nodes ahead before committing to reverse a group — a short final group is left untouched; each full group is reversed via the same recursive skeleton as p11, applied per-group rather than to the whole list, then the caller relinks groups using the saved original head/tail of each. note: the recursive helper's return value is actually dead code — the in-group reversal happens entirely as a side effect of the recursion, and the caller re-derives the correct links itself from the group's original head/tail; functionally correct, verified on both of the file's own examples plus k=1, k=length, and a single node — see the approach note for the return-value subtlety and a cleaner variant)
+- Add One to a Number Represented by LL — `src/linked_list/group_05/medium/p22_add_one_to_a_number_represented_by_ll.cpp` (reversal used as a building block rather than the end goal: reverse to get least-significant-digit-first, walk zeroing every 9 while propagating the +1 carry until a non-9 digit absorbs it, prepend a new leading node if the carry runs off the end, then reverse back. Verified on the carry-overflow case, a partial-carry case, a no-carry case, and the degenerate `[0]` input)
+
+## Auxiliary Stack (LIFO comparison)
+
+Push a sequence of values onto a stack so they naturally come back out in
+reverse order, then compare them against a forward traversal — a valid
+O(n) *extra space* alternative to an O(1)-space in-place technique when
+mutating the structure isn't desired.
+
+- Check if LL is Palindrome — `src/linked_list/group_03/medium/p15_check_if_ll_is_palindrome.cpp` (push the first half's values onto a stack, skip the middle node on odd length, then compare the second half against values popped off the stack — correct, O(n) time / O(n) space; trades the O(1)-space "reverse the second half in place" standard approach for not needing to mutate-then-restore the list's links)
+
+## Two-Chain Partition (index parity)
+
+Split a single pass over a list into two parallel chains based on a
+parity condition (odd/even index, or a value test), appending each node to
+the appropriate chain's tail, then splice the chains back together — O(1)
+extra space, one pass.
+
+- Segregate Odd and Even Nodes in LL — `src/linked_list/group_05/medium/p16_segregate_odd_and_even_nodes_in_ll.cpp` (maintain separate odd-chain and even-chain tail pointers while traversing once, alternating which chain each node is appended to, then splice the even chain onto the end of the odd chain; O(1) extra space, matching the problem's own requirement. Verified against both of the file's own examples plus empty/1-node/2-node lists)
+
+## DLL In-Place Rewiring (prev/next kept consistent on both sides)
+
+Every insert or delete on a doubly linked list must update both the
+forward (`next`) and backward (`prev`) links around the affected node(s);
+tracking "the last kept node" (rather than the literal previous node)
+handles runs of consecutive deletions cleanly.
+
+- Delete All Occurrences of a Key in DLL — `src/linked_list/group_06/hard/p24_delete_all_occurrences_of_a_key_in_dll.cpp` (tracks the last KEPT node rather than the original predecessor, with a dedicated branch for skipping leading matches before any node has been kept yet — correctly collapses runs of consecutive matches and empties the list entirely when every node matches. Both next and prev links verified consistent by walking a result backward from its tail)
+- Remove Duplicates from Sorted DLL — `src/linked_list/group_06/hard/p26_remove_duplicates_from_sorted_dll.cpp` (adjacent-run scan exploiting sortedness: an inner loop skips an entire run of equal values before splicing `prev->next` past all of them at once, correctly collapsing a run of any length down to its first node. note: crashes on an empty list — `headRef->data` is dereferenced with no null check on the very first line, and the file's own constraints explicitly allow `0 <= length <= 300`; confirmed via an actual segfault. Needs a one-line `if (headRef == nullptr) return nullptr;` guard)
+
+## Two-Pointer Narrowing on a Sorted DLL (both ends inward)
+
+With a sorted doubly linked list's O(1) backward traversal, two pointers
+starting at the head and tail move inward based on a sum/comparison check
+— the DLL equivalent of the sorted-array two-pointer technique, which a
+plain singly linked list can't support.
+
+- Find Pairs with Given Sum in Sorted DLL — `src/linked_list/group_06/medium/p25_find_pairs_with_given_sum_in_sorted_dll.cpp` (first/last pointers start at the two ends; move last backward when the sum is too high, first forward when too low, and move both inward on a match — breaking immediately once they'd cross or coincide. Matches both of the file's own examples and correctly excludes an odd list's middle element from pairing with itself. note: crashes on an empty list (`last->next` dereferenced with no null check before the main loop) — confirmed via an actual segfault; whether this is in-scope depends on the real GFG judge's constraint, which the stored problem statement doesn't pin down (unlike p06/p07, where the real constraint was later found to exclude the crashing input entirely). Also worth knowing: with duplicate values on both sides it reports one pair per two-pointer pass rather than every index-combination that happens to sum to target — this is the expected behavior of the canonical technique, not a divergence)
+
+## Merge Sort on a Linked List (position-counted, not physically split)
+
+The standard merge-sort-on-a-list shape (find the middle, recurse on each
+half, merge) can be driven either by physically cutting the list in two
+(`mid->next = nullptr`) or by threading explicit position/count ranges
+through the recursion so each merge knows exactly how many nodes to
+consume from each side.
+
+- Sort a Linked List (Merge Sort) — `src/linked_list/group_07/hard/p19_sort_a_linked_list_merge_sort.cpp` (a non-textbook but correct variant: instead of physically cutting the list in half with `mid->next = nullptr`, recursion is driven entirely by 1-indexed `(start, end)` position ranges, and `merge` is told exactly how many nodes to consume from each side (`left_count`/`right_count`) rather than relying on `nullptr` termination — the stale `.next` pointers left over from before each merge are simply never read past their count, and `merge`'s own `prev->next = nullptr` at the end always fixes the final terminator. Verified against both of the file's own examples, a battery of edge cases (empty, single node, all-equal, already-sorted, reverse-sorted at odd and even lengths), and a 2000-trial randomized stress test against `std::sort` with zero mismatches)
+
+## Linked List Intersection (length difference / redirect to other head)
+
+Either compute both lengths and advance the longer list's pointer by the
+difference before walking both together, or redirect each pointer to the
+other list's head the moment it runs out — both make the two pointers
+travel the same total distance before meeting at the intersection (or both
+reaching null).
+
+- Find the Intersection of Two Linked Lists — `src/linked_list/group_08/medium/p21_find_the_intersection_of_two_linked_lists.cpp` (count both lengths, advance the longer list's pointer by the difference, then walk both together until they coincide. note: the "advance by the difference" loop originally never decremented its counter (`while (diff > 0) { tempA = tempA->next; }` — no `diff--`), so it ran off the end of the list and crashed on ANY pair of different-length lists, including the file's own Example 1 (lengths 5 and 6); confirmed via an actual segfault, then fixed 2026-10-19 by adding `diff--;` to both branches — re-verified on both of the file's own examples, equal-length, and B-longer-than-A. The redirect-to-other-head two-pointer trick (`a = a ? a->next : headB; b = b ? b->next : headA;` until `a == b`) is the equivalent standard technique that needs no length pre-computation at all — also verified correct)
+
+## Interleave Clone (random-pointer linked list)
+
+To deep-copy a list with an extra `random` pointer in O(1) extra space,
+splice a clone directly after each original node, wire each clone's
+`random` off the interleaved pair (`curr->random->next`), then split the
+interleaved pairs back into two separate lists.
+
+- Clone a Linked List with Random Pointer — `src/linked_list/group_08/hard/p30_clone_a_linked_list_with_random_pointer.cpp` (hashmap approach: associate each original node with its clone, then resolve `random` through that map. note: the first pass's loop — building the clone chain — originally never advanced its own loop variable (`while (given_temp != nullptr) { ... }` with no `given_temp = given_temp->next;`), so it ran forever allocating nodes for any list with 2+ nodes; confirmed hanging (killed after a 5s timeout), then fixed 2026-10-19 by adding the missing advance — re-verified on the file's own example (correct values, correct random-pointer targets, a genuine deep copy), a single-node list, and an empty list. The file's own hints name the asymptotically-better interleave trick (clone spliced in directly after each original, random wired off the interleaved pair, then the two lists split apart) as the intended O(1)-extra-space technique — also implemented and verified against the file's own example: same results, with the original list's links fully restored afterward)
+
+## Rotate via Split-and-Reattach (length normalisation + pivot cut)
+
+Normalize `k` to `k % length` (rotating by the full length is a no-op),
+walk to the new pivot node, cut the link just before it, and reattach the
+old tail to the old head — turns a rotation into cutting and rejoining two
+segments.
+
+- Rotate a Linked List — `src/linked_list/group_09/hard/p28_rotate_a_linked_list.cpp` (count the length, normalise k to k % length, walk to the new pivot, then join the old tail back to the old head. note: two bugs were found and fixed 2026-10-21 — (1) `k % len` divided by zero on an empty list despite the file's own constraint explicitly allowing `0 <= length <= 500` (confirmed via a SIGFPE), fixed with an `if (head == nullptr || head->next == nullptr) return head;` guard; (2) the node just before the pivot was never cut from it, so the "rotated" list looped back through that stale link and never terminated (confirmed by a capped traversal cycling `4 5 1 2 3 4 5 1 2 3 ...`), fixed by tracking that node during the pivot walk and nulling its `next`. Re-verified: both of the file's own examples, empty/single-node, k=0, k as an exact multiple of length, and a 1000-trial randomized stress test against a naive rotation reference, all passing)
+
+## Flatten via Repeated Pairwise Merge vs. Divide-and-Conquer
+
+Flattening a list-of-sorted-lists (via `next` and a second `down`/`child`
+pointer) reduces to repeated two-way merging of columns: either fold
+columns in one at a time (closer to O(k²) in column count) or recursively
+split and merge the column list divide-and-conquer style (O(n log k)) —
+correctness in either case depends on the two-way merge comparing both
+heads, not assuming one is already smaller.
+
+- Flatten a Linked List (Next + Down Pointers) — `src/linked_list/group_09/hard/p29_flatten_a_linked_list_next_down_pointers.cpp` (two implementations sharing one `flatten_two` merge routine. `Solution` — originally an insertion-sort-like left-to-right rescan, rewritten 2026-10-21 into a stack-based right-to-left pairwise merge (push every column, repeatedly pop the top two and merge, push the result back) — this also fixed two earlier bugs (length-counting loop that never advanced; `flatten_two`'s merge condition using `||` instead of `&&` with no drain loops, confirmed null-dereferencing). `Solution2` — divide-and-conquer (slow/fast middle-split, recursive flatten, merge), asymptotically better at O(n log k) vs. `Solution`'s O(k²) in column count k. note: `flatten_two`'s `Node *smallest = ll1;` (committing to `ll1`'s head before ever comparing it to `ll2`'s) was initially flagged as a bug using test data where column order along `next` was independent of column head values — that's not a valid input for this problem, which guarantees the 2D structure sorted both horizontally (column heads non-decreasing along `next`, matching the file's own worked example `5→10→19→28`) and vertically (each column along `bottom`). Under that real guarantee the shortcut is provably correct — for any contiguous split of columns, the left group's minimum is always its first column's head, which is ≤ the right group's minimum by the same argument, so `ll1`'s head is always ≤ `ll2`'s head at every call site in both classes. Re-verified with a 5000-trial randomized stress test building columns that respect both guarantees: both `Solution` and `Solution2`, exactly as they stand, ALL PASSED)
+
+## Other techniques (no specific named algorithm)
+
+Problems solved without a reusable named pattern — usually a direct
+single-pass scan or observation specific to that problem.
+
+- Largest Element in an Array — `src/arrays/group_01/easy/p01_largest_element_in_an_array.rs` (single-pass running max)
+- Second Largest Element Without Sorting — `src/arrays/group_01/easy/p02_second_largest_element_without_sorting.rs` (also .cpp) (single-pass tracking)
+- Check if the Array is Sorted — `src/arrays/group_01/easy/p03_check_if_the_array_is_sorted.rs` (adjacent-pair scan)
+- Maximum Consecutive Ones — `src/arrays/group_03/easy/p11_maximum_consecutive_ones.rs` (single-pass running count)
+- Largest Odd Number in a String — `src/strings/group_01/easy/p03_largest_odd_number_in_a_string.cpp` (right-to-left scan, stop at the first odd digit)
+- Find the Length of a Linked List — `src/linked_list/group_01/easy/p04_find_the_length_of_a_linked_list.cpp` (single-pass counter; walks to null)
+- Search in a Linked List — `src/linked_list/group_01/medium/p05_search_in_a_linked_list.cpp` (linear scan, early-exit the moment a node matches)
+- Delete Head of Doubly Linked List — `src/linked_list/group_02/easy/p07_delete_head_of_doubly_linked_list.cpp` (advance past the old head, clear the new head's `prev`. note: an initial version crashed — null-dereferenced `head->next->prev` on a single-node list, confirmed via an actual segfault — resolved once the problem's real constraint was clarified to `size >= 2`, which puts that input out of scope)
+
+## Not yet implemented (empty / stub / broken)
+
+- Insertion at the Head of a Linked List — `src/linked_list/group_01/easy/p02_insertion_at_the_head_of_a_linked_list.cpp` (empty `// TODO: implement` stub; same operation as p01, meant to be practiced standalone)
+- Find the Repeating and Missing Number (.cpp) — `src/arrays/group_03/hard/p36_find_the_repeating_and_missing_number.cpp` (TODO; .rs version is done)
+- Largest Subarray with Sum 0 (.rs) — `src/arrays/group_04/hard/p32_largest_subarray_with_sum_0.rs` (stub; .cpp version is done)
+- 4Sum Problem (.rs) — `src/arrays/group_05/hard/p31_4sum_problem.rs` (broken stub; .cpp version is done)
+- How Many Times Array Has Been Rotated — `src/binary_search/group_1/easy/p11_how_many_times_array_has_been_rotated.rs` (todo!())
+- Find the Nth Root of a Number — `src/binary_search/group_2/easy/p15_find_the_nth_root_of_a_number.cpp` (empty body)
+- Search in Row-wise and Column-wise Sorted Matrix — `src/binary_search/group_3/medium/p30_search_in_row_wise_and_column_wise_sorted_matrix.rs` (todo!(); intended: Staircase Search from top-right)

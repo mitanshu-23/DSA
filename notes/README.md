@@ -10,7 +10,7 @@ works" layer — kept separate from the solution code and from per-problem revie
 |-------|---------------|
 | `src/**/pNN_*.rs \| .cpp` | The actual solutions (co-located per problem). |
 | `src/**/pNN_*_approach.md` | Per-problem approach notes + my reviews (see `APPROACH_REVIEW.md`). |
-| `Algorithms.txt` | Flat index of which named algorithm each *solved* problem uses. |
+| `Algorithms.md` | Flat index of which named algorithm each *solved* problem uses — plus, per entry, what the review actually found: bugs caught and fixed (with before/after proof), edge cases checked, and how the implemented approach compares to the standard/optimal one. |
 | **`notes/` (here)** | Standalone write-ups of a technique/pattern/concept, reusable across many problems. |
 
 So: a one-off "how I solved p17" goes in that problem's `_approach.md`; a general
