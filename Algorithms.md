@@ -470,6 +470,36 @@ heads, not assuming one is already smaller.
 
 - Flatten a Linked List (Next + Down Pointers) — `src/linked_list/group_09/hard/p29_flatten_a_linked_list_next_down_pointers.cpp` (two implementations sharing one `flatten_two` merge routine. `Solution` — originally an insertion-sort-like left-to-right rescan, rewritten 2026-10-21 into a stack-based right-to-left pairwise merge (push every column, repeatedly pop the top two and merge, push the result back) — this also fixed two earlier bugs (length-counting loop that never advanced; `flatten_two`'s merge condition using `||` instead of `&&` with no drain loops, confirmed null-dereferencing). `Solution2` — divide-and-conquer (slow/fast middle-split, recursive flatten, merge), asymptotically better at O(n log k) vs. `Solution`'s O(k²) in column count k. note: `flatten_two`'s `Node *smallest = ll1;` (committing to `ll1`'s head before ever comparing it to `ll2`'s) was initially flagged as a bug using test data where column order along `next` was independent of column head values — that's not a valid input for this problem, which guarantees the 2D structure sorted both horizontally (column heads non-decreasing along `next`, matching the file's own worked example `5→10→19→28`) and vertically (each column along `bottom`). Under that real guarantee the shortcut is provably correct — for any contiguous split of columns, the left group's minimum is always its first column's head, which is ≤ the right group's minimum by the same argument, so `ll1`'s head is always ≤ `ll2`'s head at every call site in both classes. Re-verified with a 5000-trial randomized stress test building columns that respect both guarantees: both `Solution` and `Solution2`, exactly as they stand, ALL PASSED)
 
+## Fast (Binary) Exponentiation
+
+Compute `x^n` in O(log n) multiplications by halving the exponent each
+step: `x^n = (x²)^(n/2)`, with one extra factor of `x` when `n` is odd.
+It can be written recursively (square the base, or square the half-result)
+or iteratively over the bits of `n`. A negative `n` is handled by inverting,
+and `n = INT_MIN` needs care because `-INT_MIN` overflows `int`.
+
+- Pow(x, n) — `src/recursion_dp/group_01/medium/p01_pow_x_n.cpp` (recursive "square the base" form: `myPow(x*x, n/2)`, times `x` when odd. Negative `n` uses `x^n = 1/x^(-n-1) · 1/x`, which sidesteps the `-INT_MIN` overflow without a 64-bit exponent. Verified: both examples, `n = INT_MIN` / `INT_MAX` with x = ±1, 2, and 200000 random cases vs `std::pow` under ASan/UBSan, all passing. The iterative O(1)-space bit loop is documented in the approach note as the standard alternative)
+
+## Backtracking — Validity-Gated Path Building
+
+Build an answer one choice at a time on a shared path. Only recurse into a
+choice that keeps the partial path valid, record the path at the base
+case, and undo the choice after the call returns (push → recurse → pop).
+Pruning invalid prefixes early means every leaf is a valid answer, so
+nothing has to be filtered afterwards.
+
+- Generate Parentheses — `src/recursion_dp/group_01/medium/p02_generate_parentheses.cpp` (state `(n = '(' left, opens = unmatched '(')`: add `(` while `n > 0`, add `)` while `opens > 0`, record when both are 0. Output comes out in lexicographic order. Verified: n=1..8 counts equal the Catalan numbers, every string unique and balanced. Style notes, not bugs: `temp` is passed by value, so the push/pop pairs are redundant, and the `result` member is never cleared, so it accumulates if one object is reused, which LeetCode doesn't do)
+
+## Recursion as an Implicit Stack (insert at bottom)
+
+Use each call frame's local variable as the storage slot of an explicit
+stack: pop an element, recurse on the rest, then do the real work with the
+held element *after* the call returns. Reversing or sorting a stack this
+way needs a second recursion, `insert_at_bottom` / `insert_sorted`, giving
+O(n²) time with no extra data structure.
+
+- Reverse a Stack — `src/recursion_dp/group_01/easy/p05_reverse_a_stack.cpp` (pop `last` → `reverse_stack` the rest → `insert_bottom(last)`, where `insert_bottom` pops, recurses to the empty bottom, pushes `last`, then re-pushes each popped element so the order above it is kept. note: the first version, reviewed 2026-11-25, moved every element into a member `stack<int> rev_stk` and never handed it back, so the caller's stack came back empty (confirmed `[1,2,3,4] -> []`), and it broke the no-extra-data-structure rule. Fixed the same day with the standard two-recursion version. Re-verified: both examples, empty, duplicates, 2000 random stacks on one reused object, and n=3000, all passing under ASan/UBSan. O(n²) time, O(n) call stack)
+
 ## Other techniques (no specific named algorithm)
 
 Problems solved without a reusable named pattern — usually a direct
